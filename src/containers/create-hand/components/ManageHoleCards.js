@@ -2,36 +2,38 @@ import React from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';
 
+import {  Col, Row } from 'reactstrap';
+
 import { cardValues, suits } from '../../../constants';
 import { holeCardsType } from '../../../types';
 
 export default function ManageHoleCards(props) {
 
   return (
-    <Container>
+    <Col className="pb-2 d-flex flex-column flex-fill">
       <div>
-        <HoleCardsRow>
+        <Row className="d-flex flex-row flex-fill justify-content-around">
           <HoleCard card={props.holeCards[0]}/>
           <HoleCard card={props.holeCards[1]}
           />
-        </HoleCardsRow>
+        </Row>
       </div>
-      <CardSelectionContainer>
+      <Col className="d-flex flex-column flex-fill">
         {
           _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
-            <CardsRow key={i}>
+            <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
               {
                 chunk.map((cv) =>
-                  <CardValue key={cv}>
+                  <Col className="d-flex flex-column align-items-center justify-content-center" key={cv}>
                     { cv }
-                  </CardValue>
+                  </Col>
                 )
               }
-            </CardsRow>
+            </Row>
           )
         }
-      </CardSelectionContainer>
-    </Container>
+      </Col>
+    </Col>
   );
 }
 
@@ -42,95 +44,44 @@ ManageHoleCards.propTypes = {
 function HoleCard(props) {
   const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
   return (
-    <HoleCardContainer>
-      <HoleCardSlot className="mb-2">
-        <HoleCardLabel>{ props.card || 'As' }</HoleCardLabel>
+    <Col className="d-flex flex-column align-items-center">
+      <HoleCardSlot className="mb-4 d-flex flex-column justify-content-center align-items-center">
+        <span>{ props.card || 'As' }</span>
       </HoleCardSlot>
-      <SuitsContainer>
-        <SuitRow>
-          <Suit>{ suitAbbreviations[0] }</Suit>
-          <Suit>{ suitAbbreviations[1] }</Suit>
-        </SuitRow>
-        <SuitRow>
-          <Suit>{ suitAbbreviations[2] }</Suit>
-          <Suit>{ suitAbbreviations[3] }</Suit>
-        </SuitRow>
-      </SuitsContainer>
-    </HoleCardContainer>
+      <SuitContainer className="d-flex flex-column justify-content-between">
+        <Row className="d-flex flex-row flex-fill">
+          <Suit className="d-flex flex-column justify-content-center align-items-center">
+            { suitAbbreviations[0] }
+          </Suit>
+          <Suit className="d-flex flex-column justify-content-center align-items-center">
+            { suitAbbreviations[1] }
+          </Suit>
+        </Row>
+        <Row className="d-flex flex-row flex-fill">
+          <Suit className="d-flex flex-column justify-content-center align-items-center">
+            { suitAbbreviations[2] }
+          </Suit>
+          <Suit className="d-flex flex-column justify-content-center align-items-center">
+            { suitAbbreviations[3] }
+          </Suit>
+        </Row>
+      </SuitContainer>
+    </Col>
   );
 }
 
-const Row = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const Col = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Container = styled(Col)`
-  flex: 1;
-  padding-bottom: 20px;
-`;
-
-const CardSelectionContainer = styled(Col)`
-  flex: 1;
-`;
-
-const HoleCardContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 150px;
-  width: 100px;
-  align-items: center;
-`;
-
-const HoleCardsRow = styled(Row)`
-  justify-content: space-around;
-  flex: 1;
-`;
-
 const HoleCardSlot = styled(Col)`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
   border: dotted 1px #333;
-  height: 75px;
+  min-height: 75px;
   width: 60px;
 `;
 
-const HoleCardLabel = styled.div`
-  text-align: center;
-`;
-
-const SuitsContainer = styled(Col)`
-  flex: 1;
-  justify-content: space-between;
-  width: 100%;
-`;
-
-const SuitRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex: 1;
+const SuitContainer = styled(Col)`
+  min-height: 100px;
+  max-height: 100px;
 `;
 
 const Suit = styled(Col)`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
   border: solid 1px #333;
-`;
-
-const CardsRow = styled(Row)`
-  flex: 1;
-  justify-content: space-between;
-`;
-
-const CardValue = styled(Col)`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+  min-height: 50px;
 `;
