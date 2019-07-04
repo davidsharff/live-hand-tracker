@@ -1,11 +1,15 @@
 import React from 'react';
-import Views from './views/routes';
+import { Provider } from 'react-redux';
+
+import store from './redux/store';
+
+import Views from './containers/routes';
 
 function App() {
   return (
-    <div>
+    <Provider store={store}>
       <Views />
-    </div>
+    </Provider>
   );
 }
 
