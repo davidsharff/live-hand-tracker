@@ -1,7 +1,8 @@
 import { bettingRounds } from '../../constants';
 
 const initialState = {
-  bettingRound: bettingRounds[0]
+  bettingRound: bettingRounds[0],
+  heroCards: []
 };
 
 export default function hand(state =initialState, action) {
