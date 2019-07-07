@@ -42,7 +42,7 @@ CreateHand.propTypes = {
   hand: handType
 };
 
-export default connect((state) => (console.log('state', state) || {
+export default connect((state) => ({
   hand: state.hand
 }))(CreateHand);
 
