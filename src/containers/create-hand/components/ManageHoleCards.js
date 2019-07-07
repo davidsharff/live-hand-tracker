@@ -62,19 +62,24 @@ export default function ManageHoleCards(props) {
     <Col className="pb-2 d-flex flex-column flex-fill">
       <div>
         <Row className="d-flex flex-row flex-fill justify-content-around">
-          <HoleCard
-            selectedCard={selectedCardKey}
-            cardKey="cardOne"
-            card={holeCards.cardOne}
-            onClickCard={handleClickCard}
-            onClickSuit={handleClickSuit}
-          />
-          <HoleCard
-            selectedCard={selectedCardKey}
-            cardKey="cardTwo" card={holeCards.cardTwo}
-            onClickCard={handleClickCard}
-            onClickSuit={handleClickSuit}
-          />
+          <Col className="d-flex flex-column align-items-center">
+            <HoleCardSlot
+              className="mb-4 d-flex flex-column justify-content-center align-items-center"
+              onClick={() => handleClickCard('cardOne')}
+              isSelected={selectedCardKey === 'cardOne'}
+            >
+              <span>{ `${holeCards.cardOne.value || ''}${holeCards.cardOne.suit || ''}` }</span>
+            </HoleCardSlot>
+          </Col>
+          <Col className="d-flex flex-column align-items-center">
+            <HoleCardSlot
+              className="mb-4 d-flex flex-column justify-content-center align-items-center"
+              onClick={() => handleClickCard('cardTwo')}
+              isSelected={selectedCardKey === 'cardTwo'}
+            >
+              <span>{ `${holeCards.cardTwo.value || ''}${holeCards.cardTwo.suit || ''}` }</span>
+            </HoleCardSlot>
+          </Col>
         </Row>
       </div>
       <Col className="my-4 d-flex flex-column flex-fill">
@@ -121,20 +126,6 @@ ManageHoleCards.propTypes = {
   // TODO: define cb param types
   onSetHoleCards: PropTypes.func
 };
-
-function HoleCard(props) {
-  return (
-    <Col className="d-flex flex-column align-items-center">
-      <HoleCardSlot
-        className="mb-4 d-flex flex-column justify-content-center align-items-center"
-        onClick={() => props.onClickCard(props.cardKey)}
-        isSelected={props.selectedCard === props.cardKey}
-      >
-        <span>{ `${props.card.value || ''}${props.card.suit || ''}` }</span>
-      </HoleCardSlot>
-    </Col>
-  );
-}
 
 // ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305
 const HoleCardSlot = styled(({ isSelected, ...rest }) => <Col { ...rest }/>)`
