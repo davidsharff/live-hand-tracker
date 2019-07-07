@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Table, Input } from 'reactstrap';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
 
@@ -26,7 +27,15 @@ function Session(props) {
     }
   });
 
+  const handleChangeLocation = (location) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_LOCATION,
+    payload: {
+      location
+    }
+  });
+
   if (props.session === null) {
+    // TODO: any real loading indicator should use reactstrap spinners
     return (
       <div>Loading...</div>
     );
@@ -35,13 +44,32 @@ function Session(props) {
   return(
     <div>
       <h1>Session</h1>
+      {/* TODO: use past locations one day. */}
+      <Input
+        value={ props.session.location }
+        onChange={(e) => handleChangeLocation(e.target.value)}
+      />
       {
-        props.session.defaultSeats.map(({ isActive }, i) =>
-          <div key={i}>
-            <span>Seat: { i + 1 }</span>
-            <span>&nbsp;Active? { isActive }</span>
-          </div>
-        )
+        <Table>
+          <thead>
+            <tr>
+              <th>Seat</th>
+              <th>Is Empty?</th>
+              <th>Hero?</th>
+            </tr>
+          </thead>
+          <tbody>
+          {
+            props.session.defaultSeats.map(({ isActive }, i) =>
+              <tr key={i}>
+                <td>Seat: { i + 1 }</td>
+                <td>{ isActive ? 'No' : 'Yes' }</td>
+                <td>{ props.session.defaultHeroSeatIndex === i ? 'Yes' : 'No' }</td>
+              </tr>
+            )
+          }
+          </tbody>
+        </Table>
       }
     </div>
   );
@@ -54,16 +82,3 @@ Session.propTypes = {
 export default connect((state) => ({
   session: state.session
 }))(Session);
-
-// useEffect(() =>
-//   props.dispatch({
-//     type: actionTypes.CREATE_HAND,
-//     payload: {
-//       bettingRound: bettingRounds[0],
-//       heroSeatIndex: 3,
-//       // TODO: consider using a set instead of array.
-//       seats: props.hand.seats.length
-//         ? props.hand.seats
-//         : defaultSeats
-//     }
-//   }));
