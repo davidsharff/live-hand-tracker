@@ -90,15 +90,17 @@ export default function ManageHoleCards(props) {
           )
         }
       </Col>
-      <Button className="mb-4" color="success">
+      <Button className="mb-4" color="success" onClick={() => props.onSetHoleCards([holeCards.cardOne, holeCards.cardTwo])}>
         Submit
       </Button>
     </Col>
   );
 }
 
+// TODO: set whether cards are disabled here via selector
 ManageHoleCards.propTypes = {
   holeCards: holeCardsType,
+  // TODO: define cb param types
   onSetHoleCards: PropTypes.func
 };
 
