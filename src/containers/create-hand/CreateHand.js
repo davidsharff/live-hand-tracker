@@ -2,14 +2,15 @@ import React from 'react';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Container, Row } from 'reactstrap';
-
 import styled from 'styled-components';
+
+import { getDeck } from "../../selectors";
 
 import ManageHoleCards from './components/ManageHoleCards';
 
 
 import actionTypes from '../../redux/actionTypes';
-import { handType } from '../../types';
+import { handType, deckType } from '../../types';
 
 function CreateHand(props) {
 
@@ -32,7 +33,7 @@ function CreateHand(props) {
       </Row>
       {
         heroHoleCards.length === 0
-          ? <ManageHoleCards onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
+          ? <ManageHoleCards deck={props.deck} onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
           : <div>Input Hand Details</div>
       }
     </CreateHandContainer>
@@ -40,11 +41,13 @@ function CreateHand(props) {
 }
 
 CreateHand.propTypes = {
-  hand: handType
+  hand: handType,
+  deck: deckType
 };
 
 export default connect((state) => ({
-  hand: state.hand
+  hand: state.hand,
+  deck: getDeck(state)
 }))(CreateHand);
 
 const CreateHandContainer = styled(Container)`

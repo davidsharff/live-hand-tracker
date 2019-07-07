@@ -11,3 +11,5 @@ export const handType = PropTypes.exact({
     holeCards: holeCardsType
   })).isRequired
 });
+
+export const deckType = PropTypes.arrayOf(PropTypes.oneOf(cards)).isRequired;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import styled from 'styled-components';
@@ -16,12 +16,12 @@ export default function ManageHoleCards(props) {
 
   const [holeCards, setHoleCards] = useState({
     cardOne: {
-      value: props.holeCards.length ? props.holeCards[0].slice(0, 1) : null,
-      suit: props.holeCards.length ? props.holeCards[0].slice(1, 2) : null
+      value: props.holeCards.length ? props.holeCards[0].slice(0, -1) : null,
+      suit: props.holeCards.length  ? props.holeCards[0].slice(1, 2) : null
     },
     cardTwo: {
-      value: props.holeCards.length ? props.holeCards[1].slice(0, 1) : null,
-      suit: props.holeCards.length ? props.holeCards[1].slice(1, 2) : null
+      value: props.holeCards.length ? props.holeCards[1].slice(0, -1) : null,
+      suit: props.holeCards.length  ? props.holeCards[1].slice(1, 2) : null
     }
   });
 
@@ -56,6 +56,12 @@ export default function ManageHoleCards(props) {
     }
   };
 
+  const getPendingDeck = useCallback(() =>
+    _.reject(props.deck, (c) =>
+      c === (holeCards.cardOne.value + holeCards.cardOne.suit) ||
+      c === (holeCards.cardTwo.value + holeCards.cardTwo.suit)
+    ), [props.deck, holeCards]);
+
   useEffect(toggleCardIfComplete, [toggleCardIfComplete, holeCards]);
 
   return (
@@ -88,7 +94,16 @@ export default function ManageHoleCards(props) {
             <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
               {
                 chunk.map((cv) =>
-                  <ValueContainer className="d-flex flex-column align-items-center justify-content-center" key={cv} onClick={() => handleClickValue(cv, )}>
+                  <ValueContainer
+                    className="d-flex flex-column align-items-center justify-content-center"
+                    key={cv}
+                    onClick={() =>
+                      !isCardValueDisabled(getPendingDeck(), holeCards[selectedCardKey].suit, cv) &&
+                      handleClickValue(cv)
+                    }
+                    disabled={isCardValueDisabled(getPendingDeck(), holeCards[selectedCardKey].suit, cv)}
+                    isSelected={holeCards[selectedCardKey].value === cv}
+                  >
                     { cv }
                   </ValueContainer>
                 )
@@ -99,18 +114,22 @@ export default function ManageHoleCards(props) {
       </Col>
       <SuitContainer>
         <Row className="d-flex flex-row justify-content-between">
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[0])}>
-            { suitAbbreviations[0] }
-          </Suit>
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[1])}>
-            { suitAbbreviations[1] }
-          </Suit>
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[2])}>
-            { suitAbbreviations[2] }
-          </Suit>
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[3])}>
-            { suitAbbreviations[3] }
-          </Suit>
+          {
+            _.range(0, 4).map(i =>
+              <Suit
+                key={i}
+                className="d-flex flex-column justify-content-center align-items-center"
+                onClick={() =>
+                  !isSuitDisabled(getPendingDeck(), holeCards[selectedCardKey].value, suitAbbreviations[i]) &&
+                  handleClickSuit(suitAbbreviations[i])
+                }
+                isSelected={holeCards[selectedCardKey].suit === suitAbbreviations[i]}
+                disabled={isSuitDisabled(getPendingDeck(), holeCards[selectedCardKey].value, suitAbbreviations[i])}
+              >
+                { suitAbbreviations[i] }
+              </Suit>
+            )
+          }
         </Row>
       </SuitContainer>
       <Button className="mb-4" color="success" onClick={() => props.onSetHoleCards([holeCards.cardOne, holeCards.cardTwo])}>
@@ -143,12 +162,34 @@ const SuitContainer = styled(Col)`
   max-height: 100px;
 `;
 
-const Suit = styled(Col)`
+const Suit = styled(({ disabled, isSelected, ...rest }) => <Col { ...rest }/>)`
   padding: 5px;
   border: solid 1px #333;
   max-width: 24%;
+  background-color: ${p => !p.isSelected && p.disabled && '#eee'};
+  ${p => p.isSelected && `
+    border-color: #28a745;
+    border-width: 2px;
+  `}
 `;
 
-const ValueContainer = styled(Col)`
+const ValueContainer = styled(({ disabled, isSelected, ...rest }) => <Col { ...rest }/>)`
   border: solid 1px #333;
+  background-color: ${p => !p.isSelected && p.disabled && '#eee'};
+  ${p => p.isSelected && `
+    border-color: #28a745;
+    border-width: 2px;
+  `}
 `;
+
+function isCardValueDisabled(deck, selectedSuit, cardValue) {
+  // TODO: test first condition when board cards are wired up.
+  const noCardValueInDeck = !deck.some((c) => c.slice(0, -1) === cardValue);
+  const noCardInDeck = !!selectedSuit && !_.includes(deck, (cardValue + selectedSuit));
+
+  return noCardValueInDeck || noCardInDeck;
+}
+
+function isSuitDisabled(deck, selectedValue, suit) {
+  return !!selectedValue && !_.includes(deck, (selectedValue + suit));
+}
