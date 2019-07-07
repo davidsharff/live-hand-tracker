@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+//import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Container, Row } from 'reactstrap';
 import styled from 'styled-components';
@@ -14,14 +14,14 @@ import { handType, deckType } from '../../types';
 
 function Hand(props) {
 
-  const handleSetHeroCards = (holeCards) => console.log('handleSetHeroCards', holeCards) || props.dispatch({
+  const handleSetHeroCards = (holeCards) => props.dispatch({
     type: actionTypes.SET_HERO_CARDS,
     payload: {
       holeCards: holeCards.map(({ value, suit}) => '' + value + suit)
     }
   });
 
-  const heroHoleCards = _.find(props.hand.knownHoleCards, { seatIndex: props.hand.heroSeatIndex }) || [];
+  const heroHoleCards = props.hand.seats[props.hand.heroSeatIndex].holeCards;
 
   return (
     <CreateHandContainer fluid className="d-flex flex-column">

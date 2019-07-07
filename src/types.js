@@ -6,8 +6,8 @@ export const holeCardsType = PropTypes.arrayOf(PropTypes.oneOf(cards)).isRequire
 export const handType = PropTypes.exact({
   bettingRound: PropTypes.oneOf(bettingRounds),
   heroSeatIndex: PropTypes.number,
-  knownHoleCards: PropTypes.arrayOf(PropTypes.exact({
-    seatIndex: PropTypes.number.isRequired,
+  seats: PropTypes.arrayOf(PropTypes.exact({
+    isActive: PropTypes.bool,
     holeCards: holeCardsType
   })).isRequired
 });
