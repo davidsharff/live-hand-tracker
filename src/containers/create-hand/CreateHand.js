@@ -25,7 +25,7 @@ function CreateHand(props) {
 
   return (
     <CreateHandContainer fluid className="d-flex flex-column">
-      <Row className="pb-2 d-flex flex-row align-items-center justify-content-center">
+      <Row className="pb-4 d-flex flex-row align-items-center justify-content-center">
         <div>
           <div>Live Hand Tracker</div>
           <div>Round: { props.hand.bettingRound }</div>

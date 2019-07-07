@@ -88,7 +88,7 @@ export default function ManageHoleCards(props) {
           </Col>
         </Row>
       </div>
-      <Col className="my-4 d-flex flex-column flex-fill">
+      <Col className="my-2 d-flex flex-column flex-fill">
         {
           _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
             <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
