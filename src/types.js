@@ -4,6 +4,10 @@ import { cards, bettingRounds } from './constants';
 export const holeCardsType = PropTypes.arrayOf(PropTypes.oneOf(cards)).isRequired;
 
 export const handType = PropTypes.exact({
-  heroCards: holeCardsType,
-  bettingRound: PropTypes.oneOf(bettingRounds)
+  bettingRound: PropTypes.oneOf(bettingRounds),
+  heroSeatIndex: PropTypes.number,
+  knownHoleCards: PropTypes.arrayOf(PropTypes.exact({
+    seatIndex: PropTypes.number.isRequired,
+    holeCards: holeCardsType
+  })).isRequired
 });
