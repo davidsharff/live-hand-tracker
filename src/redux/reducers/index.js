@@ -1,9 +1,9 @@
 import { combineReducers } from 'redux';
 
-import heroSession from './heroSession';
+import session from './session';
 import hand from './hand';
 
 export default combineReducers({
-  heroSession,
+  session,
   hand
 });
