@@ -1,19 +1,16 @@
 import _ from 'lodash';
-import { bettingRounds, defaultSeats } from '../../constants';
 
 import actionTypes from '../actionTypes';
 
-const initialState = {
-  bettingRound: bettingRounds[0],
-  heroSeatIndex: 3,
-  // TODO: consider using a set instead of array.
-  seats: defaultSeats
-};
+const initialState = null;
 
 export default function hand(state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
+    case actionTypes.CREATE_HAND:
+      return payload.hand;
+
     case actionTypes.SET_HERO_CARDS: {
       const { holeCards } = payload;
       return _.assign({}, state, {

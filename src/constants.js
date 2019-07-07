@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+// TODO: change to sets everywhere it makes sense
+
 export const PRE_FLOP = 'preflop';
 
 export const bettingRounds = [
