@@ -16,6 +16,12 @@ export default function session(state = null, action) {
         location: payload.location
       });
     }
+
+    case actionTypes.UPDATE_SESSION_DEFAULT_HERO_SEAT_INDEX: {
+      return _.assign({}, state, {
+        defaultHeroSeatIndex: payload.seatIndex
+      });
+    }
     // TODO: case: actionTypes.SET_SESSION_DEFAULT_SEATS
     default:
       return state;
