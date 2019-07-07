@@ -12,7 +12,7 @@ import ManageHoleCards from './components/ManageHoleCards';
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType } from '../../types';
 
-function CreateHand(props) {
+function Hand(props) {
 
   const handleSetHeroCards = (holeCards) => console.log('handleSetHeroCards', holeCards) || props.dispatch({
     type: actionTypes.SET_HERO_CARDS,
@@ -40,7 +40,7 @@ function CreateHand(props) {
   );
 }
 
-CreateHand.propTypes = {
+Hand.propTypes = {
   hand: handType,
   deck: deckType
 };
@@ -48,7 +48,7 @@ CreateHand.propTypes = {
 export default connect((state) => ({
   hand: state.hand,
   deck: getDeck(state)
-}))(CreateHand);
+}))(Hand);
 
 const CreateHandContainer = styled(Container)`
   height: 100%;

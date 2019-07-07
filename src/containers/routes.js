@@ -1,16 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 
-import CreateHand from './create-hand/CreateHand';
+import Hand from './hand/Hand';
 
 export default function Views() {
   return (
     <Router>
       <Switch>
         <Route exact path="/" render={(props) => (
-          <Redirect to="/create-hand"/>
+          <Redirect to="/hand"/>
         )}/>
-        <Route exact path="/create-hand" component={CreateHand}/>
+        <Route exact path="/hand" component={Hand}/>
       </Switch>
     </Router>
   );
