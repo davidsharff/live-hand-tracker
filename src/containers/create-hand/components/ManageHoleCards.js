@@ -8,6 +8,8 @@ import {  Col, Row, Button } from 'reactstrap';
 import { cardValues, suits } from '../../../constants';
 import { holeCardsType } from '../../../types';
 
+const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
+
 export default function ManageHoleCards(props) {
 
   const [selectedCardKey, setSelectedCardKey] = useState('cardOne');
@@ -90,6 +92,22 @@ export default function ManageHoleCards(props) {
           )
         }
       </Col>
+      <SuitContainer>
+        <Row className="d-flex flex-row justify-content-between">
+          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[0])}>
+            { suitAbbreviations[0] }
+          </Suit>
+          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[1])}>
+            { suitAbbreviations[1] }
+          </Suit>
+          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[2])}>
+            { suitAbbreviations[2] }
+          </Suit>
+          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => handleClickSuit(suitAbbreviations[3])}>
+            { suitAbbreviations[3] }
+          </Suit>
+        </Row>
+      </SuitContainer>
       <Button className="mb-4" color="success" onClick={() => props.onSetHoleCards([holeCards.cardOne, holeCards.cardTwo])}>
         Submit
       </Button>
@@ -105,7 +123,6 @@ ManageHoleCards.propTypes = {
 };
 
 function HoleCard(props) {
-  const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
   return (
     <Col className="d-flex flex-column align-items-center">
       <HoleCardSlot
@@ -115,24 +132,6 @@ function HoleCard(props) {
       >
         <span>{ `${props.card.value || ''}${props.card.suit || ''}` }</span>
       </HoleCardSlot>
-      <SuitContainer className="d-flex flex-column justify-content-between">
-        <Row className="d-flex flex-row flex-fill">
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => props.onClickSuit(suitAbbreviations[0])}>
-            { suitAbbreviations[0] }
-          </Suit>
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => props.onClickSuit(suitAbbreviations[1])}>
-            { suitAbbreviations[1] }
-          </Suit>
-        </Row>
-        <Row className="d-flex flex-row flex-fill">
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => props.onClickSuit(suitAbbreviations[2])}>
-            { suitAbbreviations[2] }
-          </Suit>
-          <Suit className="d-flex flex-column justify-content-center align-items-center" onClick={() => props.onClickSuit(suitAbbreviations[3])}>
-            { suitAbbreviations[3] }
-          </Suit>
-        </Row>
-      </SuitContainer>
     </Col>
   );
 }
@@ -154,8 +153,9 @@ const SuitContainer = styled(Col)`
 `;
 
 const Suit = styled(Col)`
+  padding: 5px;
   border: solid 1px #333;
-  min-height: 50px;
+  max-width: 24%;
 `;
 
 const ValueContainer = styled(Col)`
