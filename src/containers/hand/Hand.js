@@ -53,7 +53,8 @@ Hand.propTypes = {
 
 export default connect((state) => ({
   hand: state.hand,
-  deck: getDeck(state),
+  // TODO: this can be removed when check for session happens in middleware
+  deck: state.hand ? getDeck(state) : null,
   hasSession: state.session !== null
 }))(Hand);
 

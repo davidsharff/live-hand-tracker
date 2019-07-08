@@ -16,8 +16,8 @@ export const handType = PropTypes.exact({
 
 export const sessionType = PropTypes.exact({
   defaultSeats: seatsType,
-  defaultHeroSeatIndex: PropTypes.number.isRequired,
+  defaultHeroSeatIndex: PropTypes.number,
   location: PropTypes.string
-}).isRequired;
+});
 
 export const deckType = PropTypes.arrayOf(PropTypes.oneOf(cards));
