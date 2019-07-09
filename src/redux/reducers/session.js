@@ -5,7 +5,9 @@ import actionTypes from '../actionTypes';
 const initialSession =  {
   location: '',
   defaultHeroSeatIndex: null,
-  defaultSeats: []
+  defaultSeats: [],
+  smallBlind: null,
+  bigBlind: null
 };
 
 // TODO: consider renaming file to sessionDefaults or add default suffix to overrideable fields
@@ -57,6 +59,18 @@ export default function session(state = null, action) {
           : change > 0
             ? [ ...defaultSeats, ...(_.range(0, change).map(() => ({ isActive: true, holeCards: []})))]
             : defaultSeats
+      });
+    }
+
+    case actionTypes.UPDATE_SESSION_SMALL_BLIND: {
+      return _.assign({}, state, {
+        smallBlind: payload.smallBlind
+      });
+    }
+
+    case actionTypes.UPDATE_SESSION_BIG_BLIND: {
+      return _.assign({}, state, {
+        bigBlind: payload.bigBlind
       });
     }
     // TODO: case: actionTypes.SET_SESSION_DEFAULT_SEATS

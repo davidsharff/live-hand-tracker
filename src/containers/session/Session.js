@@ -56,6 +56,20 @@ function Session(props) {
     }
   });
 
+  const handleChangeSmallBlind = (e) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_SMALL_BLIND,
+    payload: {
+      smallBlind: parseInt(e.target.value, 10)
+    }
+  });
+
+  const handleChangeBigBlind = (e) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_BIG_BLIND,
+    payload: {
+      bigBlind: parseInt(e.target.value, 10)
+    }
+  });
+
   // TODO: consider breaking into discreet steps
   return(
     <Container fluid>
@@ -81,12 +95,12 @@ function Session(props) {
                 </Row>
                 <Row className="py-2">
                   <BlindInputGroup size="sm">
-                    <InputGroupAddon addonType="prepend">SB</InputGroupAddon>
-                    <Input />
+                    <InputGroupAddon addonType="prepend" type="number">SB</InputGroupAddon>
+                    <Input type="number" value={session.smallBlind || ''} onChange={handleChangeSmallBlind} />
                   </BlindInputGroup>
                   <BlindInputGroup size="sm">
                     <InputGroupAddon addonType="prepend">BB</InputGroupAddon>
-                    <Input />
+                    <Input type="number" value={session.bigBlind || ''} onChange={handleChangeBigBlind} />
                   </BlindInputGroup>
                 </Row>
                 <Row className="py-2">

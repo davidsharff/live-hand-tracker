@@ -15,9 +15,11 @@ export const handType = PropTypes.exact({
 });
 
 export const sessionType = PropTypes.exact({
+  location: PropTypes.string,
   defaultSeats: seatsType,
   defaultHeroSeatIndex: PropTypes.number,
-  location: PropTypes.string
+  smallBlind: PropTypes.number, // This decision will force creating a new session if blinds change. Need to include duplicate session UI.
+  bigBlind: PropTypes.number
 });
 
 export const deckType = PropTypes.arrayOf(PropTypes.oneOf(cards));
