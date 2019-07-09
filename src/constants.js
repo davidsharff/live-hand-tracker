@@ -14,8 +14,3 @@ export const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q
 export const cards = _.flatMap(suits, (s) => cardValues.map(c =>
   c + s.slice(0, 1)
 ));
-
-export const defaultSeats = _.range(0, 10).map(() => ({
-  isActive: true,
-  holeCards: []
-}));

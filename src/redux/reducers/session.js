@@ -1,12 +1,11 @@
 import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
-import { defaultSeats } from '../../constants';
 
 const initialSession =  {
   location: '',
   defaultHeroSeatIndex: null,
-  defaultSeats
+  defaultSeats: []
 };
 
 // TODO: consider renaming file to sessionDefaults or add default suffix to overrideable fields

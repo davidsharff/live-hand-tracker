@@ -61,85 +61,93 @@ function Session(props) {
     <Container fluid>
       <Row>
         <Col>
-          <Card>
+          <Card style={{minHeight: '100vh'}}>
             <CardHeader>
               <CardTitle>
                 Configure Session
               </CardTitle>
             </CardHeader>
-            <CardBody>
+            <CardBody className="d-flex flex-column justify-content-between">
               {/* TODO: use past locations one day. */}
-              <Row className="pb-2">
-                <InputGroup size="sm">
-                  <InputGroupAddon addonType="prepend">Location</InputGroupAddon>
-                  <Input
-                    value={ session.location }
-                    onChange={(e) => handleChangeLocation(e.target.value)}
-                  />
-                </InputGroup>
-              </Row>
-              <Row className="py-2">
-                <BlindInputGroup size="sm">
-                  <InputGroupAddon addonType="prepend">SB</InputGroupAddon>
-                  <Input />
-                </BlindInputGroup>
-                <BlindInputGroup size="sm">
-                  <InputGroupAddon addonType="prepend">BB</InputGroupAddon>
-                  <Input />
-                </BlindInputGroup>
-              </Row>
-              <Row className="py-2">
-                <UncontrolledDropdown size="sm">
-                  <DropdownToggle caret>{ session.defaultSeats.length } Total Seats</DropdownToggle>
-                  <DropdownMenu>
+              <Col className="p-0">
+                <Row className="pb-2">
+                  <InputGroup size="sm">
+                    <InputGroupAddon addonType="prepend">Location</InputGroupAddon>
+                    <Input
+                      value={ session.location }
+                      onChange={(e) => handleChangeLocation(e.target.value)}
+                    />
+                  </InputGroup>
+                </Row>
+                <Row className="py-2">
+                  <BlindInputGroup size="sm">
+                    <InputGroupAddon addonType="prepend">SB</InputGroupAddon>
+                    <Input />
+                  </BlindInputGroup>
+                  <BlindInputGroup size="sm">
+                    <InputGroupAddon addonType="prepend">BB</InputGroupAddon>
+                    <Input />
+                  </BlindInputGroup>
+                </Row>
+                <Row className="py-2">
+                  <UncontrolledDropdown size="sm">
+                    <DropdownToggle caret>
+                      {
+                        session.defaultSeats.length === 0
+                          ? 'Set Table Size'
+                          : `${session.defaultSeats.length} Total Seats`
+                      }
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      {
+                        _.range(2, 11).reverse().map((num) =>
+                          num !== session.defaultSeats.length &&
+                          <DropdownItem key={num} onClick={() => handleChangeMaxSeats(num)}>
+                            { num } Total Seats
+                          </DropdownItem>
+                        )
+                      }
+                    </DropdownMenu>
+                  </UncontrolledDropdown>
+                </Row>
+                <Row className="py-2">
+                  <Table>
+                    <thead>
+                    <tr>
+                      <th>Seat</th>
+                      <CheckBoxCellHeader>Occupied</CheckBoxCellHeader>
+                      <CheckBoxCellHeader>Hero?</CheckBoxCellHeader>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {
-                      _.range(2, 11).reverse().map((num) =>
-                        num !== session.defaultSeats.length &&
-                        <DropdownItem key={num} onClick={() => handleChangeMaxSeats(num)}>
-                          { num } Total Seats
-                        </DropdownItem>
+                      !!session.defaultSeats.length &&
+                      // TODO: consider dropping defaultSeats constants if we can dynamically create based on numeric input
+                      session.defaultSeats.map(({ isActive }, i) =>
+                        <tr key={i}>
+                          <td>Seat: { i + 1 }</td>
+                          <CheckBoxCell>
+                            <Input
+                              type="checkbox"
+                              checked={isActive}
+                              onChange={() => handleToggleActiveSeat(i)}
+                              disabled={session.defaultHeroSeatIndex === i}
+                            />
+                          </CheckBoxCell>
+                          <CheckBoxCell>
+                            <Input
+                              type="checkbox"
+                              checked={ session.defaultHeroSeatIndex === i }
+                              onChange={() => handleSetHeroSeatIndex(i) }/>
+                          </CheckBoxCell>
+                        </tr>
                       )
                     }
-                  </DropdownMenu>
-                </UncontrolledDropdown>
-              </Row>
-              <Row className="py-2">
-              {/* TODO: add total seats input include note about value validation */}
-                <Table>
-                  <thead>
-                  <tr>
-                    <th>Seat</th>
-                    <CheckBoxCellHeader>Occupied</CheckBoxCellHeader>
-                    <CheckBoxCellHeader>Hero?</CheckBoxCellHeader>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {
-                    // TODO: consider dropping defaultSeats constants if we can dynamically create based on numeric input
-                    session.defaultSeats.map(({ isActive }, i) =>
-                      <tr key={i}>
-                        <td>Seat: { i + 1 }</td>
-                        <CheckBoxCell>
-                          <Input
-                            type="checkbox"
-                            checked={isActive}
-                            onChange={() => handleToggleActiveSeat(i)}
-                            disabled={session.defaultHeroSeatIndex === i}
-                          />
-                        </CheckBoxCell>
-                        <CheckBoxCell>
-                          <Input
-                            type="checkbox"
-                            checked={ session.defaultHeroSeatIndex === i }
-                            onChange={() => handleSetHeroSeatIndex(i) }/>
-                        </CheckBoxCell>
-                      </tr>
-                    )
-                  }
-                  </tbody>
-                </Table>
-              </Row>
-              <Row>
+                    </tbody>
+                  </Table>
+                </Row>
+              </Col>
+              <Row className="justify-self-end">
                 <SubmitButton>Submit</SubmitButton>
               </Row>
             </CardBody>
