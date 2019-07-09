@@ -25,7 +25,12 @@ export default function session(state = null, action) {
 
     case actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX: {
       return _.assign({}, state, {
-        defaultHeroSeatIndex: payload.seatIndex
+        defaultHeroSeatIndex: payload.seatIndex,
+        defaultSeats: state.defaultSeats.map((s, i) =>
+          i === payload.seatIndex
+            ? _.assign({}, s, { isActive: true })
+            : s
+        )
       });
     }
 
@@ -48,12 +53,11 @@ export default function session(state = null, action) {
       const { change } = payload;
 
       return _.assign({}, state, {
-        defaultSeats: change === - 1
-          ? defaultSeats.slice(0, -1)
-          : [
-            ...defaultSeats,
-            { isActive: true, holeCards: [] }
-          ]
+        defaultSeats: change < 0
+          ? defaultSeats.slice(0, change)
+          : change > 0
+            ? [ ...defaultSeats, ...(_.range(0, change).map(() => ({ isActive: true, holeCards: []})))]
+            : defaultSeats
       });
     }
     // TODO: case: actionTypes.SET_SESSION_DEFAULT_SEATS

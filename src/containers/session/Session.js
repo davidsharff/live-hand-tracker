@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { Button, Col, Container, Row, Card, CardHeader, CardTitle, CardBody, Table, InputGroup, InputGroupAddon, Input } from 'reactstrap';
+import _ from 'lodash';
+import styled from 'styled-components';
+import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Col, Container, Row, Card, CardHeader, CardTitle, CardBody, Table, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
 
@@ -40,10 +42,10 @@ function Session(props) {
     }
   });
 
-  const handleChangeMaxSeats = (change) => props.dispatch({
+  const handleChangeMaxSeats = (newTotalSeats) => console.log('newTotalSeats', newTotalSeats) || props.dispatch({
     type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
     payload: {
-      change
+      change: newTotalSeats - props.session.defaultSeats.length
     }
   });
 
@@ -67,8 +69,8 @@ function Session(props) {
             </CardHeader>
             <CardBody>
               {/* TODO: use past locations one day. */}
-              <Row className="mb-1">
-                <InputGroup>
+              <Row className="pb-2">
+                <InputGroup size="sm">
                   <InputGroupAddon addonType="prepend">Location</InputGroupAddon>
                   <Input
                     value={ session.location }
@@ -76,24 +78,39 @@ function Session(props) {
                   />
                 </InputGroup>
               </Row>
-              <Row className="mb-1">
-                <span>Max Seats</span>
-                <Button size="sm" color="primary" className="ml-2" onClick={() => handleChangeMaxSeats(-1)} disabled={session.defaultSeats.length === 2}>
-                  -1
-                </Button>
-                { session.defaultSeats.length }
-                <Button size="sm" color="primary" onClick={() => handleChangeMaxSeats(1)} disabled={session.defaultSeats.length === 10}>
-                  +1
-                </Button>
+              <Row className="py-2">
+                <BlindInputGroup size="sm">
+                  <InputGroupAddon addonType="prepend">SB</InputGroupAddon>
+                  <Input />
+                </BlindInputGroup>
+                <BlindInputGroup size="sm">
+                  <InputGroupAddon addonType="prepend">BB</InputGroupAddon>
+                  <Input />
+                </BlindInputGroup>
               </Row>
-              <Row className="mb-1">
+              <Row className="py-2">
+                <UncontrolledDropdown size="sm">
+                  <DropdownToggle caret>{ session.defaultSeats.length } Total Seats</DropdownToggle>
+                  <DropdownMenu>
+                    {
+                      _.range(2, 11).reverse().map((num) =>
+                        num !== session.defaultSeats.length &&
+                        <DropdownItem key={num} onClick={() => handleChangeMaxSeats(num)}>
+                          { num } Total Seats
+                        </DropdownItem>
+                      )
+                    }
+                  </DropdownMenu>
+                </UncontrolledDropdown>
+              </Row>
+              <Row className="py-2">
               {/* TODO: add total seats input include note about value validation */}
                 <Table>
                   <thead>
                   <tr>
                     <th>Seat</th>
-                    <th>Occupied</th>
-                    <th>Hero?</th>
+                    <CheckBoxCellHeader>Occupied</CheckBoxCellHeader>
+                    <CheckBoxCellHeader>Hero?</CheckBoxCellHeader>
                   </tr>
                   </thead>
                   <tbody>
@@ -102,28 +119,28 @@ function Session(props) {
                     session.defaultSeats.map(({ isActive }, i) =>
                       <tr key={i}>
                         <td>Seat: { i + 1 }</td>
-                        <td>
-                          {
-                            session.defaultHeroSeatIndex === i
-                              ? 'Hero'
-                              : <Input
-                                type="checkbox"
-                                checked={isActive}
-                                onChange={() => handleToggleActiveSeat(i)}
-                              />
-                          }
-                        </td>
-                        <td>
+                        <CheckBoxCell>
+                          <Input
+                            type="checkbox"
+                            checked={isActive}
+                            onChange={() => handleToggleActiveSeat(i)}
+                            disabled={session.defaultHeroSeatIndex === i}
+                          />
+                        </CheckBoxCell>
+                        <CheckBoxCell>
                           <Input
                             type="checkbox"
                             checked={ session.defaultHeroSeatIndex === i }
                             onChange={() => handleSetHeroSeatIndex(i) }/>
-                        </td>
+                        </CheckBoxCell>
                       </tr>
                     )
                   }
                   </tbody>
                 </Table>
+              </Row>
+              <Row>
+                <SubmitButton>Submit</SubmitButton>
               </Row>
             </CardBody>
           </Card>
@@ -140,3 +157,20 @@ Session.propTypes = {
 export default connect((state) => ({
   session: state.session
 }))(Session);
+
+const BlindInputGroup = styled(InputGroup)`
+  max-width: 65px;
+  margin-right: 10px;
+`;
+
+const SubmitButton = styled(Button)`
+  min-width: 100%;
+`;
+
+const CheckBoxCellHeader = styled.th`
+  text-align: center;
+`;
+
+const CheckBoxCell = styled.td`
+  text-align: center;
+`;
