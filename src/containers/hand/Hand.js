@@ -14,7 +14,6 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType } from '../../types';
 
 function Hand(props) {
-
   if (!props.hasSession) {
     return <Redirect to="/session" />;
   }

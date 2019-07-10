@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
 import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Col, Container, Row, Card, CardHeader, CardTitle, CardBody, Table, Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
+import { isValidSession} from '../../selectors';
 
 import connect from "react-redux/es/connect/connect";
 
@@ -162,7 +164,9 @@ function Session(props) {
                 </Row>
               </Col>
               <Row className="justify-self-end">
-                <SubmitButton>Submit</SubmitButton>
+                <SubmitButton disabled={!isValidSession(session)} onClick={() => props.history.push('/hand')}>
+                  Next
+                </SubmitButton>
               </Row>
             </CardBody>
           </Card>
@@ -176,9 +180,9 @@ Session.propTypes = {
   session: sessionType
 };
 
-export default connect((state) => ({
+export default withRouter(connect((state) => ({
   session: state.session
-}))(Session);
+}))(Session));
 
 const BlindInputGroup = styled(InputGroup)`
   max-width: 65px;

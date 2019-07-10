@@ -6,3 +6,7 @@ export function getDeck(state) {
 
   return _.reject(cards, (c) => _.includes(_.map(seats, 'holeCards'), c));
 }
+
+export function isValidSession(session) {
+  return session.smallBlind && session.bigBlind && session.defaultSeats.length && session.defaultHeroSeatIndex;
+}
