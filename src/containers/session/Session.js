@@ -2,12 +2,15 @@ import React, { useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
+import PropTypes from 'prop-types';
 import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Col, Container, Row, Card, CardHeader, CardTitle, CardBody, Table, Input, InputGroup, InputGroupAddon } from 'reactstrap';
+
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
 import { isValidSession} from '../../selectors';
 
 import connect from "react-redux/es/connect/connect";
+import { bettingRounds } from "../../constants";
 
 // TODO: seat selection defaults to two rows with two column radio buttons: empty | hero and third option on last item X remove.
 // TODO: after initial setup, show num seats/players with potentially collapsed edit table, blinds, hero seat, and other details that have to be confirmed at start of each hand.
@@ -71,6 +74,29 @@ function Session(props) {
       bigBlind: parseInt(e.target.value, 10)
     }
   });
+
+  const handleClickNext = () => {
+
+    // TODO: this should be in middleware that inspects the action type fire by next button
+    if (props.hasHand) {
+      // TODO: fire update hand action
+    } else {
+      props.dispatch({
+        type: actionTypes.CREATE_HAND,
+        payload: {
+          hand: {
+            bettingRound: bettingRounds[0],
+            heroSeatIndex: session.defaultHeroSeatIndex,
+            seats: session.defaultSeats
+          }
+        }
+      });
+    }
+    // TODO: hack until middleware handles the navigation.
+    setTimeout(() =>
+        props.history.push('/hand')
+      , 500);
+  };
 
   // TODO: consider breaking into discreet steps
   return(
@@ -164,7 +190,7 @@ function Session(props) {
                 </Row>
               </Col>
               <Row className="justify-self-end">
-                <SubmitButton disabled={!isValidSession(session)} onClick={() => props.history.push('/hand')}>
+                <SubmitButton disabled={!isValidSession(session)} onClick={handleClickNext}>
                   Next
                 </SubmitButton>
               </Row>
@@ -177,11 +203,13 @@ function Session(props) {
 }
 
 Session.propTypes = {
-  session: sessionType
+  session: sessionType,
+  hasHand: PropTypes.bool
 };
 
 export default withRouter(connect((state) => ({
-  session: state.session
+  session: state.session,
+  hasHand: state.hand !== null
 }))(Session));
 
 const BlindInputGroup = styled(InputGroup)`
