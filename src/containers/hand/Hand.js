@@ -1,20 +1,23 @@
 // TODO: clicking create hand button should move existing hand into a "hands" session collection and reset hand state with defaults
 import React from 'react';
+import _ from 'lodash';
 import { Redirect } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Container, Row } from 'reactstrap';
+import { Container } from 'reactstrap';
 import styled from 'styled-components';
 
 import { getDeck } from "../../selectors";
 
 import ManageHoleCards from './components/ManageHoleCards';
+import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';
-import { handType, deckType } from '../../types';
+import { handType, deckType, sessionType } from '../../types';
 
 function Hand(props) {
-  if (!props.hasSession) {
+  const { session, hand } = props;
+
+  if (session === null) {
     return <Redirect to="/session" />;
   }
 
@@ -25,16 +28,11 @@ function Hand(props) {
     }
   });
 
-  const heroHoleCards = props.hand.seats[props.hand.heroSeatIndex].holeCards;
+  const heroHoleCards = hand.seats[props.hand.heroSeatIndex].holeCards;
 
   return (
     <HandContainer fluid className="d-flex flex-column">
-      <Row className="pb-4 d-flex flex-row align-items-center justify-content-center">
-        <div>
-          <div>Live Hand Tracker</div>
-          <div>Round: { props.hand.bettingRound }</div>
-        </div>
-      </Row>
+      <Header location={session.location} smallBlind={session.smallBlind} bigBlind={session.bigBlind} totalPlayers={_.sumBy(hand.seats, 'isActive')} bettingRound={hand.bettingRound}/>
       {
         heroHoleCards.length === 0
           ? <ManageHoleCards deck={props.deck} onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
@@ -47,14 +45,14 @@ function Hand(props) {
 Hand.propTypes = {
   hand: handType,
   deck: deckType,
-  hasSession: PropTypes.bool
+  session: sessionType
 };
 
 export default connect((state) => ({
   hand: state.hand,
   // TODO: this can be removed when check for session happens in middleware
   deck: state.hand ? getDeck(state) : null,
-  hasSession: state.session !== null
+  session: state.session
 }))(Hand);
 
 const HandContainer = styled(Container)`
