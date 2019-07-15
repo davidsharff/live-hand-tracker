@@ -20,9 +20,20 @@ function Session(props) {
 
   useEffect(() => {
     if (session === null) {
-      props.dispatch({
-        type: actionTypes.CREATE_SESSION
-      });
+      const storedSessionStr = localStorage.getItem('savedSession');
+
+      if (storedSessionStr) {
+        props.dispatch({
+          type: actionTypes.LOAD_SESSION,
+          payload: {
+            session: JSON.parse(storedSessionStr)
+          }
+        });
+      } else {
+        props.dispatch({
+          type: actionTypes.CREATE_SESSION
+        });
+      }
     }
   });
 
@@ -81,6 +92,8 @@ function Session(props) {
     if (props.hasHand) {
       // TODO: fire update hand action
     } else {
+
+      localStorage.setItem('savedSession', JSON.stringify(session));
       props.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {

@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
 
-const initialSession =  {
+const baseSession =  {
   location: '',
   defaultHeroSeatIndex: null,
   defaultSeats: [],
@@ -16,7 +16,10 @@ export default function session(state = null, action) {
 
   switch (type) {
     case actionTypes.CREATE_SESSION:
-      return initialSession;
+      return baseSession;
+
+    case actionTypes.LOAD_SESSION:
+      return payload.session;
 
     case actionTypes.UPDATE_SESSION_LOCATION: {
       return _.assign({}, state, {
