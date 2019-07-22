@@ -96,6 +96,7 @@ function Session(props) {
     if (props.hasHand) {
       // TODO: fire update hand action
     } else {
+      localStorage.setItem('savedSession', JSON.stringify(session));
       props.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {
@@ -104,6 +105,9 @@ function Session(props) {
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats
           }
+        },
+        aux: {
+          redirectToFn: (pathName) => props.history.push(pathName)
         }
       });
     }

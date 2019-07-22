@@ -16,12 +16,15 @@ export default store => next => action => {
 
     case actionTypes.CREATE_HAND: {
       next(action);
+      action.aux.redirectToFn('/hand');
       return;
     }
 
     case actionTypes.LOAD_SESSION: {
       next(action);
-      next({
+
+      // Dispatch so it will be processed by above middleware and handle redirecting.
+      store.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {
           hand: {
@@ -30,10 +33,11 @@ export default store => next => action => {
             heroSeatIndex: payload.session.defaultHeroSeatIndex,
             seats: payload.session.defaultSeats
           }
+        },
+        aux: {
+          redirectToFn: action.aux.redirectToFn
         }
       });
-
-      action.aux.redirectToFn('/hand');
       return;
     }
 
