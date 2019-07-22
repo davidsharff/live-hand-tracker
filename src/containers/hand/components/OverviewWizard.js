@@ -13,19 +13,30 @@ export default function OverviewWizard(props) {
         {
           hand.seats.map((s, i) =>
             <HeaderItem key={i}>
-              <div>Seat { i + 1 }</div>
+              <div>
+                {
+                  i === hand.heroSeatIndex
+                    ? 'Hero'
+                    : `Seat ${ i + 1 }`
+                }
+              </div>
               {
-                hand.buttonSeatIndex !== null && (
-                  s.isActive
-                    ? <div>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</div>
-                    : 'Empty'
-                )
+                s.isActive && hand.buttonSeatIndex !== null &&
+                <div>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</div>
+              }
+              {
+                !s.isActive &&
+                <div>Empty</div>
               }
             </HeaderItem>
           )
         }
       </Row>
       <Row>
+        {
+          // TODO: need input for selecting Button position and consider expandable editable session details.
+          // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
+        }
         <div style={{ width: '100%'}}>Body</div>
       </Row>
     </Container>
