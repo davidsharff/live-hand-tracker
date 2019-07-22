@@ -11,12 +11,15 @@ export default function OverviewWizard(props) {
     <Container>
       <Row>
         {
-          _.filter(hand.seats, 'isActive').map((s, i) =>
+          hand.seats.map((s, i) =>
             <HeaderItem key={i}>
               <div>Seat { i + 1 }</div>
               {
-                hand.buttonSeatIndex &&
-                <div>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</div>
+                hand.buttonSeatIndex !== null && (
+                  s.isActive
+                    ? <div>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</div>
+                    : 'Empty'
+                )
               }
             </HeaderItem>
           )
@@ -38,9 +41,11 @@ const HeaderItem = styled.div`
 `;
 
 function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
-  const decoratedActiveSeats = _.filter(hand.seats, 'isActive').map((s, i) => _.assign({}, s, {
+  const decoratedSeats = hand.seats.map((s, i) => _.assign({}, s, {
     seatIndex: i
   }));
+
+  const decoratedActiveSeats = _.filter(decoratedSeats, 'isActive');
 
   const seatsByPositionOrder = [
     ...decoratedActiveSeats.slice(buttonSeatIndex + 1),
