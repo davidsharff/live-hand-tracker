@@ -58,7 +58,7 @@ function Session(props) {
     }
   });
 
-  const handleChangeMaxSeats = (newTotalSeats) => console.log('newTotalSeats', newTotalSeats) || props.dispatch({
+  const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
     payload: {
       change: newTotalSeats - props.session.defaultSeats.length
@@ -93,22 +93,19 @@ function Session(props) {
       // TODO: fire update hand action
     } else {
 
-      localStorage.setItem('savedSession', JSON.stringify(session));
       props.dispatch({
-        type: actionTypes.CREATE_HAND,
+        type: actionTypes.EDIT_SESSION_COMPLETE_EVENT,
         payload: {
           hand: {
             bettingRound: bettingRounds[0],
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats
-          }
+          },
+          session,
+          redirectToFn: (pathName) => props.history.push(pathName)
         }
       });
     }
-    // TODO: hack until middleware handles the navigation.
-    setTimeout(() =>
-        props.history.push('/hand')
-      , 500);
   };
 
   // TODO: consider breaking into discreet steps

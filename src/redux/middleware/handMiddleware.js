@@ -1,10 +1,10 @@
 //import _ from 'lodash';
 import actionTypes from '../actionTypes';
 
+// TODO: add validateAction middleware.
+// TODO: add pre and postActionValidation middleware. Post should be absolute last in chain before reducer and block _EVENT suffix actions from getting through.
 export default store => next => action => {
   const { type, payload } = action;
-
-  console.log('handMiddleware type', type, 'payload', payload);
 
   switch(type) {
 
@@ -15,6 +15,22 @@ export default store => next => action => {
 
     case actionTypes.CREATE_HAND: {
       next(action);
+      return;
+    }
+
+    case actionTypes.EDIT_SESSION_COMPLETE_EVENT: {
+      localStorage.setItem('savedSession', JSON.stringify(payload.session));
+
+      if (store.getState().hand === null) {
+        next({
+          type: actionTypes.CREATE_HAND,
+          payload: {
+            hand: payload.hand
+          }
+        });
+      }
+
+      payload.redirectToFn('/hand');
       return;
     }
 

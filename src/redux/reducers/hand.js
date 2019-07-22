@@ -4,10 +4,11 @@ import actionTypes from '../actionTypes';
 
 const initialState = null;
 
-export default function hand(state = initialState, action) {
+export default function handReducer(state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
+
     case actionTypes.CREATE_HAND:
       return payload.hand;
 
