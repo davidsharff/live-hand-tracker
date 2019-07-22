@@ -1,6 +1,8 @@
-import { createStore } from 'redux';
-import { devToolsEnhancer } from 'redux-devtools-extension';
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
-import reducers from './reducers';
+import handMiddleware  from './middleware/handMiddleware';
 
-export default createStore(reducers, devToolsEnhancer());
+import combinedReducer from './reducers';
+
+export default composeWithDevTools(applyMiddleware(handMiddleware))(createStore)(combinedReducer);
