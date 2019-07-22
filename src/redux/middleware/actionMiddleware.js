@@ -26,6 +26,7 @@ export default store => next => action => {
         payload: {
           hand: {
             bettingRound: bettingRounds[0],
+            buttonSeatIndex: null,
             heroSeatIndex: payload.session.defaultHeroSeatIndex,
             seats: payload.session.defaultSeats
           }

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { cards, bettingRounds } from './constants';
 
@@ -10,7 +11,9 @@ export const seatsType = PropTypes.arrayOf(PropTypes.exact({
 
 export const handType = PropTypes.exact({
   bettingRound: PropTypes.oneOf(bettingRounds),
-  heroSeatIndex: PropTypes.number,
+  // TODO: get hardcoded max for seats from constants?
+  buttonSeatIndex: PropTypes.oneOf(_.range(0, 10)),
+  heroSeatIndex: PropTypes.oneOf(_.range(0, 10)),
   seats: seatsType
 });
 
