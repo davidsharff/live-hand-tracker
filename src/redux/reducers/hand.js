@@ -22,6 +22,7 @@ export default function handReducer(state = initialState, action) {
         ]
       });
     }
+
     default:
       return state;
   }

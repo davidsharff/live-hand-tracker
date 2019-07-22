@@ -27,6 +27,9 @@ function Session(props) {
           type: actionTypes.LOAD_SESSION,
           payload: {
             session: JSON.parse(storedSessionStr)
+          },
+          aux: {
+            redirectToFn: (pathName) => props.history.push(pathName)
           }
         });
       } else {
@@ -86,23 +89,21 @@ function Session(props) {
     }
   });
 
+  // TODO: refeator to named functions?
   const handleClickNext = () => {
 
     // TODO: this should be in middleware that inspects the action type fire by next button
     if (props.hasHand) {
       // TODO: fire update hand action
     } else {
-
       props.dispatch({
-        type: actionTypes.EDIT_SESSION_COMPLETE_EVENT,
+        type: actionTypes.CREATE_HAND,
         payload: {
           hand: {
             bettingRound: bettingRounds[0],
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats
-          },
-          session,
-          redirectToFn: (pathName) => props.history.push(pathName)
+          }
         }
       });
     }
