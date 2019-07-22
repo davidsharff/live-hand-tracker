@@ -36,22 +36,6 @@ export default store => next => action => {
       return;
     }
 
-    case actionTypes.EDIT_SESSION_COMPLETE_EVENT: {
-      localStorage.setItem('savedSession', JSON.stringify(payload.session));
-
-      if (store.getState().hand === null) {
-        next({
-          type: actionTypes.CREATE_HAND,
-          payload: {
-            hand: payload.hand
-          }
-        });
-      }
-
-      payload.redirectToFn('/hand');
-      return;
-    }
-
     default:
       next(action);
   }

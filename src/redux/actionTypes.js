@@ -10,8 +10,5 @@ export default {
   UPDATE_SESSION_BIG_BLIND: 'UPDATE_SESSION_BIG_BLIND',
 
   CREATE_HAND: 'CREATE_HAND',
-  SET_HERO_CARDS: 'SET_HERO_CARDS',
-
-  // Pure events. These should be handled and squashed in middleware (never hit reducer on their own but can spawn other actions)
-  EDIT_SESSION_COMPLETE_EVENT: 'EDIT_SESSION_COMPLETE_EVENT'
+  SET_HERO_CARDS: 'SET_HERO_CARDS'
 };
