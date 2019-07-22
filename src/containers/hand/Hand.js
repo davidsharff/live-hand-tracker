@@ -16,7 +16,7 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 
 function Hand(props) {
-  const { session, hand } = props;
+  const { session, hand, deck} = props;
 
   if (session === null) {
     return <Redirect to="/session" />;
@@ -52,11 +52,11 @@ function Hand(props) {
       <Switch>
 
         <Route exact path="/hand/manage-hole-cards" render={() =>
-          <ManageHoleCards deck={props.deck} onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
+          <ManageHoleCards deck={deck} onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
         }/>
 
         <Route exact path="/hand/input-wizard" render={() =>
-          <HandInputWizard />
+          <HandInputWizard hand={hand} />
         }/>
 
       </Switch>
