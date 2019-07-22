@@ -12,7 +12,7 @@ export default function Routes() {
           // TODO: currently hand will handle redirecting to session if it hasn't been created yet. Should we send to /session instead?
           <Redirect to="/hand"/>
         )}/>
-        <Route exact path="/hand" component={Hand} />
+        <Route path="/hand" component={Hand} />
         <Route exact path="/session" component={Session} />
       </Switch>
     </Router>

@@ -3,12 +3,12 @@ import { Provider } from 'react-redux';
 
 import store from './redux/store';
 
-import Views from './containers/routes';
+import ContainerRoutes from './containers/ContainerRoutes';
 
 function App() {
   return (
     <Provider store={store}>
-      <Views />
+      <ContainerRoutes />
     </Provider>
   );
 }
