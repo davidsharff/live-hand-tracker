@@ -23,6 +23,7 @@ export default function handReducer(state = initialState, action) {
       });
     }
 
+    // TODO: consider decorating seat index and then sorting based on button when button index is set.
     default:
       return state;
   }

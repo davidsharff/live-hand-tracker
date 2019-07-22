@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { getDeck } from "../../selectors";
 
 import ManageHoleCards from './components/ManageHoleCards';
-import HandInputWizard from './components/HandInputWizard';
+import OverviewWizard from './components/OverviewWizard';
 import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';
@@ -56,7 +56,7 @@ function Hand(props) {
         }/>
 
         <Route exact path="/hand/input-wizard" render={() =>
-          <HandInputWizard hand={hand} />
+          <OverviewWizard hand={hand} />
         }/>
 
       </Switch>
