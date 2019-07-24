@@ -11,7 +11,7 @@ export default function OverviewWizard(props) {
 
   return (
     <Container>
-      <Row>
+      <Row className="mb-1">
         {
           hand.seats.map((s, i) =>
             <HeaderItem key={i} isButtonInputMode={hand.buttonSeatIndex === null}>
@@ -34,15 +34,18 @@ export default function OverviewWizard(props) {
           )
         }
       </Row>
-      <Row>
+      <Row className="d-flex flex-row justify-content-center">
         {
           // TODO: need input for selecting Button position and consider expandable editable session details.
           // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
         }
-        <div style={{ width: '100%'}}>
+        <div style={{ textAlign: 'center'}}>
           {
             hand.buttonSeatIndex === null &&
-            <div>Where's the button (tap seat above to set position)?</div>
+            <React.Fragment>
+              <div>Where's the button?</div>
+              <div>Tap seat above to set position</div>
+            </React.Fragment>
 
           }
         </div>
@@ -58,7 +61,7 @@ const HeaderItem = styled.div`
   padding: 2px 0 0 4px;
   border: ${p => 
     p.isButtonInputMode
-      ? 'solid #aaa 2px'
+      ? 'solid #28a745 2px'
       : 'solid #eee 1px'
   };
 `;
