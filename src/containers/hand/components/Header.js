@@ -5,7 +5,7 @@ import { Container, Row, Col } from 'reactstrap';
 
 export default function HandHeader(props) {
   return (
-    <Container>
+    <Container className="pt-1 pb-2">
       <Col style={{fontSize: '14px'}}>
         <Row className="d-flex flex-row justify-content-center align-items-center">
           <div>Blinds {props.smallBlind}/{props.bigBlind}&nbsp;</div>
