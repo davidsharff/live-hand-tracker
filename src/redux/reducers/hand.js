@@ -4,7 +4,7 @@ import actionTypes from '../actionTypes';
 
 const initialState = null;
 
-export default function handReducer(state = initialState, action) {
+export default function handReducer(handState = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
@@ -14,17 +14,23 @@ export default function handReducer(state = initialState, action) {
 
     case actionTypes.SET_HERO_CARDS: {
       const { holeCards } = payload;
-      return _.assign({}, state, {
+      return _.assign({}, handState, {
         seats: [
-          ...state.seats.slice(0, state.heroSeatIndex),
-          _.assign({}, state.seats[state.heroSeatIndex], { holeCards }),
-          ...state.seats.slice(state.heroSeatIndex + 1)
+          ...handState.seats.slice(0, handState.heroSeatIndex),
+          _.assign({}, handState.seats[handState.heroSeatIndex], { holeCards }),
+          ...handState.seats.slice(handState.heroSeatIndex + 1)
         ]
+      });
+    }
+
+    case actionTypes.SET_BUTTON_INDEX: {
+      return _.assign({}, handState, {
+        buttonSeatIndex: payload.buttonSeatIndex
       });
     }
 
     // TODO: consider decorating seat index and then sorting based on button when button index is set.
     default:
-      return state;
+      return handState;
   }
 }

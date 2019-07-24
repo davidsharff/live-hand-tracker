@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { getDeck } from "../../selectors";
 
 import ManageHoleCards from './components/ManageHoleCards';
-import OverviewWizard from './components/Wizard';
+import Wizard from './components/Wizard';
 import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';
@@ -46,6 +46,16 @@ function Hand(props) {
     props.history.push('/hand/input-wizard');
   };
 
+  // TODO: explore / decide between const and named functions.
+  function handleSetButtonIndex(buttonSeatIndex) {
+    props.dispatch({
+      type: actionTypes.SET_BUTTON_INDEX,
+      payload: {
+        buttonSeatIndex
+      }
+    });
+  }
+
   return (
     <HandContainer fluid className="d-flex flex-column">
       <Header location={session.location} smallBlind={session.smallBlind} bigBlind={session.bigBlind} totalPlayers={_.sumBy(hand.seats, 'isActive')} bettingRound={hand.bettingRound}/>
@@ -56,7 +66,7 @@ function Hand(props) {
         }/>
 
         <Route exact path="/hand/input-wizard" render={() =>
-          <OverviewWizard hand={hand} />
+          <Wizard hand={hand} onSetButtonSeatIndex={handleSetButtonIndex}/>
         }/>
 
       </Switch>

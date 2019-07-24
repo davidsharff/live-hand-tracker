@@ -14,7 +14,7 @@ export default function OverviewWizard(props) {
       <Row className="mb-1">
         {
           hand.seats.map((s, i) =>
-            <HeaderItem key={i} isButtonInputMode={hand.buttonSeatIndex === null}>
+            <HeaderItem key={i} isButtonInputMode={hand.buttonSeatIndex === null} onClick={() => props.onSetButtonSeatIndex(i)}>
               <div>
                 {
                   i === hand.heroSeatIndex
@@ -73,9 +73,11 @@ function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
 
   const decoratedActiveSeats = _.filter(decoratedSeats, 'isActive');
 
+  const convertedButtonIndex =_.findIndex(decoratedActiveSeats, { seatIndex: buttonSeatIndex });
+
   const seatsByPositionOrder = [
-    ...decoratedActiveSeats.slice(buttonSeatIndex),
-    ...decoratedActiveSeats.slice(0, buttonSeatIndex)
+    ...decoratedActiveSeats.slice(convertedButtonIndex),
+    ...decoratedActiveSeats.slice(0, convertedButtonIndex)
   ];
 
   const positionOrderIndex = _.findIndex(seatsByPositionOrder, { seatIndex: targetSeatIndex });
