@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { getDeck } from "../../selectors";
 
 import ManageHoleCards from './components/ManageHoleCards';
-import OverviewWizard from './components/OverviewWizard';
+import OverviewWizard from './components/Wizard';
 import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';

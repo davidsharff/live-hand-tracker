@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 import { Container, Row } from 'reactstrap';
 
+import { positionLabelsMap } from '../../../constants';
+
 export default function OverviewWizard(props) {
   const { hand } = props;
 
@@ -21,7 +23,7 @@ export default function OverviewWizard(props) {
                 }
               </div>
               {
-                s.isActive && hand.buttonSeatIndex !== null &&
+                s.isActive && (hand.buttonSeatIndex !== null) &&
                 <div>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</div>
               }
               {
@@ -37,7 +39,9 @@ export default function OverviewWizard(props) {
           // TODO: need input for selecting Button position and consider expandable editable session details.
           // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
         }
-        <div style={{ width: '100%'}}>Body</div>
+        <div style={{ width: '100%'}}>
+          Body
+        </div>
       </Row>
     </Container>
   );
@@ -59,33 +63,14 @@ function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
   const decoratedActiveSeats = _.filter(decoratedSeats, 'isActive');
 
   const seatsByPositionOrder = [
-    ...decoratedActiveSeats.slice(buttonSeatIndex + 1),
-    ...decoratedActiveSeats.slice(0, buttonSeatIndex),
-    decoratedActiveSeats[buttonSeatIndex]
+    ...decoratedActiveSeats.slice(buttonSeatIndex),
+    ...decoratedActiveSeats.slice(0, buttonSeatIndex)
   ];
 
   const positionOrderIndex = _.findIndex(seatsByPositionOrder, { seatIndex: targetSeatIndex });
 
-  if (decoratedActiveSeats.length === 9) {
-    // TODO: better support for relative position labels for small tables (< 5 seats)
-    return positionOrderIndex === 0
-      ? 'SB'
-      : positionOrderIndex === 1
-        ? 'BB'
-        : positionOrderIndex === 2
-          ? 'EP1'
-          : positionOrderIndex === 3
-            ? 'EP2'
-            : positionOrderIndex === 4
-              ? 'MP1'
-              : positionOrderIndex === 5
-                ? 'MP2'
-                : positionOrderIndex === 6
-                  ? 'HJ'
-                  : positionOrderIndex === 7
-                    ? 'CO'
-                    : 'Button';
-  }
+  const positionLabels = positionLabelsMap[decoratedActiveSeats.length];
 
-  throw new Error('TODO: need support different table sizes when getting seat position label');
+  return positionLabels[positionOrderIndex];
 }
+
