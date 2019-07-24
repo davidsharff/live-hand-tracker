@@ -14,7 +14,7 @@ export default function OverviewWizard(props) {
       <Row>
         {
           hand.seats.map((s, i) =>
-            <HeaderItem key={i}>
+            <HeaderItem key={i} isButtonInputMode={hand.buttonSeatIndex === null}>
               <div>
                 {
                   i === hand.heroSeatIndex
@@ -40,7 +40,11 @@ export default function OverviewWizard(props) {
           // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
         }
         <div style={{ width: '100%'}}>
-          Body
+          {
+            hand.buttonSeatIndex === null &&
+            <div>Where's the button (tap seat above to set position)?</div>
+
+          }
         </div>
       </Row>
     </Container>
@@ -51,8 +55,12 @@ const HeaderItem = styled.div`
   flex-basis: 20%;
   font-size: 14px;
   height: 75px;
-  border: solid #eee 1px;
   padding: 2px 0 0 4px;
+  border: ${p => 
+    p.isButtonInputMode
+      ? 'solid #aaa 2px'
+      : 'solid #eee 1px'
+  };
 `;
 
 function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
