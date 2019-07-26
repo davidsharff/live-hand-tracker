@@ -101,7 +101,7 @@ function Session(props) {
         type: actionTypes.CREATE_HAND,
         payload: {
           hand: {
-            bettingRound: bettingRounds.PRE_FLOP,
+            currentBettingRound: bettingRounds.PRE_FLOP,
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats,
             smallBlind: session.smallBlind,

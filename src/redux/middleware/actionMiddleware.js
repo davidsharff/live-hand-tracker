@@ -28,7 +28,7 @@ export default store => next => action => {
         type: actionTypes.CREATE_HAND,
         payload: {
           hand: {
-            bettingRound: bettingRounds[0],
+            currentBettingRound: bettingRounds.PRE_FLOP,
             buttonSeatIndex: null,
             heroSeatIndex: payload.session.defaultHeroSeatIndex,
             seats: payload.session.defaultSeats,

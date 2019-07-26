@@ -10,7 +10,7 @@ export const seatsType = PropTypes.arrayOf(PropTypes.exact({
 })).isRequired;
 
 export const handType = PropTypes.exact({
-  bettingRound: PropTypes.oneOf(_.values(bettingRounds)),
+  currentBettingRound: PropTypes.oneOf(_.values(bettingRounds)),
   // TODO: get hardcoded max for seats from constants?
   buttonSeatIndex: PropTypes.oneOf(_.range(0, 10)),
   heroSeatIndex: PropTypes.oneOf(_.range(0, 10)),

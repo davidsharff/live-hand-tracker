@@ -58,7 +58,7 @@ function Hand(props) {
 
   return (
     <HandContainer fluid className="d-flex flex-column">
-      <Header location={session.location} smallBlind={session.smallBlind} bigBlind={session.bigBlind} totalPlayers={_.sumBy(hand.seats, 'isActive')} bettingRound={hand.bettingRound}/>
+      <Header location={session.location} smallBlind={session.smallBlind} bigBlind={session.bigBlind} totalPlayers={_.sumBy(hand.seats, 'isActive')} bettingRound={hand.currentBettingRound}/>
       <Switch>
 
         <Route exact path="/hand/manage-hole-cards" render={() =>

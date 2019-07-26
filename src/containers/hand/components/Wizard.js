@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import styled from 'styled-components';
 
 import { Container, Row, Col } from 'reactstrap';
@@ -6,7 +7,7 @@ import { Container, Row, Col } from 'reactstrap';
 import { getSeatPositionLabel } from "../../../redux/reducers/hand";
 
 export default function OverviewWizard(props) {
-  const { hand, blinds } = props;
+  const { hand } = props;
 
   return (
     <Container>
@@ -44,15 +45,18 @@ export default function OverviewWizard(props) {
                 {
                   hand.buttonSeatIndex !== null &&
                   <div style={{fontSize: '12px'}}>
-                    <span>
-                      {
-                        getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'SB'
-                          ? blinds.small
-                          : getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'BB'
-                            ? blinds.big
-                            : null
-                      }
-                    </span>
+                    {
+                      (() => {
+                        const action = _.find(hand.actions, { bettingRound: hand.currentBettingRound, seatIndex: i });
+
+                        return action && (
+                          <React.Fragment>
+                            <div>{_.capitalize(action.actionType)}</div>
+                            <div>${action.amount}</div>
+                          </React.Fragment>
+                        );
+                      })()
+                    }
                   </div>
                 }
               </ActionRow>
