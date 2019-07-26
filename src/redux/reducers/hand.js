@@ -41,7 +41,7 @@ export default function handReducer(handState = initialState, action) {
           {
             bettingRound: bettingRounds.PRE_FLOP,
             seatIndex: getSeatIndexForPositionLabel(handState, positionLabels.BB),
-            amount: handState.smallBlind,
+            amount: handState.bigBlind,
             actionType: handActionTypes.POST
           }
         ]
