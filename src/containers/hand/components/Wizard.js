@@ -1,10 +1,9 @@
 import React from 'react';
-import _ from 'lodash';
 import styled from 'styled-components';
 
 import { Container, Row, Col } from 'reactstrap';
 
-import { positionLabelsMap } from '../../../constants';
+import { getSeatPositionLabel } from "../../../redux/reducers/hand";
 
 export default function OverviewWizard(props) {
   const { hand, blinds } = props;
@@ -96,25 +95,4 @@ const HeaderItem = styled(Col)`
 const ActionRow = styled(Row)`
   margin-top: -12px !important;
 `;
-
-function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
-  const decoratedSeats = hand.seats.map((s, i) => _.assign({}, s, {
-    seatIndex: i
-  }));
-
-  const decoratedActiveSeats = _.filter(decoratedSeats, 'isActive');
-
-  const convertedButtonIndex =_.findIndex(decoratedActiveSeats, { seatIndex: buttonSeatIndex });
-
-  const seatsByPositionOrder = [
-    ...decoratedActiveSeats.slice(convertedButtonIndex),
-    ...decoratedActiveSeats.slice(0, convertedButtonIndex)
-  ];
-
-  const positionOrderIndex = _.findIndex(seatsByPositionOrder, { seatIndex: targetSeatIndex });
-
-  const positionLabels = positionLabelsMap[decoratedActiveSeats.length];
-
-  return positionLabels[positionOrderIndex];
-}
 

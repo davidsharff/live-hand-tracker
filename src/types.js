@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { cards, bettingRounds } from './constants';
+import { cards, bettingRounds, handActionTypes } from './constants';
 
 export const holeCardsType = PropTypes.arrayOf(PropTypes.oneOf(cards)).isRequired; // TODO: shouldn't force required at top level.
 
@@ -10,11 +10,19 @@ export const seatsType = PropTypes.arrayOf(PropTypes.exact({
 })).isRequired;
 
 export const handType = PropTypes.exact({
-  bettingRound: PropTypes.oneOf(bettingRounds),
+  bettingRound: PropTypes.oneOf(_.values(bettingRounds)),
   // TODO: get hardcoded max for seats from constants?
   buttonSeatIndex: PropTypes.oneOf(_.range(0, 10)),
   heroSeatIndex: PropTypes.oneOf(_.range(0, 10)),
-  seats: seatsType
+  seats: seatsType,
+  smallBlind: PropTypes.number,
+  bigBlind: PropTypes.number,
+  actions: PropTypes.arrayOf(PropTypes.exact({
+    bettingRound: PropTypes.oneOf(_.values(bettingRounds)),
+    seatIndex: PropTypes.number,
+    amount: PropTypes.number,
+    actionType: PropTypes.oneOf(_.values(handActionTypes)),
+  })).isRequired
 });
 
 export const sessionType = PropTypes.exact({

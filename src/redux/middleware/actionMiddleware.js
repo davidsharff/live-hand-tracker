@@ -31,7 +31,9 @@ export default store => next => action => {
             bettingRound: bettingRounds[0],
             buttonSeatIndex: null,
             heroSeatIndex: payload.session.defaultHeroSeatIndex,
-            seats: payload.session.defaultSeats
+            seats: payload.session.defaultSeats,
+            smallBlind: payload.session.smallBlind,
+            bigBlind: payload.session.bigBlind
           }
         },
         aux: {
