@@ -66,7 +66,11 @@ function Hand(props) {
         }/>
 
         <Route exact path="/hand/input-wizard" render={() =>
-          <Wizard hand={hand} onSetButtonSeatIndex={handleSetButtonIndex}/>
+          <Wizard
+            hand={hand}
+            onSetButtonSeatIndex={handleSetButtonIndex}
+            blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
+          />
         }/>
 
       </Switch>

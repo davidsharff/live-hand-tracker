@@ -17,13 +17,13 @@ export const cards = _.flatMap(suits, (s) => cardValues.map(c =>
 
 export const positionLabelsMap = {
   // TODO: get feedback/lookup what labels should be for smaller tables.
-  '10':['Button', 'SB', 'BB', 'EP1', 'EP2', 'MP1', 'MP2', 'MP3', 'HJ', 'CO'],
-  '9': ['Button', 'SB', 'BB', 'EP1', 'EP2', 'MP1', 'MP2', 'HJ', 'CO'],
-  '8': ['Button', 'SB', 'BB', 'EP1', 'MP1', 'MP2', 'HJ', 'CO'],
-  '7': ['Button', 'SB', 'BB', 'EP1', 'MP1', 'HJ', 'CO'],
-  '6': ['Button', 'SB', 'BB', 'MP1', 'HJ', 'CO'],
-  '5': ['Button', 'SB', 'BB', 'HJ', 'CO'],
-  '4': ['Button', 'SB', 'BB', 'CO'],
-  '3': ['Button', 'SB', 'BB'],
-  '2': ['Button', 'BB']
+  '10':['B', 'SB', 'BB', 'EP1', 'EP2', 'MP1', 'MP2', 'MP3', 'HJ', 'CO'],
+  '9': ['B', 'SB', 'BB', 'EP1', 'EP2', 'MP1', 'MP2', 'HJ', 'CO'],
+  '8': ['B', 'SB', 'BB', 'EP1', 'MP1', 'MP2', 'HJ', 'CO'],
+  '7': ['B', 'SB', 'BB', 'EP1', 'MP1', 'HJ', 'CO'],
+  '6': ['B', 'SB', 'BB', 'MP1', 'HJ', 'CO'],
+  '5': ['B', 'SB', 'BB', 'HJ', 'CO'],
+  '4': ['B', 'SB', 'BB', 'CO'],
+  '3': ['B', 'SB', 'BB'],
+  '2': ['B', 'BB']
 };
