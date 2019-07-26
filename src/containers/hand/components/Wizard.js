@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';
 
-import { Container, Row } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 
 import { positionLabelsMap } from '../../../constants';
 
@@ -14,8 +14,13 @@ export default function OverviewWizard(props) {
       <Row className="mb-1">
         {
           hand.seats.map((s, i) =>
-            <HeaderItem key={i} isButtonInputMode={hand.buttonSeatIndex === null} onClick={() => props.onSetButtonSeatIndex(i)}>
-              <Row className="d-flex flex-row justify-content-between m-0">
+            <HeaderItem
+              key={i}
+              isButtonInputMode={hand.buttonSeatIndex === null}
+              onClick={() => props.onSetButtonSeatIndex(i)}
+              className="d-flex flex-column justify-content-between"
+            >
+              <Row className="d-flex flex-row justify-content-between m-0 flex-fill">
                 {
                   s.isActive
                     ? (
@@ -36,20 +41,22 @@ export default function OverviewWizard(props) {
                     : <span>Empty</span>
                 }
               </Row>
-              <Row className="d-flex flex-row justify-content-center m-0 flex-fill">
+              <ActionRow className="d-flex flex-row justify-content-around m-0 flex-fill align-items-start">
                 {
                   hand.buttonSeatIndex !== null &&
                   <div style={{fontSize: '12px'}}>
-                    {
-                      getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'SB'
-                        ? blinds.small
-                        : getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'BB'
-                          ? blinds.big
-                          : null
-                    }
+                    <span>
+                      {
+                        getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'SB'
+                          ? blinds.small
+                          : getSeatPositionLabel(hand, i, hand.buttonSeatIndex) === 'BB'
+                            ? blinds.big
+                            : null
+                      }
+                    </span>
                   </div>
                 }
-              </Row>
+              </ActionRow>
             </HeaderItem>
           )
         }
@@ -74,7 +81,7 @@ export default function OverviewWizard(props) {
   );
 }
 
-const HeaderItem = styled.div`
+const HeaderItem = styled(Col)`
   flex-basis: 20%;
   font-size: 12px;
   height: 75px;
@@ -84,6 +91,10 @@ const HeaderItem = styled.div`
       ? 'solid #28a745 2px'
       : 'solid #eee 1px'
   };
+`;
+
+const ActionRow = styled(Row)`
+  margin-top: -12px !important;
 `;
 
 function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
