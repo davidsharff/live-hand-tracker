@@ -110,6 +110,7 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
         }
       ];
     } else {
+      // TODO: I think this can handle checking if anyone is left to act. If so, someone must have folded unecessarily.
       return [
         {
           type: 'win'
@@ -119,7 +120,7 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
   }
 
   // We had a live action this round.
-  switch (lastLiveAction) {
+  switch (lastLiveAction.type) {
 
     case handActionTypes.POST:
       return [
