@@ -27,7 +27,7 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const actionComponentMap = createActionComponentsMap();
+  const actionComponentMap = createActionComponentsMap(null, null, () => console.log('handling raise!'));
 
   return (
     <Container>
@@ -85,12 +85,23 @@ export default function OverviewWizard(props) {
           )
         }
       </Row>
-      <Row className="d-flex flex-row justify-content-center">
+      <Row className="d-flex flex-row justify-content-center mt-2">
+        {
+          hand.buttonSeatIndex &&
+          <h4>
+            {
+              getSeatPositionLabel(hand, selectedSeatIndex, hand.buttonSeatIndex)
+            }
+            &nbsp;(Seat { (selectedSeatIndex + 1) })
+          </h4>
+        }
+      </Row>
+      <Row className="d-flex flex-row justify-content-center flex-fill">
         {
           // TODO: need input for selecting Button position and consider expandable editable session details.
           // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
         }
-        <div style={{ textAlign: 'center'}}>
+        <div className="flex-fill">
           {
             hand.buttonSeatIndex === null &&
             <React.Fragment>
@@ -101,13 +112,12 @@ export default function OverviewWizard(props) {
           }
           {
             hand.buttonSeatIndex !== null &&
-            getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1).map(availableAction =>
-              <div key={availableAction.type}>
-                {
-                  actionComponentMap[availableAction.type]()
-                }
-              </div>
-            )
+            _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1), sortActionComponents).map(availableAction => {
+              const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
+              return (
+                <ThisActionComponent key={availableAction.type} amount={availableAction.minAmount}/>
+              );
+            })
           }
         </div>
       </Row>
@@ -127,43 +137,71 @@ const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {
   };
 `;
 
-function createActionComponentsMap(handleCall, handleFold, handleRaise, liveAmount) {
+function createActionComponentsMap(handleCall, handleFold, handleRaise) {
 
-  const CallComponent = ({ onCall }) => (
-    <Button onClick={handleCall}>Call</Button>
+  const CallComponent = ({ onCall, amount }) => (
+    <ActionButtonRow>
+      <Button className="flex-fill" color="primary" onClick={handleCall}>Call&nbsp;${ amount }</Button>
+    </ActionButtonRow>
   );
 
-  const RaiseComponent = ({ onRaise, liveAmount }) => {
-    const { raiseAmount, setRaiseAmount } = useState(liveAmount * 2);
+  const RaiseComponent = ({ onRaise, minRaise }) => {
+    const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
     const handleChange = (e) => {
       const newValue = parseInt(e.target.value);
-      if (newValue > (liveAmount * 2)) {
+      if (newValue > (minRaise)) {
         setRaiseAmount(newValue);
       }
     };
 
     return (
-      <Row>
-        <Button onClick={handleRaise}>Raise</Button>
-        <Input type="number" value={raiseAmount} onChange={handleChange}>
-          { raiseAmount }
-        </Input>
-      </Row>
+      <React.Fragment>
+        <ActionButtonRow className="justify-content-center align-items-center">
+          <Button className="flex-fill" color="warning" onClick={handleRaise}>
+            <Row className="d-flex flex-row justify-content-center align-items-center">
+              <span style={{ marginRight: '10px'}}>Raise</span>
+              <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={raiseAmount} onChange={handleChange} />
+            </Row>
+          </Button>
+        </ActionButtonRow>
+      </React.Fragment>
     );
   };
 
   const FoldComponent = ({ onFold }) => (
-    <Button onClick={handleFold}>Fold</Button>
+    <ActionButtonRow>
+      <Button className="flex-fill" color="danger" onClick={handleFold}>Fold</Button>
+    </ActionButtonRow>
   );
 
   return {
-    [handActionTypes.CALL]:  () =>  <CallComponent  onCall={handleCall}   />,
+    [handActionTypes.CALL]:  ({ amount }) => <CallComponent  onCall={handleCall} amount={amount}/>,
     [handActionTypes.FOLD]:  () =>  <FoldComponent  onFold={handleFold}   />,
-    [handActionTypes.RAISE]: () =>  <RaiseComponent onRaise={handleRaise} liveAmount={liveAmount} />
+    [handActionTypes.RAISE]: ({ amount }) => <RaiseComponent onRaise={handleRaise} minRaise={amount} />
   };
 }
 
 const ActionRow = styled(Row)`
   margin-top: -12px !important;
 `;
+
+const ActionButtonRow = styled(Row)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 20px 0 0 0 !important;
+`;
+
+function sortActionComponents({ type }) {
+  return type === handActionTypes.CHECK
+    ? 0
+    : type === handActionTypes.CALL
+      ? 1
+      : type  === handActionTypes.FOLD
+        ? 2
+        : type === handActionTypes.BET
+          ? 3
+          : 4;
+};
