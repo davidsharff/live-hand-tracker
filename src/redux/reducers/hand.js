@@ -115,3 +115,24 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
   }
 
 }
+
+export function getNextToActSeatIndex(hand) {
+  const lastActionSeatIndex = hand.actions.slice(-1)[0].seatIndex;
+
+  const simpleNextSeatIndex = lastActionSeatIndex + 1;
+
+  // TODO: do we need to validate here or perhaps on creating seatIndex field in action collection?
+  return simpleNextSeatIndex === hand.seats.length
+    ? 0
+    : simpleNextSeatIndex;
+
+}
+
+// export function getSeatIndexForStep(hand, startingSeatIndex, step) {
+//   const totalSeats = hand.seats.length;
+//   const naieveNewSeatIndex = startingSeatIndex + step;
+//
+//   const newIndex = naieveNewSeatIndex >= totalSeats
+//     ? naieveNewSeatIndex - totalSeats
+//     : naieveNewSeatIndex;
+// }
