@@ -84,3 +84,34 @@ export function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
 
   return positionLabels[positionOrderIndex];
 }
+
+export function getAvailableActionForSeatIndex(hand, seatIndex) {
+  const lastAction = hand.actions.slice(-1)[0];
+
+  if (seatIndex === lastAction.seatIndex) {
+    return [];
+  }
+
+  const lastActionType = lastAction.actionType;
+
+  switch (lastActionType) {
+    case handActionTypes.POST:
+      return [
+        {
+          type: handActionTypes.FOLD
+        },
+        {
+          type: handActionTypes.CALL
+        },
+        {
+          type: handActionTypes.RAISE,
+          minAmount: lastAction.amount * 2
+        }
+      ];
+    default:
+      throw new Error(
+        `Could not determine available action for seatIndex: ${seatIndex}. Last action type ${lastActionType}`
+      );
+  }
+
+}

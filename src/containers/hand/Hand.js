@@ -24,7 +24,12 @@ function Hand(props) {
 
   const heroHoleCards = hand.seats[props.hand.heroSeatIndex].holeCards;
 
+  // if (!_.includes(props.history.location.pathname, 'input-wizard')) {
+  //   props.history.push('/hand/input-wizard');
+  // }
+
   if (
+//    false &&
     session &&
     heroHoleCards.length < 2 &&
     props.location.pathname !== '/hand/manage-hole-cards'

@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';
 
 import { Container, Row, Col } from 'reactstrap';
 
-import { getSeatPositionLabel } from "../../../redux/reducers/hand";
+import { getAvailableActionForSeatIndex, getSeatPositionLabel } from "../../../redux/reducers/hand";
 
 export default function OverviewWizard(props) {
   const { hand } = props;
+
+  const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
+
+  useEffect(() => {
+    if (hand.buttonSeatIndex !== null) {
+      setSelectedSeatIndex(hand.buttonSeatIndex + 3);
+    }
+  }, [hand.buttonSeatIndex]);
 
   return (
     <Container>
@@ -17,7 +25,7 @@ export default function OverviewWizard(props) {
             <HeaderItem
               key={i}
               isButtonInputMode={hand.buttonSeatIndex === null}
-              onClick={() => props.onSetButtonSeatIndex(i)}
+              onClick={() => hand.buttonSeatIndex === null && props.onSetButtonSeatIndex(i)}
               className="d-flex flex-column justify-content-between"
             >
               <Row className="d-flex flex-row justify-content-between m-0 flex-fill">
@@ -78,13 +86,19 @@ export default function OverviewWizard(props) {
             </React.Fragment>
 
           }
+          {
+            hand.buttonSeatIndex !== null &&
+            getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1).map(availableAction =>
+              <div key={availableAction.type}>{ availableAction.type }</div>
+            )
+          }
         </div>
       </Row>
     </Container>
   );
 }
 
-const HeaderItem = styled(Col)`
+const HeaderItem = styled(({ isButtonInputMode, ...rest }) => <Col {...rest} />)`
   flex-basis: 20%;
   font-size: 12px;
   height: 75px;
