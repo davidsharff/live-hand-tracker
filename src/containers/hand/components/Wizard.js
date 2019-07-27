@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
 import styled from 'styled-components';
 
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Button, Input } from 'reactstrap';
 
 import {
   getAvailableActionForSeatIndex,
   getNextToActSeatIndex,
   getSeatPositionLabel
 } from "../../../redux/reducers/hand";
+
+import { handActionTypes } from "../../../constants";
 
 export default function OverviewWizard(props) {
   const { hand } = props;
@@ -24,6 +26,8 @@ export default function OverviewWizard(props) {
       setSelectedSeatIndex(nextToActSeatIndex);
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
+
+  const actionComponentMap = createActionComponentsMap();
 
   return (
     <Container>
@@ -98,7 +102,11 @@ export default function OverviewWizard(props) {
           {
             hand.buttonSeatIndex !== null &&
             getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1).map(availableAction =>
-              <div key={availableAction.type}>{ availableAction.type }</div>
+              <div key={availableAction.type}>
+                {
+                  actionComponentMap[availableAction.type]()
+                }
+              </div>
             )
           }
         </div>
@@ -119,7 +127,43 @@ const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {
   };
 `;
 
+function createActionComponentsMap(handleCall, handleFold, handleRaise, liveAmount) {
+
+  const CallComponent = ({ onCall }) => (
+    <Button onClick={handleCall}>Call</Button>
+  );
+
+  const RaiseComponent = ({ onRaise, liveAmount }) => {
+    const { raiseAmount, setRaiseAmount } = useState(liveAmount * 2);
+
+    const handleChange = (e) => {
+      const newValue = parseInt(e.target.value);
+      if (newValue > (liveAmount * 2)) {
+        setRaiseAmount(newValue);
+      }
+    };
+
+    return (
+      <Row>
+        <Button onClick={handleRaise}>Raise</Button>
+        <Input type="number" value={raiseAmount} onChange={handleChange}>
+          { raiseAmount }
+        </Input>
+      </Row>
+    );
+  };
+
+  const FoldComponent = ({ onFold }) => (
+    <Button onClick={handleFold}>Fold</Button>
+  );
+
+  return {
+    [handActionTypes.CALL]:  () =>  <CallComponent  onCall={handleCall}   />,
+    [handActionTypes.FOLD]:  () =>  <FoldComponent  onFold={handleFold}   />,
+    [handActionTypes.RAISE]: () =>  <RaiseComponent onRaise={handleRaise} liveAmount={liveAmount} />
+  };
+}
+
 const ActionRow = styled(Row)`
   margin-top: -12px !important;
 `;
-
