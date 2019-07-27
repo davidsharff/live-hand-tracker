@@ -33,16 +33,16 @@ export default function handReducer(handState = initialState, action) {
       return _.assign({}, handState, {
         actions: [
           {
+            type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
             seatIndex: getSeatIndexForPositionLabel(handState, positionLabels.SB, payload.buttonSeatIndex),
-            amount: handState.smallBlind,
-            actionType: handActionTypes.POST
+            amount: handState.smallBlind
           },
           {
+            type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
             seatIndex: getSeatIndexForPositionLabel(handState, positionLabels.BB),
-            amount: handState.bigBlind,
-            actionType: handActionTypes.POST
+            amount: handState.bigBlind
           }
         ]
       });
@@ -92,9 +92,35 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     return [];
   }
 
-  const lastActionType = lastAction.actionType;
+  // TODO: better noun?
+  const actionsThisRound = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
+  const lastLiveAction = _.reject(actionsThisRound, { type: handActionTypes.FOLD })[0];
 
-  switch (lastActionType) {
+  // TODO: below is untested
+  // TODO: I guess we'll have to support someone folding instead of checking. Code below assumes that is impossible.
+  if (!lastLiveAction) {
+    if (actionsThisRound.length === 0) {
+      return [
+        {
+          type: handActionTypes.CHECK
+        },
+        {
+          type: handActionTypes.BET,
+          minAmount: hand.bigBlind
+        }
+      ];
+    } else {
+      return [
+        {
+          type: 'win'
+        }
+      ];
+    }
+  }
+
+  // We had a live action this round.
+  switch (lastLiveAction) {
+
     case handActionTypes.POST:
       return [
         {
@@ -108,9 +134,10 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           minAmount: lastAction.amount * 2
         }
       ];
+
     default:
       throw new Error(
-        `Could not determine available action for seatIndex: ${seatIndex}. Last action type ${lastActionType}`
+        `Could not determine available action for seatIndex: ${seatIndex}. Last action type ${lastLiveAction}`
       );
   }
 

@@ -21,7 +21,7 @@ export const handType = PropTypes.exact({
     bettingRound: PropTypes.oneOf(_.values(bettingRounds)),
     seatIndex: PropTypes.number,
     amount: PropTypes.number,
-    actionType: PropTypes.oneOf(_.values(handActionTypes)),
+    type: PropTypes.oneOf(_.values(handActionTypes)), // TODO: techincally only can by POST if PRE_FLOP
   })).isRequired
 });
 
