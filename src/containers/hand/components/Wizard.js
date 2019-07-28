@@ -117,7 +117,7 @@ export default function OverviewWizard(props) {
             _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1), sortActionComponents).map(availableAction => {
               const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
               return (
-                <ThisActionComponent key={availableAction.type} amount={availableAction.minAmount} />
+                <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
               );
             })
           }

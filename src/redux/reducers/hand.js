@@ -114,7 +114,8 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           type: handActionTypes.FOLD
         },
         {
-          type: handActionTypes.CALL
+          type: handActionTypes.CALL,
+          amount: lastAction.amount
         },
         {
           type: handActionTypes.RAISE,
