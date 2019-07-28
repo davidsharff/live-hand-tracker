@@ -7,7 +7,7 @@ import { Container, Row, Col, Button, Input } from 'reactstrap';
 import {
   getAvailableActionForSeatIndex,
   getNextToActSeatIndex,
-  getSeatPositionLabel
+  getPositionLabelForSeatIndex
 } from "../../../redux/reducers/hand";
 
 import { handActionTypes } from "../../../constants";
@@ -55,7 +55,9 @@ export default function OverviewWizard(props) {
                        </span>
                         {
                           hand.buttonSeatIndex !== null &&
-                          <span>{ getSeatPositionLabel(hand, i, hand.buttonSeatIndex) }</span>
+                          <span>
+                            { s.isActive ? getPositionLabelForSeatIndex(hand, i, s) : 'Empty'}
+                          </span>
                         }
                       </React.Fragment>
                     )
@@ -87,10 +89,10 @@ export default function OverviewWizard(props) {
       </Row>
       <Row className="d-flex flex-row justify-content-center mt-2">
         {
-          hand.buttonSeatIndex &&
+          selectedSeatIndex &&
           <h4>
             {
-              getSeatPositionLabel(hand, selectedSeatIndex, hand.buttonSeatIndex)
+              getPositionLabelForSeatIndex(hand, selectedSeatIndex)
             }
             &nbsp;(Seat { (selectedSeatIndex + 1) })
           </h4>
@@ -115,7 +117,7 @@ export default function OverviewWizard(props) {
             _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1), sortActionComponents).map(availableAction => {
               const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
               return (
-                <ThisActionComponent key={availableAction.type} amount={availableAction.minAmount}/>
+                <ThisActionComponent key={availableAction.type} amount={availableAction.minAmount} />
               );
             })
           }

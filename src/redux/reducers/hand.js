@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
-import { positionLabelsMap, positionLabels, bettingRounds, handActionTypes } from "../../constants";
+import { positionLabelsMap, bettingRounds, handActionTypes } from "../../constants";
 
 const initialState = null;
 
@@ -11,7 +11,7 @@ export default function handReducer(handState = initialState, action) {
   switch (type) {
 
     case actionTypes.CREATE_HAND:
-      return _.assign({}, payload.hand, { actions: [] }) ;
+      return _.assign({}, payload.hand, { actions: [], positions: [] }) ;
 
     case actionTypes.SET_HERO_CARDS: {
       const { holeCards } = payload;
@@ -25,23 +25,36 @@ export default function handReducer(handState = initialState, action) {
     }
 
     case actionTypes.SET_BUTTON_INDEX: {
-      // TODO: add validation that this action can only occur before any other action has been inputted.
-      handState = _.assign({}, handState, {
-        buttonSeatIndex: payload.buttonSeatIndex
-      });
+      const decoratedSeats = handState.seats.map((s, seatIndex) =>
+        _.assign({}, s, { seatIndex })
+      );
+
+      const sortedActiveSeats = _(decoratedSeats.slice(payload.buttonSeatIndex))
+        .concat(decoratedSeats.slice(0, payload.buttonSeatIndex))
+        .filter('isActive')
+        .value();
+
+      const positionLabels = positionLabelsMap[sortedActiveSeats.length];
+
+      const positions = sortedActiveSeats.map(({ seatIndex }, positionIndex) => ({
+        seatIndex,
+        label: positionLabels[positionIndex]
+      }));
 
       return _.assign({}, handState, {
+        buttonSeatIndex: payload.buttonSeatIndex,
+        positions,
         actions: [
           {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
-            seatIndex: getSeatIndexForPositionLabel(handState, positionLabels.SB, payload.buttonSeatIndex),
+            seatIndex: positions[1].seatIndex, // TODO: special case two-handed
             amount: handState.smallBlind
           },
           {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
-            seatIndex: getSeatIndexForPositionLabel(handState, positionLabels.BB),
+            seatIndex: positions[2].seatIndex,
             amount: handState.bigBlind
           }
         ]
@@ -54,35 +67,8 @@ export default function handReducer(handState = initialState, action) {
   }
 }
 
-function getSeatIndexForPositionLabel(hand, positionLabel, optionalButtonSeatIndex) {
-  const buttonSeatIndex = optionalButtonSeatIndex || hand.buttonSeatIndex;
-
-  const seatPositionLabels = hand.seats.map((s, i) =>
-    getSeatPositionLabel(hand, i, buttonSeatIndex) || 'empty'
-  );
-
-  return seatPositionLabels.indexOf(positionLabel);
-}
-
-export function getSeatPositionLabel(hand, targetSeatIndex, buttonSeatIndex) {
-  const decoratedSeats = hand.seats.map((s, i) => _.assign({}, s, {
-    seatIndex: i
-  }));
-
-  const decoratedActiveSeats = _.filter(decoratedSeats, 'isActive');
-
-  const convertedButtonIndex =_.findIndex(decoratedActiveSeats, { seatIndex: buttonSeatIndex });
-
-  const seatsByPositionOrder = [
-    ...decoratedActiveSeats.slice(convertedButtonIndex),
-    ...decoratedActiveSeats.slice(0, convertedButtonIndex)
-  ];
-
-  const positionOrderIndex = _.findIndex(seatsByPositionOrder, { seatIndex: targetSeatIndex });
-
-  const positionLabels = positionLabelsMap[decoratedActiveSeats.length];
-
-  return positionLabels[positionOrderIndex];
+export function getPositionLabelForSeatIndex(hand, seatIndex) {
+  return _.find(hand.positions, { seatIndex }).label;
 }
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {
@@ -145,28 +131,19 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 }
 
 export function getNextToActSeatIndex(hand) {
-  const lastActionSeatIndex = hand.actions.slice(-1)[0].seatIndex;
+  const roundActions = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
 
-  const simpleNextSeatIndex = lastActionSeatIndex + 1;
+  if (roundActions.length === 0) {
+    return hand.positions[0].seatIndex;
+  }
 
-  // TODO: do we need to validate here or perhaps on creating seatIndex field in action collection?
-  const nextToActSeatIndex = simpleNextSeatIndex === hand.seats.length
-    ? 0
-    : simpleNextSeatIndex;
+  const currentPosition = _.find(hand.positions, { seatIndex: _.last(roundActions).seatIndex });
+  const currentPositionIndex = _.findIndex(hand.positions, { label: currentPosition.label });
 
-  const nextActiveSeat = _(hand.seats)
-    .slice(nextToActSeatIndex)
-    .filter('isActive')
-    .head();
+  const nextPosition = currentPositionIndex === (hand.positions.length - 1)
+    ? hand.positions[0]
+    : hand.positions[currentPositionIndex + 1];
 
-  return hand.seats.indexOf(nextActiveSeat); // Get active seats index in the full seats array by obj reference.
+
+  return nextPosition.seatIndex;
 }
-
-// export function getSeatIndexForStep(hand, startingSeatIndex, step) {
-//   const totalSeats = hand.seats.length;
-//   const naieveNewSeatIndex = startingSeatIndex + step;
-//
-//   const newIndex = naieveNewSeatIndex >= totalSeats
-//     ? naieveNewSeatIndex - totalSeats
-//     : naieveNewSeatIndex;
-// }
