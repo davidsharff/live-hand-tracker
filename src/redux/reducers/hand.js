@@ -150,10 +150,16 @@ export function getNextToActSeatIndex(hand) {
   const simpleNextSeatIndex = lastActionSeatIndex + 1;
 
   // TODO: do we need to validate here or perhaps on creating seatIndex field in action collection?
-  return simpleNextSeatIndex === hand.seats.length
+  const nextToActSeatIndex = simpleNextSeatIndex === hand.seats.length
     ? 0
     : simpleNextSeatIndex;
 
+  const nextActiveSeat = _(hand.seats)
+    .slice(nextToActSeatIndex)
+    .filter('isActive')
+    .head();
+
+  return hand.seats.indexOf(nextActiveSeat); // Get active seats index in the full seats array by obj reference.
 }
 
 // export function getSeatIndexForStep(hand, startingSeatIndex, step) {

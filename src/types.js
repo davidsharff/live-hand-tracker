@@ -14,7 +14,7 @@ export const handType = PropTypes.exact({
   // TODO: get hardcoded max for seats from constants?
   buttonSeatIndex: PropTypes.oneOf(_.range(0, 10)),
   heroSeatIndex: PropTypes.oneOf(_.range(0, 10)),
-  seats: seatsType,
+  seats: seatsType, // TODO: consider a allTableSeats and activeSeats array where activeSeatsArray has tableSeatIndex attribute.
   smallBlind: PropTypes.number,
   bigBlind: PropTypes.number,
   actions: PropTypes.arrayOf(PropTypes.exact({
