@@ -27,11 +27,13 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const handleCall = () =>  props.onCall(selectedSeatIndex);
-  const handleFold = () =>  props.onFold(selectedSeatIndex);
+  const handleCall  = () =>  props.onCall(selectedSeatIndex);
+  const handleFold  = () =>  props.onFold(selectedSeatIndex);
+  const handleCheck = () =>  props.onCheck(selectedSeatIndex);
   const handleRaise = (amount) => props.onRaise(selectedSeatIndex, amount);
+  const handleBet   = (amount) => props.onBet(selectedSeatIndex, amount);
 
-  const actionComponentMap = createActionComponentsMap(handleCall, handleFold, handleRaise);
+  const actionComponentMap = createActionComponentsMap(handleCall, handleFold, handleRaise, handleCheck, handleBet);
 
   return (
     <Container>
@@ -146,7 +148,7 @@ const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {
   };
 `;
 
-function createActionComponentsMap(handleCall, handleFold, handleRaise) {
+function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCheck, handleBet) {
 
   const CallComponent = ({ onCall, amount }) => (
     <ActionButtonRow>
@@ -158,11 +160,10 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
     const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
     const handleChange = (e) => {
-      const newValue = parseInt(e.target.value);
-
-      if (newValue > (minRaise)) {
-        setRaiseAmount(newValue);
-      }
+      const newValue = parseInt(e.target.value, 10);
+      setRaiseAmount(
+        isNaN(newValue) ? 0 : newValue
+      );
     };
 
     return (
@@ -179,16 +180,48 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
     );
   };
 
+  const BetComponent = ({ onBet, minBet }) => {
+    const [betAmount, setBetAmount] = useState(minBet);
+
+    const handleChange = (e) => {
+      const newValue = parseInt(e.target.value, 10);
+      setBetAmount(
+        isNaN(newValue) ? 0 : newValue
+      );
+    };
+
+    return (
+      <React.Fragment>
+        <ActionButtonRow className="justify-content-center align-items-center">
+          <Button className="flex-fill" color="warning" onClick={() => onBet(betAmount)}>
+            <Row className="d-flex flex-row justify-content-center align-items-center">
+              <span style={{ marginRight: '10px'}}>Bet</span>
+              <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={betAmount} onChange={handleChange} />
+            </Row>
+          </Button>
+        </ActionButtonRow>
+      </React.Fragment>
+    );
+  };
+
   const FoldComponent = ({ onFold }) => (
     <ActionButtonRow>
       <Button className="flex-fill" color="danger" onClick={onFold}>Fold</Button>
     </ActionButtonRow>
   );
 
+  const CheckComponent = ({ onCheck }) => (
+    <ActionButtonRow>
+      <Button className="flex-fill" color="danger" onClick={onCheck}>Fold</Button>
+    </ActionButtonRow>
+  );
+
   return {
-    [handActionTypes.CALL]:  ({ amount }) => <CallComponent  onCall={handleCall} amount={amount}/>,
-    [handActionTypes.FOLD]:  () =>  <FoldComponent  onFold={handleFold}   />,
-    [handActionTypes.RAISE]: ({ amount }) => <RaiseComponent onRaise={handleRaise} minRaise={amount} />
+    [handActionTypes.CALL]: ({ amount }) => <CallComponent  onCall={handleCall} amount={amount} />,
+    [handActionTypes.FOLD]: () =>  <FoldComponent  onFold={handleFold}   />,
+    [handActionTypes.CHECK]: () =>  <CheckComponent  onCheck={handleCheck}   />,
+    [handActionTypes.RAISE]: ({ amount }) => <RaiseComponent onRaise={handleRaise} minRaise={amount} />,
+    [handActionTypes.BET]: ({ amount }) => <BetComponent onRaise={handleBet} minBet={amount} />
   };
 }
 

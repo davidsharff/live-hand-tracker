@@ -106,6 +106,36 @@ export default function handReducer(hand = initialState, action) {
       });
     }
 
+    case actionTypes.CHECK: {
+      const { seatIndex } = payload;
+      return _.assign({}, hand, {
+        actions: [
+          ...hand.actions,
+          {
+            type: handActionTypes.CHECK,
+            bettingRound: hand.currentBettingRound,
+            seatIndex,
+            amount: null
+          }
+        ]
+      });
+    }
+
+    case actionTypes.BET: {
+      const { seatIndex, amount } = payload;
+      return _.assign({}, hand, {
+        actions: [
+          ...hand.actions,
+          {
+            type: handActionTypes.BET,
+            bettingRound: hand.currentBettingRound,
+            seatIndex,
+            amount
+          }
+        ]
+      });
+    }
+
     // TODO: consider decorating seat index and then sorting based on button when button index is set.
     default:
       return hand;
@@ -133,11 +163,12 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     if (actionsThisRound.length === 0) {
       return [
         {
-          type: handActionTypes.CHECK
+          type: handActionTypes.CHECK,
+          amount: null
         },
         {
           type: handActionTypes.BET,
-          minAmount: hand.bigBlind
+          amount: hand.bigBlind
         }
       ];
     } else {
@@ -156,7 +187,8 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     case handActionTypes.POST:
       return [
         {
-          type: handActionTypes.FOLD
+          type: handActionTypes.FOLD,
+          amount: null
         },
         {
           type: handActionTypes.CALL,
