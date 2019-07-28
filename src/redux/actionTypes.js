@@ -13,5 +13,7 @@ export default {
   SET_HERO_CARDS: 'SET_HERO_CARDS',
 
   SET_BUTTON_INDEX: 'SET_BUTTON_INDEX',
-  CALL: 'CALL'
+  CALL: 'CALL',
+  FOLD: 'FOLD',
+  RAISE: 'RAISE'
 };

@@ -27,9 +27,11 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const handleCall = () => props.onCall(selectedSeatIndex);
+  const handleCall = () =>  props.onCall(selectedSeatIndex);
+  const handleFold = () =>  props.onFold(selectedSeatIndex);
+  const handleRaise = (amount) => props.onRaise(selectedSeatIndex, amount);
 
-  const actionComponentMap = createActionComponentsMap(handleCall, null, () => console.log('handling raise!'));
+  const actionComponentMap = createActionComponentsMap(handleCall, handleFold, handleRaise);
 
   return (
     <Container>
@@ -76,8 +78,11 @@ export default function OverviewWizard(props) {
 
                         return action && (
                           <React.Fragment>
-                            <div>{_.capitalize(action.actionType)}</div>
-                            <div>${action.amount}</div>
+                            <div>{_.capitalize(action.type)}</div>
+                            {
+                              (action.type !== handActionTypes.FOLD && action.type !== handActionTypes.CHECK) &&
+                              <div>${action.amount}</div>
+                            }
                           </React.Fragment>
                         );
                       })()
@@ -145,7 +150,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
 
   const CallComponent = ({ onCall, amount }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={handleCall}>Call&nbsp;${ amount }</Button>
+      <Button className="flex-fill" color="primary" onClick={onCall}>Call&nbsp;${ amount }</Button>
     </ActionButtonRow>
   );
 
@@ -154,6 +159,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
 
     const handleChange = (e) => {
       const newValue = parseInt(e.target.value);
+
       if (newValue > (minRaise)) {
         setRaiseAmount(newValue);
       }
@@ -162,7 +168,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
     return (
       <React.Fragment>
         <ActionButtonRow className="justify-content-center align-items-center">
-          <Button className="flex-fill" color="warning" onClick={handleRaise}>
+          <Button className="flex-fill" color="warning" onClick={() => onRaise(raiseAmount)}>
             <Row className="d-flex flex-row justify-content-center align-items-center">
               <span style={{ marginRight: '10px'}}>Raise</span>
               <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={raiseAmount} onChange={handleChange} />
@@ -175,7 +181,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise) {
 
   const FoldComponent = ({ onFold }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="danger" onClick={handleFold}>Fold</Button>
+      <Button className="flex-fill" color="danger" onClick={onFold}>Fold</Button>
     </ActionButtonRow>
   );
 
