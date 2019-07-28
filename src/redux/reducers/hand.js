@@ -5,27 +5,27 @@ import { positionLabelsMap, bettingRounds, handActionTypes } from "../../constan
 
 const initialState = null;
 
-export default function handReducer(handState = initialState, action) {
+export default function handReducer(hand = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
 
     case actionTypes.CREATE_HAND:
-      return _.assign({}, payload.hand, { actions: [], positions: [] }) ;
+      return _.assign({}, payload.hand, { actions: [], positions: [], currentBettingRound: bettingRounds.PRE_FLOP }) ;
 
     case actionTypes.SET_HERO_CARDS: {
       const { holeCards } = payload;
-      return _.assign({}, handState, {
+      return _.assign({}, hand, {
         seats: [
-          ...handState.seats.slice(0, handState.heroSeatIndex),
-          _.assign({}, handState.seats[handState.heroSeatIndex], { holeCards }),
-          ...handState.seats.slice(handState.heroSeatIndex + 1)
+          ...hand.seats.slice(0, hand.heroSeatIndex),
+          _.assign({}, hand.seats[hand.heroSeatIndex], { holeCards }),
+          ...hand.seats.slice(hand.heroSeatIndex + 1)
         ]
       });
     }
 
     case actionTypes.SET_BUTTON_INDEX: {
-      const decoratedSeats = handState.seats.map((s, seatIndex) =>
+      const decoratedSeats = hand.seats.map((s, seatIndex) =>
         _.assign({}, s, { seatIndex })
       );
 
@@ -41,7 +41,7 @@ export default function handReducer(handState = initialState, action) {
         label: positionLabels[positionIndex]
       }));
 
-      return _.assign({}, handState, {
+      return _.assign({}, hand, {
         buttonSeatIndex: payload.buttonSeatIndex,
         positions,
         actions: [
@@ -49,13 +49,28 @@ export default function handReducer(handState = initialState, action) {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
             seatIndex: positions[1].seatIndex, // TODO: special case two-handed
-            amount: handState.smallBlind
+            amount: hand.smallBlind
           },
           {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
             seatIndex: positions[2].seatIndex,
-            amount: handState.bigBlind
+            amount: hand.bigBlind
+          }
+        ]
+      });
+    }
+
+    case actionTypes.CALL: {
+      const { seatIndex } = payload;
+      return _.assign({}, hand, {
+        actions: [
+          ...hand.actions,
+          {
+            type: handActionTypes.CALL,
+            bettingRound: hand.currentBettingRound,
+            seatIndex,
+            amount: getLastLiveAction(hand).amount
           }
         ]
       });
@@ -63,7 +78,7 @@ export default function handReducer(handState = initialState, action) {
 
     // TODO: consider decorating seat index and then sorting based on button when button index is set.
     default:
-      return handState;
+      return hand;
   }
 }
 
@@ -147,4 +162,10 @@ export function getNextToActSeatIndex(hand) {
 
 
   return nextPosition.seatIndex;
+}
+
+function getLastLiveAction(hand) {
+  return _(hand.actions)
+    .reject({ type: handActionTypes.FOLD })
+    .last();
 }

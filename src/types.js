@@ -23,10 +23,10 @@ export const handType = PT.exact({
   smallBlind: PT.number,
   bigBlind: PT.number,
   actions: PT.arrayOf(PT.exact({
+    type: PT.oneOf(_.values(handActionTypes)), // TODO: techincally only can by "POST" during preflop
     bettingRound: PT.oneOf(_.values(bettingRounds)),
     seatIndex: PT.number,
-    amount: PT.number,
-    type: PT.oneOf(_.values(handActionTypes)), // TODO: techincally only can by POST if PRE_FLOP
+    amount: PT.number
   })).isRequired
 });
 

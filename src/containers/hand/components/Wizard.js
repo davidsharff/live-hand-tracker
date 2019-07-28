@@ -27,7 +27,9 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const actionComponentMap = createActionComponentsMap(null, null, () => console.log('handling raise!'));
+  const handleCall = () => props.onCall(selectedSeatIndex);
+
+  const actionComponentMap = createActionComponentsMap(handleCall, null, () => console.log('handling raise!'));
 
   return (
     <Container>

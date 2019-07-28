@@ -74,6 +74,7 @@ function Hand(props) {
           <Wizard
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
+            onCall={(seatIndex) => props.dispatch({ type: actionTypes.CALL, payload: { seatIndex }})}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
           />
         }/>

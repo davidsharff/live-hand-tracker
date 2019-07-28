@@ -10,7 +10,6 @@ import actionTypes from '../../redux/actionTypes';
 import { isValidSession} from '../../selectors';
 
 import connect from "react-redux/es/connect/connect";
-import { bettingRounds } from "../../constants";
 
 // TODO: seat selection defaults to two rows with two column radio buttons: empty | hero and third option on last item X remove.
 // TODO: after initial setup, show num seats/players with potentially collapsed edit table, blinds, hero seat, and other details that have to be confirmed at start of each hand.
@@ -101,7 +100,6 @@ function Session(props) {
         type: actionTypes.CREATE_HAND,
         payload: {
           hand: {
-            currentBettingRound: bettingRounds.PRE_FLOP,
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats,
             smallBlind: session.smallBlind,
