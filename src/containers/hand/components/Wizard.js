@@ -27,9 +27,9 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const handleCall  = () =>  props.onCall(selectedSeatIndex);
-  const handleFold  = () =>  props.onFold(selectedSeatIndex);
-  const handleCheck = () =>  props.onCheck(selectedSeatIndex);
+  const handleCall  = () =>       props.onCall(selectedSeatIndex);
+  const handleFold  = () =>       props.onFold(selectedSeatIndex);
+  const handleCheck = () =>       props.onCheck(selectedSeatIndex);
   const handleRaise = (amount) => props.onRaise(selectedSeatIndex, amount);
   const handleBet   = (amount) => props.onBet(selectedSeatIndex, amount);
 
@@ -76,7 +76,7 @@ export default function OverviewWizard(props) {
                   <div style={{fontSize: '12px'}}>
                     {
                       (() => {
-                        const action = _.find(hand.actions, { bettingRound: hand.currentBettingRound, seatIndex: i });
+                        const action = _.findLast(hand.actions, { bettingRound: hand.currentBettingRound, seatIndex: i });
 
                         return action && (
                           <React.Fragment>
