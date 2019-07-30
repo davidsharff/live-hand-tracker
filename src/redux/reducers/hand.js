@@ -155,7 +155,9 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 
   // TODO: better noun?
   const actionsThisRound = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
-  const lastLiveAction = _.reject(actionsThisRound, { type: handActionTypes.FOLD })[0];
+  const lastLiveAction = _.last(_.reject(actionsThisRound, { type: handActionTypes.FOLD }));
+
+  const targetSeatLastAction = _.findLast(actionsThisRound, { seatIndex });
 
   // TODO: below is untested
   // TODO: I guess we'll have to support someone folding instead of checking. Code below assumes that is impossible.
@@ -181,9 +183,15 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     }
   }
 
+  const targetSeatAmountCommitted = targetSeatLastAction
+    ? targetSeatLastAction.amount
+    : 0;
+
   // We had a live action this round.
   switch (lastLiveAction.type) {
 
+    // TODO: switch may be wrong approach. Look for better alternatives as it is flushed out.
+    case handActionTypes.CALL:
     case handActionTypes.POST:
       return [
         {
@@ -191,14 +199,21 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           amount: null
         },
         {
-          type: handActionTypes.CALL,
-          amount: lastAction.amount
-        },
-        {
           type: handActionTypes.RAISE,
           amount: lastAction.amount * 2
-        }
+        },
+        (
+          !targetSeatAmountCommitted === lastLiveAction.amount
+            ? {
+              type: handActionTypes.CHECK
+            }
+            : {
+              type: handActionTypes.CALL,
+              amount: lastAction.amount - targetSeatAmountCommitted
+            }
+        )
       ];
+
 
     default:
       throw new Error(

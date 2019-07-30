@@ -123,8 +123,9 @@ export default function OverviewWizard(props) {
           }
           {
             hand.buttonSeatIndex !== null &&
-            _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex + 1), sortActionComponents).map(availableAction => {
+            _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents).map(availableAction => {
               const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
+
               return (
                 <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
               );
@@ -152,7 +153,9 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
 
   const CallComponent = ({ onCall, amount }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={onCall}>Call&nbsp;${ amount }</Button>
+      <Button className="flex-fill" color="primary" onClick={onCall}>
+        Call&nbsp;${ amount }
+      </Button>
     </ActionButtonRow>
   );
 
@@ -206,13 +209,17 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
 
   const FoldComponent = ({ onFold }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="danger" onClick={onFold}>Fold</Button>
+      <Button className="flex-fill" color="danger" onClick={onFold}>
+        Fold
+      </Button>
     </ActionButtonRow>
   );
 
   const CheckComponent = ({ onCheck }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="danger" onClick={onCheck}>Fold</Button>
+      <Button className="flex-fill" color="primary" onClick={onCheck}>
+        Check
+      </Button>
     </ActionButtonRow>
   );
 
