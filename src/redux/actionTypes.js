@@ -13,12 +13,6 @@ export default {
   SET_HERO_CARDS: 'SET_HERO_CARDS',
 
   SET_BUTTON_INDEX: 'SET_BUTTON_INDEX',
-  // TODO: consider SET_ACTION_TYPE. I just thought these looked cool in redux.
   SET_NEW_ACTION: 'SET_NEW_ACTION',
-
-  CALL: 'CALL',
-  FOLD: 'FOLD',
-  CHECK: 'CHECK',
-  RAISE: 'RAISE',
-  BET: 'BET'
+  ADVANCE_BETTING_ROUND: 'ADVANCE_BETTING_ROUND'
 };

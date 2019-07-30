@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
-import { positionLabelsMap, bettingRounds, handActionTypes } from "../../constants";
+import { positionLabelsMap, bettingRounds, handActionTypes, bettingRoundOrder } from "../../constants";
 
 const initialState = null;
 
@@ -42,7 +42,7 @@ export default function handReducer(hand = initialState, action) {
       }));
 
       return _.assign({}, hand, {
-        buttonSeatIndex: payload.buttonSeatIndex,
+        buttonSeatIndex: payload.buttonSeatIndex, // TODO: i don't think we need this state.
         positions,
         actions: [
           {
@@ -81,6 +81,16 @@ export default function handReducer(hand = initialState, action) {
       });
     }
 
+    case actionTypes.ADVANCE_BETTING_ROUND: {
+      // TODO: validate that it isn't the river
+      const { currentBettingRound } = hand;
+      const currentBettingRoundIndex = bettingRoundOrder.indexOf(currentBettingRound);
+
+      return _.assign({}, hand, {
+        currentBettingRound: bettingRoundOrder[currentBettingRoundIndex + 1]
+      });
+    }
+
     // TODO: consider decorating seat index and then sorting based on button when button index is set.
     default:
       return hand;
@@ -93,11 +103,6 @@ export function getPositionLabelForSeatIndex(hand, seatIndex) {
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {
   const lastLiveAction = getLastLiveAction(hand);
-
-  if (seatIndex === lastLiveAction.seatIndex) {
-    // TODO: not sure original intent here.
-    return [];
-  }
 
   // TODO: better noun?
   const actionsThisRound = getCurrentActions(hand);
@@ -158,7 +163,7 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
       }
     ];
   } else if (lastAmount === targetSeatAmountInvested) {
-      if (targetSeatLastAction.type === handActionTypes.POST) {
+      if (targetSeatLastAction && targetSeatLastAction.type === handActionTypes.POST) {
         return [
           {
             type: handActionTypes.CHECK
@@ -213,7 +218,7 @@ export function getNextToActSeatIndex(hand) {
 
 function getLastLiveAction(hand) {
   return _(hand.actions)
-    .reject({ type: handActionTypes.FOLD })
+    .filter(({ type, bettingRound}) => bettingRound === hand.currentBettingRound && type !== handActionTypes.FOLD)
     .last();
 }
 
@@ -228,4 +233,11 @@ export function getCurrentActions(hand) {
 
 export function getCurrentActionsForSeat(hand, seatIndex) {
   return _.filter(getCurrentActions(hand), { seatIndex });
+}
+
+export function getAmountToContinue(hand) {
+  return _(hand.seats)
+    .map((seat, i) => ({amountInvested: getCurrentAmountInvestedForSeat(hand, i)}))
+    .maxBy('amountInvested')
+    .amountInvested;
 }
