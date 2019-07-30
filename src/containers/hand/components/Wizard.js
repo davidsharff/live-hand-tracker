@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Container, Row, Col, Button, Input } from 'reactstrap';
 
 import {
-  getAvailableActionForSeatIndex,
+  getAvailableActionForSeatIndex, getCurrentAmountInvestedForSeat,
   getNextToActSeatIndex,
   getPositionLabelForSeatIndex
 } from "../../../redux/reducers/hand";
@@ -18,7 +18,7 @@ export default function OverviewWizard(props) {
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   const nextToActSeatIndex = hand.buttonSeatIndex !== null
-    ? getNextToActSeatIndex(hand)
+    ? getNextToActSeatIndex(hand, selectedSeatIndex)
     : null;
 
   useEffect(() => {
@@ -27,13 +27,9 @@ export default function OverviewWizard(props) {
     }
   }, [hand.buttonSeatIndex, nextToActSeatIndex]);
 
-  const handleCall  = () =>       props.onCall(selectedSeatIndex);
-  const handleFold  = () =>       props.onFold(selectedSeatIndex);
-  const handleCheck = () =>       props.onCheck(selectedSeatIndex);
-  const handleRaise = (amount) => props.onRaise(selectedSeatIndex, amount);
-  const handleBet   = (amount) => props.onBet(selectedSeatIndex, amount);
+  const handleAction = (actionType, amount) => props.onAction(selectedSeatIndex, actionType, amount);
 
-  const actionComponentMap = createActionComponentsMap(handleCall, handleFold, handleRaise, handleCheck, handleBet);
+  const actionComponentMap = createActionComponentsMap(handleAction);
 
   return (
     <Container>
@@ -83,7 +79,7 @@ export default function OverviewWizard(props) {
                             <div>{_.capitalize(action.type)}</div>
                             {
                               (action.type !== handActionTypes.FOLD && action.type !== handActionTypes.CHECK) &&
-                              <div>${action.amount}</div>
+                              <div>${getCurrentAmountInvestedForSeat(hand, i)}</div>
                             }
                           </React.Fragment>
                         );
@@ -149,17 +145,17 @@ const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {
   };
 `;
 
-function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCheck, handleBet) {
+function createActionComponentsMap(handleAction) {
 
-  const CallComponent = ({ onCall, amount }) => (
+  const CallComponent = ({ amount }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={onCall}>
+      <Button className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CALL)}>
         Call&nbsp;${ amount }
       </Button>
     </ActionButtonRow>
   );
 
-  const RaiseComponent = ({ onRaise, minRaise }) => {
+  const RaiseComponent = ({ minRaise }) => {
     const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
     const handleChange = (e) => {
@@ -172,7 +168,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
     return (
       <React.Fragment>
         <ActionButtonRow className="justify-content-center align-items-center">
-          <Button className="flex-fill" color="warning" onClick={() => onRaise(raiseAmount)}>
+          <Button className="flex-fill" color="warning" onClick={() => handleAction(handActionTypes.RAISE, raiseAmount)}>
             <Row className="d-flex flex-row justify-content-center align-items-center">
               <span style={{ marginRight: '10px'}}>Raise</span>
               <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={raiseAmount} onChange={handleChange} />
@@ -196,7 +192,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
     return (
       <React.Fragment>
         <ActionButtonRow className="justify-content-center align-items-center">
-          <Button className="flex-fill" color="warning" onClick={() => onBet(betAmount)}>
+          <Button className="flex-fill" color="warning" onClick={() => handleAction(handActionTypes.BET, betAmount)}>
             <Row className="d-flex flex-row justify-content-center align-items-center">
               <span style={{ marginRight: '10px'}}>Bet</span>
               <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={betAmount} onChange={handleChange} />
@@ -209,7 +205,7 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
 
   const FoldComponent = ({ onFold }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="danger" onClick={onFold}>
+      <Button className="flex-fill" color="danger" onClick={() => handleAction(handActionTypes.FOLD)}>
         Fold
       </Button>
     </ActionButtonRow>
@@ -217,18 +213,18 @@ function createActionComponentsMap(handleCall, handleFold, handleRaise, handleCh
 
   const CheckComponent = ({ onCheck }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={onCheck}>
+      <Button className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CHECK)}>
         Check
       </Button>
     </ActionButtonRow>
   );
 
   return {
-    [handActionTypes.CALL]: ({ amount }) => <CallComponent  onCall={handleCall} amount={amount} />,
-    [handActionTypes.FOLD]: () =>  <FoldComponent  onFold={handleFold}   />,
-    [handActionTypes.CHECK]: () =>  <CheckComponent  onCheck={handleCheck}   />,
-    [handActionTypes.RAISE]: ({ amount }) => <RaiseComponent onRaise={handleRaise} minRaise={amount} />,
-    [handActionTypes.BET]: ({ amount }) => <BetComponent onRaise={handleBet} minBet={amount} />
+    [handActionTypes.CALL]: ({ amount }) => <CallComponent amount={amount} />,
+    [handActionTypes.FOLD]: () =>  <FoldComponent />,
+    [handActionTypes.CHECK]: () =>  <CheckComponent />,
+    [handActionTypes.RAISE]: ({ amount }) => <RaiseComponent minRaise={amount} />,
+    [handActionTypes.BET]: ({ amount }) => <BetComponent minBet={amount} />
   };
 }
 

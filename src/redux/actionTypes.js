@@ -14,6 +14,8 @@ export default {
 
   SET_BUTTON_INDEX: 'SET_BUTTON_INDEX',
   // TODO: consider SET_ACTION_TYPE. I just thought these looked cool in redux.
+  SET_NEW_ACTION: 'SET_NEW_ACTION',
+
   CALL: 'CALL',
   FOLD: 'FOLD',
   CHECK: 'CHECK',

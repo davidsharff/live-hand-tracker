@@ -74,11 +74,7 @@ function Hand(props) {
           <Wizard
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
-            onCall={(seatIndex) => props.dispatch({ type: actionTypes.CALL, payload: { seatIndex }})}
-            onFold={(seatIndex) => props.dispatch({ type: actionTypes.FOLD, payload: { seatIndex }})}
-            onRaise={(seatIndex, amount) => props.dispatch({ type: actionTypes.RAISE, payload: { seatIndex, amount }})}
-            onCheck={(seatIndex) => props.dispatch({ type: actionTypes.CHECK, payload: { seatIndex }})}
-            onBet={(seatIndex) => props.dispatch({ type: actionTypes.BET, payload: { seatIndex }})}
+            onAction={(seatIndex, type, amount) => props.dispatch({ type: actionTypes.SET_NEW_ACTION, payload: { seatIndex, type, amount }})}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
           />
         }/>

@@ -61,77 +61,21 @@ export default function handReducer(hand = initialState, action) {
       });
     }
 
-    case actionTypes.CALL: {
-      const { seatIndex } = payload;
+    case actionTypes.SET_NEW_ACTION: {
+      const { type, amount, seatIndex } = payload;
       return _.assign({}, hand, {
         actions: [
           ...hand.actions,
           {
-            type: handActionTypes.CALL,
+            type,
             bettingRound: hand.currentBettingRound,
             seatIndex,
             // TODO: this should record the new amount invested, and not the total price of call, and will require UI to use calc for total invested during round.
-            amount: getLastLiveAction(hand).amount
-          }
-        ]
-      });
-    }
-
-    case actionTypes.FOLD: {
-      const { seatIndex } = payload;
-      return _.assign({}, hand, {
-        actions: [
-          ...hand.actions,
-          {
-            type: handActionTypes.FOLD,
-            bettingRound: hand.currentBettingRound,
-            seatIndex,
-            amount: null
-          }
-        ]
-      });
-    }
-
-    case actionTypes.RAISE: {
-      const { seatIndex, amount } = payload;
-      return _.assign({}, hand, {
-        actions: [
-          ...hand.actions,
-          {
-            type: handActionTypes.RAISE,
-            bettingRound: hand.currentBettingRound,
-            seatIndex,
-            amount
-          }
-        ]
-      });
-    }
-
-    case actionTypes.CHECK: {
-      const { seatIndex } = payload;
-      return _.assign({}, hand, {
-        actions: [
-          ...hand.actions,
-          {
-            type: handActionTypes.CHECK,
-            bettingRound: hand.currentBettingRound,
-            seatIndex,
-            amount: null
-          }
-        ]
-      });
-    }
-
-    case actionTypes.BET: {
-      const { seatIndex, amount } = payload;
-      return _.assign({}, hand, {
-        actions: [
-          ...hand.actions,
-          {
-            type: handActionTypes.BET,
-            bettingRound: hand.currentBettingRound,
-            seatIndex,
-            amount
+            amount: type === handActionTypes.RAISE || type === handActionTypes.BET
+              ? amount
+              : type === handActionTypes.CALL
+                ? getCurrentAmountInvestedForSeat(hand, getLastLiveAction(hand).seatIndex) - getCurrentAmountInvestedForSeat(hand, seatIndex)
+                : 0
           }
         ]
       });
@@ -148,17 +92,15 @@ export function getPositionLabelForSeatIndex(hand, seatIndex) {
 }
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {
-  const lastAction = getLastLiveAction(hand);
+  const lastLiveAction = getLastLiveAction(hand);
 
-  if (seatIndex === lastAction.seatIndex) {
+  if (seatIndex === lastLiveAction.seatIndex) {
+    // TODO: not sure original intent here.
     return [];
   }
 
   // TODO: better noun?
-  const actionsThisRound = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
-  const lastLiveAction = _.last(
-    _.reject(actionsThisRound, { type: handActionTypes.FOLD })
-  );
+  const actionsThisRound = getCurrentActions(hand);
 
   const targetSeatLastAction = _.findLast(actionsThisRound, { seatIndex });
 
@@ -193,13 +135,14 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     }
   }
 
-  const lastAmount = lastLiveAction.amount || 0;
+  // TODO: reconsider names
+  const lastAmount = getCurrentAmountInvestedForSeat(hand, lastLiveAction.seatIndex);
 
-  const targetSeatAmountCommitted = targetSeatLastAction
-    ? targetSeatLastAction.amount
+  const targetSeatAmountInvested = targetSeatLastAction
+    ? getCurrentAmountInvestedForSeat(hand, targetSeatLastAction.seatIndex)
     : 0;
 
-  if (lastAmount > targetSeatAmountCommitted) {
+  if (lastAmount > targetSeatAmountInvested) {
     return [
       {
         type: handActionTypes.FOLD,
@@ -207,14 +150,14 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
       },
       {
         type: handActionTypes.CALL,
-        amount: lastAction.amount - targetSeatAmountCommitted
+        amount: lastAmount - targetSeatAmountInvested
       },
       {
         type: handActionTypes.RAISE,
-        amount: lastAction.amount * 2
+        amount: lastAmount * 2
       }
     ];
-  } else if (lastAmount === targetSeatAmountCommitted) {
+  } else if (lastAmount === targetSeatAmountInvested) {
       if (targetSeatLastAction.type === handActionTypes.POST) {
         return [
           {
@@ -222,7 +165,7 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           },
           {
             type: handActionTypes.RAISE,
-            amount: lastAction.amount * 2
+            amount: lastAmount * 2
           }
         ];
       } else {
@@ -241,19 +184,29 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 }
 
 export function getNextToActSeatIndex(hand) {
-  const roundActions = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
+  const roundActions = getCurrentActions(hand);
 
   if (roundActions.length === 0) {
     return hand.positions[0].seatIndex;
   }
 
-  const currentPosition = _.find(hand.positions, { seatIndex: _.last(roundActions).seatIndex });
-  const currentPositionIndex = _.findIndex(hand.positions, { label: currentPosition.label });
+  const lastActionSeatIndex = _.last(roundActions).seatIndex;
 
-  const nextPosition = currentPositionIndex === (hand.positions.length - 1)
-    ? hand.positions[0]
-    : hand.positions[currentPositionIndex + 1];
+  const activePositions = hand.positions.filter(({ seatIndex }) => {
+    const lastActionForPosition = _.last(getCurrentActionsForSeat(hand, seatIndex));
+    return (
+      seatIndex === lastActionSeatIndex || // Always include the position that just acted
+      !lastActionForPosition ||  // Always include positions yet to act
+      lastActionForPosition.type !== handActionTypes.FOLD // Only include positions that haven't folded.
+    );
+  });
 
+  const currentPosition = _.find(activePositions, { seatIndex: lastActionSeatIndex });
+  const currentPositionIndex = _.findIndex(activePositions, { seatIndex: currentPosition.seatIndex });
+
+  const nextPosition = currentPositionIndex === (activePositions.length - 1)
+    ? activePositions[0]
+    : activePositions[currentPositionIndex + 1];
 
   return nextPosition.seatIndex;
 }
@@ -262,4 +215,17 @@ function getLastLiveAction(hand) {
   return _(hand.actions)
     .reject({ type: handActionTypes.FOLD })
     .last();
+}
+
+export function getCurrentAmountInvestedForSeat(hand, seatIndex) {
+  const lastAmount = _.sumBy(getCurrentActionsForSeat(hand, seatIndex), 'amount');
+  return lastAmount;
+}
+
+export function getCurrentActions(hand) {
+  return _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
+}
+
+export function getCurrentActionsForSeat(hand, seatIndex) {
+  return _.filter(getCurrentActions(hand), { seatIndex });
 }
