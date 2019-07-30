@@ -70,6 +70,7 @@ export default function handReducer(hand = initialState, action) {
             type: handActionTypes.CALL,
             bettingRound: hand.currentBettingRound,
             seatIndex,
+            // TODO: this should record the new amount invested, and not the total price of call, and will require UI to use calc for total invested during round.
             amount: getLastLiveAction(hand).amount
           }
         ]
@@ -155,9 +156,18 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 
   // TODO: better noun?
   const actionsThisRound = _.filter(hand.actions, { bettingRound: hand.currentBettingRound });
-  const lastLiveAction = _.last(_.reject(actionsThisRound, { type: handActionTypes.FOLD }));
+  const lastLiveAction = _.last(
+    _.reject(actionsThisRound, { type: handActionTypes.FOLD })
+  );
 
   const targetSeatLastAction = _.findLast(actionsThisRound, { seatIndex });
+
+  // If there hasn't been any actions, check or bet.
+  // If there has been action and...
+  //  If there is no amount: check, bet
+  //  If there is an amount and I'm less: call, raise, fold
+  //  If there is an amount and I match and i'm big blind: check, raise
+  //  If there is an amount and I match and i'm not big blind: impossible since we should be at next round
 
   // TODO: below is untested
   // TODO: I guess we'll have to support someone folding instead of checking. Code below assumes that is impossible.
@@ -183,42 +193,49 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
     }
   }
 
+  const lastAmount = lastLiveAction.amount || 0;
+
   const targetSeatAmountCommitted = targetSeatLastAction
     ? targetSeatLastAction.amount
     : 0;
 
-  // We had a live action this round.
-  switch (lastLiveAction.type) {
-
-    // TODO: switch may be wrong approach. Look for better alternatives as it is flushed out.
-    case handActionTypes.CALL:
-    case handActionTypes.POST:
-      return [
-        {
-          type: handActionTypes.FOLD,
-          amount: null
-        },
-        {
-          type: handActionTypes.RAISE,
-          amount: lastAction.amount * 2
-        },
-        (
-          !targetSeatAmountCommitted === lastLiveAction.amount
-            ? {
-              type: handActionTypes.CHECK
-            }
-            : {
-              type: handActionTypes.CALL,
-              amount: lastAction.amount - targetSeatAmountCommitted
-            }
-        )
-      ];
-
-
-    default:
-      throw new Error(
-        `Could not determine available action for seatIndex: ${seatIndex}. Last action type ${lastLiveAction}`
-      );
+  if (lastAmount > targetSeatAmountCommitted) {
+    return [
+      {
+        type: handActionTypes.FOLD,
+        amount: null
+      },
+      {
+        type: handActionTypes.CALL,
+        amount: lastAction.amount - targetSeatAmountCommitted
+      },
+      {
+        type: handActionTypes.RAISE,
+        amount: lastAction.amount * 2
+      }
+    ];
+  } else if (lastAmount === targetSeatAmountCommitted) {
+      if (targetSeatLastAction.type === handActionTypes.POST) {
+        return [
+          {
+            type: handActionTypes.CHECK
+          },
+          {
+            type: handActionTypes.RAISE,
+            amount: lastAction.amount * 2
+          }
+        ];
+      } else {
+        // TODO: validate that there was no prior amount. Otherwise, middleware should have already advanced us to next hand.
+        return [
+          {
+            type: handActionTypes.CHECK
+          },
+          {
+            type: handActionTypes.BET
+          }
+        ];
+      }
   }
 
 }
