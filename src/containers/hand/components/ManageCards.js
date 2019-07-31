@@ -17,7 +17,7 @@ export default function ManageCards(props) {
 
   // TODO: should also check if props.cards is already filled out and use that instead.
 
-  const [cards, setCards] = useState(
+  const [cardsMap, setCardsMap] = useState(
     _.range(0, props.numCards).reduce((obj, i) =>
         _.assign({}, obj, { ['card' + (i + 1)]: {
             value: props.cards.length > i ? props.cards[i].slice(0, -1) : null,
@@ -28,15 +28,15 @@ export default function ManageCards(props) {
 
   const handleClickCard = (cardKey) => setSelectedCardKey(cardKey);
 
-  const handleClickSuit = (suit) => setCards(_.assign({}, cards, {
-    [selectedCardKey]: _.assign({}, cards[selectedCardKey], {
+  const handleClickSuit = (suit) => setCardsMap(_.assign({}, cardsMap, {
+    [selectedCardKey]: _.assign({}, cardsMap[selectedCardKey], {
       suit
     })
   }));
 
   const handleClickValue = (value) => {
-    setCards(_.assign({}, cards, {
-      [selectedCardKey]: _.assign({}, cards[selectedCardKey], {
+    setCardsMap(_.assign({}, cardsMap, {
+      [selectedCardKey]: _.assign({}, cardsMap[selectedCardKey], {
         value
       })
     }));
@@ -44,12 +44,14 @@ export default function ManageCards(props) {
 
   const toggleCardIfComplete = () => {
     const selectedCardNum = parseInt(selectedCardKey.slice(-1), 10);
+
     // Auto-toggle selected card the first time they fill out card1
-    if (selectedCardNum < 3) {
-      const selectedCard = cards['card' + selectedCardNum];
+    if (selectedCardNum < _.keys(cardsMap).length) {
+
+      const selectedCard = cardsMap['card' + selectedCardNum];
 
       const nextCardKey = 'card' + (selectedCardNum + 1);
-      const nextCard = cards[nextCardKey];
+      const nextCard = cardsMap[nextCardKey];
 
       if (
         !!selectedCard.value && !!selectedCard.suit &&
@@ -62,18 +64,18 @@ export default function ManageCards(props) {
 
   const getPendingDeck = useCallback(() =>
     _.reject(props.deck, (c) =>
-      c === (cards.card1.value + cards.card1.suit) ||
-      c === (cards.card2.value + cards.card2.suit)
-    ), [props.deck, cards]);
+      c === (cardsMap.card1.value + cardsMap.card1.suit) ||
+      c === (cardsMap.card2.value + cardsMap.card2.suit)
+    ), [props.deck, cardsMap]);
 
-  useEffect(toggleCardIfComplete, [toggleCardIfComplete, cards]);
+  useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   return (
     <Col className="pb-2 d-flex flex-column flex-fill">
       <div>
         <Row className="d-flex flex-row flex-fill justify-content-around">
           {
-            _.map(cards, ({ value, suit, }, cardKey) =>
+            _.map(cardsMap, ({ value, suit, }, cardKey) =>
               <Col key={cardKey} className="d-flex flex-column align-items-center">
                 <CardSlot
                   className="mb-4 d-flex flex-column justify-content-center align-items-center"
@@ -97,11 +99,11 @@ export default function ManageCards(props) {
                     className="d-flex flex-column align-items-center justify-content-center"
                     key={cv}
                     onClick={() =>
-                      !isCardValueDisabled(getPendingDeck(), cards[selectedCardKey].suit, cv) &&
+                      !isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
                       handleClickValue(cv)
                     }
-                    disabled={isCardValueDisabled(getPendingDeck(), cards[selectedCardKey].suit, cv)}
-                    isSelected={cards[selectedCardKey].value === cv}
+                    disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
+                    isSelected={cardsMap[selectedCardKey].value === cv}
                   >
                     { cv }
                   </ValueContainer>
@@ -119,11 +121,11 @@ export default function ManageCards(props) {
                 key={i}
                 className="d-flex flex-column justify-content-center align-items-center"
                 onClick={() =>
-                  !isSuitDisabled(getPendingDeck(), cards[selectedCardKey].value, suitAbbreviations[i]) &&
+                  !isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i]) &&
                   handleClickSuit(suitAbbreviations[i])
                 }
-                isSelected={cards[selectedCardKey].suit === suitAbbreviations[i]}
-                disabled={isSuitDisabled(getPendingDeck(), cards[selectedCardKey].value, suitAbbreviations[i])}
+                isSelected={cardsMap[selectedCardKey].suit === suitAbbreviations[i]}
+                disabled={isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i])}
               >
                 { suitAbbreviations[i] }
               </Suit>
@@ -131,7 +133,7 @@ export default function ManageCards(props) {
           }
         </Row>
       </SuitContainer>
-      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cards))}>
+      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cardsMap))}>
         Submit
       </Button>
     </Col>
