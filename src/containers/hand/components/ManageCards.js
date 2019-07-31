@@ -10,81 +10,80 @@ import { holeCardsType } from '../../../types';
 
 const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
 
-export default function ManageHoleCards(props) {
+export default function ManageCards(props) {
 
-  const [selectedCardKey, setSelectedCardKey] = useState('cardOne');
+  const [selectedCardKey, setSelectedCardKey] = useState('card1');
 
-  const [holeCards, setHoleCards] = useState({
-    cardOne: {
-      value: props.holeCards.length ? props.holeCards[0].slice(0, -1) : null,
-      suit: props.holeCards.length  ? props.holeCards[0].slice(1, 2) : null
-    },
-    cardTwo: {
-      value: props.holeCards.length ? props.holeCards[1].slice(0, -1) : null,
-      suit: props.holeCards.length  ? props.holeCards[1].slice(1, 2) : null
-    }
-  });
+  // TODO: should also check if props.cards is already filled out and use that instead.
+
+  const [cards, setCards] = useState(
+    _.range(0, props.numCards).reduce((obj, i) =>
+        _.assign({}, obj, { ['card' + (i + 1)]: {
+            value: props.cards.length > i ? props.cards[i].slice(0, -1) : null,
+            suit: props.cards.length > i ? props.cards[i].slice(1, 2) : null,
+          }})
+      , {})
+  );
 
   const handleClickCard = (cardKey) => setSelectedCardKey(cardKey);
 
-  const handleClickSuit = (suit) => setHoleCards(_.assign({}, holeCards, {
-    [selectedCardKey]: _.assign({}, holeCards[selectedCardKey], {
+  const handleClickSuit = (suit) => setCards(_.assign({}, cards, {
+    [selectedCardKey]: _.assign({}, cards[selectedCardKey], {
       suit
     })
   }));
 
   const handleClickValue = (value) => {
-    setHoleCards(_.assign({}, holeCards, {
-      [selectedCardKey]: _.assign({}, holeCards[selectedCardKey], {
+    setCards(_.assign({}, cards, {
+      [selectedCardKey]: _.assign({}, cards[selectedCardKey], {
         value
       })
     }));
   };
 
   const toggleCardIfComplete = () => {
-    // Auto-toggle selected card the first time they fill out cardOne
-    if (selectedCardKey === 'cardOne') {
-      const cardOne = holeCards['cardOne'];
-      const cardTwo = holeCards['cardTwo'];
-
+    // Auto-toggle selected card the first time they fill out card1
+    if (selectedCardKey === 'card1') {
+      const card1 = cards['card1'];
+      const card2 = cards['card2'];
       if (
-        !!cardOne.value && !!cardOne.suit &&
-        cardTwo.value === null && cardTwo.suit === null
+        !!card1.value && !!card1.suit &&
+        card2.value === null && card2.suit === null
       ) {
-        setSelectedCardKey('cardTwo');
+        setSelectedCardKey('card2');
       }
     }
   };
 
   const getPendingDeck = useCallback(() =>
     _.reject(props.deck, (c) =>
-      c === (holeCards.cardOne.value + holeCards.cardOne.suit) ||
-      c === (holeCards.cardTwo.value + holeCards.cardTwo.suit)
-    ), [props.deck, holeCards]);
+      c === (cards.card1.value + cards.card1.suit) ||
+      c === (cards.card2.value + cards.card2.suit)
+    ), [props.deck, cards]);
 
-  useEffect(toggleCardIfComplete, [toggleCardIfComplete, holeCards]);
+  useEffect(toggleCardIfComplete, [toggleCardIfComplete, cards]);
 
   return (
     <Col className="pb-2 d-flex flex-column flex-fill">
       <div>
         <Row className="d-flex flex-row flex-fill justify-content-around">
           <Col className="d-flex flex-column align-items-center">
-            <HoleCardSlot
+            <CardSlot
               className="mb-4 d-flex flex-column justify-content-center align-items-center"
-              onClick={() => handleClickCard('cardOne')}
-              isSelected={selectedCardKey === 'cardOne'}
+              onClick={() => handleClickCard('card1')}
+              isSelected={selectedCardKey === 'card1'}
             >
-              <span>{ `${holeCards.cardOne.value || ''}${holeCards.cardOne.suit || ''}` }</span>
-            </HoleCardSlot>
+              <span>{ `${cards.card1.value || ''}${cards.card1.suit || ''}` }</span>
+            </CardSlot>
           </Col>
           <Col className="d-flex flex-column align-items-center">
-            <HoleCardSlot
+            <CardSlot
               className="mb-4 d-flex flex-column justify-content-center align-items-center"
-              onClick={() => handleClickCard('cardTwo')}
-              isSelected={selectedCardKey === 'cardTwo'}
+              onClick={() => handleClickCard('card2')}
+              isSelected={selectedCardKey === 'card2'}
             >
-              <span>{ `${holeCards.cardTwo.value || ''}${holeCards.cardTwo.suit || ''}` }</span>
-            </HoleCardSlot>
+              <span>{ `${cards.card2.value || ''}${cards.card2.suit || ''}` }</span>
+            </CardSlot>
           </Col>
         </Row>
       </div>
@@ -98,11 +97,11 @@ export default function ManageHoleCards(props) {
                     className="d-flex flex-column align-items-center justify-content-center"
                     key={cv}
                     onClick={() =>
-                      !isCardValueDisabled(getPendingDeck(), holeCards[selectedCardKey].suit, cv) &&
+                      !isCardValueDisabled(getPendingDeck(), cards[selectedCardKey].suit, cv) &&
                       handleClickValue(cv)
                     }
-                    disabled={isCardValueDisabled(getPendingDeck(), holeCards[selectedCardKey].suit, cv)}
-                    isSelected={holeCards[selectedCardKey].value === cv}
+                    disabled={isCardValueDisabled(getPendingDeck(), cards[selectedCardKey].suit, cv)}
+                    isSelected={cards[selectedCardKey].value === cv}
                   >
                     { cv }
                   </ValueContainer>
@@ -120,11 +119,11 @@ export default function ManageHoleCards(props) {
                 key={i}
                 className="d-flex flex-column justify-content-center align-items-center"
                 onClick={() =>
-                  !isSuitDisabled(getPendingDeck(), holeCards[selectedCardKey].value, suitAbbreviations[i]) &&
+                  !isSuitDisabled(getPendingDeck(), cards[selectedCardKey].value, suitAbbreviations[i]) &&
                   handleClickSuit(suitAbbreviations[i])
                 }
-                isSelected={holeCards[selectedCardKey].suit === suitAbbreviations[i]}
-                disabled={isSuitDisabled(getPendingDeck(), holeCards[selectedCardKey].value, suitAbbreviations[i])}
+                isSelected={cards[selectedCardKey].suit === suitAbbreviations[i]}
+                disabled={isSuitDisabled(getPendingDeck(), cards[selectedCardKey].value, suitAbbreviations[i])}
               >
                 { suitAbbreviations[i] }
               </Suit>
@@ -132,7 +131,7 @@ export default function ManageHoleCards(props) {
           }
         </Row>
       </SuitContainer>
-      <Button className="mb-4" color="success" onClick={() => props.onSetHoleCards([holeCards.cardOne, holeCards.cardTwo])}>
+      <Button className="mb-4" color="success" onClick={() => props.onSave([cards.card1, cards.card2])}>
         Submit
       </Button>
     </Col>
@@ -140,14 +139,14 @@ export default function ManageHoleCards(props) {
 }
 
 // TODO: set whether cards are disabled here via selector
-ManageHoleCards.propTypes = {
-  holeCards: holeCardsType,
+ManageCards.propTypes = {
+  cards: holeCardsType,
   // TODO: define cb param types
-  onSetHoleCards: PropTypes.func
+  onSave: PropTypes.func
 };
 
 // ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305
-const HoleCardSlot = styled(({ isSelected, ...rest }) => <Col { ...rest }/>)`
+const CardSlot = styled(({ isSelected, ...rest }) => <Col { ...rest }/>)`
   border: dotted 1px #333;
   min-height: 100px;
   width: 80px;

@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import { getDeck } from "../../selectors";
 
-import ManageHoleCards from './components/ManageHoleCards';
+import ManageHoleCards from './components/ManageCards';
 import Wizard from './components/Wizard';
 import Header from './components/Header';
 
@@ -24,12 +24,12 @@ function Hand(props) {
 
   const heroHoleCards = hand.seats[props.hand.heroSeatIndex].holeCards;
 
-  if (!_.includes(props.history.location.pathname, 'input-wizard')) {
-    props.history.push('/hand/input-wizard');
-  }
+  // if (!_.includes(props.history.location.pathname, 'input-wizard')) {
+  //   props.history.push('/hand/input-wizard');
+  // }
 
   if (
-    false &&
+    //false &&
     session &&
     heroHoleCards.length < 2 &&
     props.location.pathname !== '/hand/manage-hole-cards'
@@ -67,7 +67,7 @@ function Hand(props) {
       <Switch>
 
         <Route exact path="/hand/manage-hole-cards" render={() =>
-          <ManageHoleCards deck={deck} onSetHoleCards={handleSetHeroCards} holeCards={heroHoleCards} />
+          <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} numCards={2} />
         }/>
 
         <Route exact path="/hand/input-wizard" render={() =>
