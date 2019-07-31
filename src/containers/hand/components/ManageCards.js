@@ -10,6 +10,7 @@ import { holeCardsType } from '../../../types';
 
 const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
 
+// TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
 export default function ManageCards(props) {
 
   const [selectedCardKey, setSelectedCardKey] = useState('card1');
@@ -42,15 +43,19 @@ export default function ManageCards(props) {
   };
 
   const toggleCardIfComplete = () => {
+    const selectedCardNum = parseInt(selectedCardKey.slice(-1), 10);
     // Auto-toggle selected card the first time they fill out card1
-    if (selectedCardKey === 'card1') {
-      const card1 = cards['card1'];
-      const card2 = cards['card2'];
+    if (selectedCardNum < 3) {
+      const selectedCard = cards['card' + selectedCardNum];
+
+      const nextCardKey = 'card' + (selectedCardNum + 1);
+      const nextCard = cards[nextCardKey];
+
       if (
-        !!card1.value && !!card1.suit &&
-        card2.value === null && card2.suit === null
+        !!selectedCard.value && !!selectedCard.suit &&
+        nextCard.value === null && nextCard.suit === null
       ) {
-        setSelectedCardKey('card2');
+        setSelectedCardKey(nextCardKey);
       }
     }
   };
@@ -67,24 +72,19 @@ export default function ManageCards(props) {
     <Col className="pb-2 d-flex flex-column flex-fill">
       <div>
         <Row className="d-flex flex-row flex-fill justify-content-around">
-          <Col className="d-flex flex-column align-items-center">
-            <CardSlot
-              className="mb-4 d-flex flex-column justify-content-center align-items-center"
-              onClick={() => handleClickCard('card1')}
-              isSelected={selectedCardKey === 'card1'}
-            >
-              <span>{ `${cards.card1.value || ''}${cards.card1.suit || ''}` }</span>
-            </CardSlot>
-          </Col>
-          <Col className="d-flex flex-column align-items-center">
-            <CardSlot
-              className="mb-4 d-flex flex-column justify-content-center align-items-center"
-              onClick={() => handleClickCard('card2')}
-              isSelected={selectedCardKey === 'card2'}
-            >
-              <span>{ `${cards.card2.value || ''}${cards.card2.suit || ''}` }</span>
-            </CardSlot>
-          </Col>
+          {
+            _.map(cards, ({ value, suit, }, cardKey) =>
+              <Col key={cardKey} className="d-flex flex-column align-items-center">
+                <CardSlot
+                  className="mb-4 d-flex flex-column justify-content-center align-items-center"
+                  onClick={() => handleClickCard(cardKey)}
+                  isSelected={selectedCardKey === cardKey}
+                >
+                  <span>{ `${value || ''}${suit || ''}` }</span>
+                </CardSlot>
+              </Col>
+            )
+          }
         </Row>
       </div>
       <Col className="my-2 d-flex flex-column flex-fill">
@@ -131,7 +131,7 @@ export default function ManageCards(props) {
           }
         </Row>
       </SuitContainer>
-      <Button className="mb-4" color="success" onClick={() => props.onSave([cards.card1, cards.card2])}>
+      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cards))}>
         Submit
       </Button>
     </Col>
