@@ -193,7 +193,12 @@ export function getNextToActSeatIndex(hand) {
   const roundActions = getCurrentActions(hand);
 
   if (roundActions.length === 0) {
-    return hand.positions[0].seatIndex;
+    return _(hand.positions) // TODO: duplication with activePositions logic below.
+      .reject(({ seatIndex }) =>
+        getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.FOLD
+      )
+      .last()
+      .seatIndex;
   }
 
   const lastActionSeatIndex = _.last(roundActions).seatIndex;
@@ -215,6 +220,13 @@ export function getNextToActSeatIndex(hand) {
     : activePositions[currentPositionIndex + 1];
 
   return nextPosition.seatIndex;
+}
+
+export function getLastActionTypeForSeat(hand, seatIndex) {
+  const lastAction = _.last(getCurrentActionsForSeat(hand, seatIndex));
+  return lastAction
+    ? lastAction.type
+    : null;
 }
 
 function getLastLiveAction(hand) {
