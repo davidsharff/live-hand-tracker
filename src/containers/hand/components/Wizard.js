@@ -5,9 +5,11 @@ import styled from 'styled-components';
 import { Container, Row, Col, Button, Input } from 'reactstrap';
 
 import {
-  getAvailableActionForSeatIndex, getCurrentAmountInvestedForSeat,
+  getAvailableActionForSeatIndex,
+  getCurrentActionsForSeat,
+  getCurrentAmountInvestedForSeat,
   getNextToActSeatIndex,
-  getPositionLabelForSeatIndex
+  getPositionLabelForSeatIndex,
 } from "../../../redux/reducers/hand";
 
 import { handActionTypes } from "../../../constants";
@@ -58,7 +60,10 @@ export default function OverviewWizard(props) {
                         {
                           hand.buttonSeatIndex !== null &&
                           <span>
-                            { s.isActive ? getPositionLabelForSeatIndex(hand, i, s) : 'Empty'}
+                            { s.isActive
+                              ? getPositionLabelForSeatIndex(hand, i, s)
+                              : 'Empty'
+                            }
                           </span>
                         }
                       </React.Fragment>
@@ -72,7 +77,7 @@ export default function OverviewWizard(props) {
                   <div style={{fontSize: '12px'}}>
                     {
                       (() => {
-                        const action = _.findLast(hand.actions, { bettingRound: hand.currentBettingRound, seatIndex: i });
+                        const action = _.last(getCurrentActionsForSeat(hand, i));
 
                         return action && (
                           <React.Fragment>

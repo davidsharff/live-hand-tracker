@@ -180,7 +180,8 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
             type: handActionTypes.CHECK
           },
           {
-            type: handActionTypes.BET
+            type: handActionTypes.BET,
+            amount: hand.bigBlind
           }
         ];
       }
@@ -232,7 +233,13 @@ export function getCurrentActions(hand) {
 }
 
 export function getCurrentActionsForSeat(hand, seatIndex) {
-  return _.filter(getCurrentActions(hand), { seatIndex });
+  return _.filter(hand.actions, (a) =>
+    a.seatIndex === seatIndex &&
+    (
+      a.bettingRound === hand.currentBettingRound ||
+      a.type === handActionTypes.FOLD
+    )
+  );
 }
 
 export function getAmountToContinue(hand) {
