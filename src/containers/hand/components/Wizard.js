@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Switch, Route } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
 
@@ -12,12 +13,14 @@ import {
   getPositionLabelForSeatIndex,
 } from "../../../redux/reducers/hand";
 
-import { handActionTypes } from "../../../constants";
+import { bettingRounds, handActionTypes } from "../../../constants";
+import ManageCards from "./ManageCards";
 
-export default function OverviewWizard(props) {
-  const { hand } = props;
+export default function Wizard(props) {
+  const { hand, deck } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
+  const [isInputtingCards, setIsInputtingCards] = useState(false);
 
   const nextToActSeatIndex = hand.buttonSeatIndex !== null
     ? getNextToActSeatIndex(hand, selectedSeatIndex)
@@ -33,9 +36,10 @@ export default function OverviewWizard(props) {
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
+  // TODO: below sections should be their own components
   return (
-    <Container>
-      <Row className="mb-1">
+    <Container className="flex-fill d-flex flex-column px-0">
+      <Row className="mb-1 mx-0">
         {
           hand.seats.map((s, i) =>
             <HeaderItem
@@ -44,6 +48,7 @@ export default function OverviewWizard(props) {
               onClick={() => hand.buttonSeatIndex === null && props.onSetButtonSeatIndex(i)}
               className="d-flex flex-column justify-content-between"
               isSelected={selectedSeatIndex === i}
+              shouldCollapse={isInputtingCards}
             >
               <Row className="d-flex flex-row justify-content-between m-0 flex-fill">
                 {
@@ -99,7 +104,7 @@ export default function OverviewWizard(props) {
       </Row>
       <Row className="d-flex flex-row justify-content-center mt-2">
         {
-          selectedSeatIndex &&
+          !isInputtingCards && selectedSeatIndex &&
           <h4>
             {
               getPositionLabelForSeatIndex(hand, selectedSeatIndex)
@@ -107,38 +112,41 @@ export default function OverviewWizard(props) {
             &nbsp;(Seat { (selectedSeatIndex + 1) })
           </h4>
         }
-      </Row>
-      <Row className="d-flex flex-row justify-content-center flex-fill">
         {
-          // TODO: need input for selecting Button position and consider expandable editable session details.
-          // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
+          isInputtingCards &&
+          <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
         }
-        <div className="flex-fill">
-          {
-            hand.buttonSeatIndex === null &&
-            <React.Fragment>
-              <div>Where's the button?</div>
-              <div>Tap seat above to set position</div>
-            </React.Fragment>
+      </Row>
+      <Switch>
+        {
+          // TODO: use constant
+          ['hole-cards', ..._.values(bettingRounds)].map((cardsInputType) =>
+            <Route exact key={cardsInputType} path={`/hand/input-wizard/input-board-cards/${cardsInputType}`} render={() => {
 
-          }
-          {
-            hand.buttonSeatIndex !== null &&
-            _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents).map(availableAction => {
-              const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
+              setIsInputtingCards(true);
 
               return (
-                <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
+                // TODO: Remove numCards in favor of constants lookup based on cards type.
+                <ManageCards cards={[]} deck={deck} onSave={() => ({})} numCards={3} cardsType={cardsInputType} />
               );
-            })
-          }
-        </div>
-      </Row>
+            }}/>
+          )
+        }
+        <Route exact path="/hand/input-wizard" render={() => {
+
+          setIsInputtingCards(false);
+
+          return (
+            <ActionInputBody hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
+          );
+        }}/>
+      </Switch>
     </Container>
   );
 }
 
-const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {...rest} />)`
+const HeaderItem = styled(({ isButtonInputMode, shouldCollapse, isSelected, ...rest }) => <Col {...rest} />)`
+  max-height: ${p => p.shouldCollapse && '20px'};
   flex-basis: 20%;
   font-size: 12px;
   height: 75px;
@@ -149,6 +157,37 @@ const HeaderItem = styled(({ isButtonInputMode, isSelected, ...rest }) => <Col {
       : 'solid #eee 1px'
   };
 `;
+
+const ActionInputBody = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
+  <Row className="d-flex flex-row justify-content-center flex-fill mx-0">
+
+    {
+      // TODO: need input for selecting Button position and consider expandable editable session details.
+      // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
+    }
+    <div className="flex-fill">
+
+      {
+        hand.buttonSeatIndex === null &&
+        <React.Fragment>
+          <div>Where's the button?</div>
+          <div>Tap seat above to set position</div>
+        </React.Fragment>
+
+      }
+      {
+        hand.buttonSeatIndex !== null &&
+        _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents).map(availableAction => {
+          const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
+
+          return (
+            <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
+          );
+        })
+      }
+    </div>
+  </Row>
+);
 
 function createActionComponentsMap(handleAction) {
 

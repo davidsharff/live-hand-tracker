@@ -71,9 +71,9 @@ export default function ManageCards(props) {
   useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   return (
-    <Col className="pb-2 d-flex flex-column flex-fill">
+    <Col className="pb-2 d-flex flex-column px-0">
       <div>
-        <Row className="d-flex flex-row flex-fill justify-content-around">
+        <Row className="d-flex flex-row flex-fill justify-content-around flex-nowrap">
           {
             _.map(cardsMap, ({ value, suit, }, cardKey) =>
               <Col key={cardKey} className="d-flex flex-column align-items-center">
@@ -144,7 +144,8 @@ export default function ManageCards(props) {
 ManageCards.propTypes = {
   cards: holeCardsType,
   // TODO: define cb param types
-  onSave: PropTypes.func
+  onSave: PropTypes.func.isRequired,
+  numCards: PropTypes.number.isRequired
 };
 
 // ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305

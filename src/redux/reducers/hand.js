@@ -212,7 +212,7 @@ export function getNextToActSeatIndex(hand) {
     );
   });
 
-  const currentPosition = _.find(activePositions, { seatIndex: lastActionSeatIndex });
+  const currentPosition      = _.find(activePositions, { seatIndex: lastActionSeatIndex });
   const currentPositionIndex = _.findIndex(activePositions, { seatIndex: currentPosition.seatIndex });
 
   const nextPosition = currentPositionIndex === (activePositions.length - 1)

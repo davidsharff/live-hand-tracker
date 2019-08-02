@@ -1,5 +1,5 @@
 // TODO: clicking create hand button should move existing hand into a "hands" session collection and reset hand state with defaults
-import React  from 'react';
+import React, { useEffect }  from 'react';
 import _ from 'lodash';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -14,9 +14,16 @@ import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
+import { bettingRounds } from "../../constants";
 
 function Hand(props) {
-  const { session, hand, deck} = props;
+  const { session, hand, deck, currentBettingRound } = props;
+
+  useEffect(() => {
+    if (currentBettingRound && currentBettingRound !== bettingRounds.PRE_FLOP) {
+      props.history.push(`/hand/input-wizard/input-board-cards/${currentBettingRound}`);
+    }
+  }, [currentBettingRound, props.history]);
 
   if (session === null) {
     return <Redirect to="/session" />;
@@ -29,7 +36,7 @@ function Hand(props) {
   // }
 
   if (
-    //false &&
+   //false &&
     session &&
     heroHoleCards.length < 2 &&
     props.location.pathname !== '/hand/manage-hole-cards'
@@ -60,22 +67,30 @@ function Hand(props) {
       }
     });
   }
-
   return (
     <HandContainer fluid className="d-flex flex-column">
-      <Header location={session.location} smallBlind={session.smallBlind} bigBlind={session.bigBlind} totalPlayers={_.sumBy(hand.seats, 'isActive')} bettingRound={hand.currentBettingRound}/>
+      <Header
+        location={session.location}
+        smallBlind={session.smallBlind}
+        bigBlind={session.bigBlind}
+        totalPlayers={_.sumBy(hand.seats, 'isActive')}
+        bettingRound={hand.currentBettingRound}
+        shouldCollapse={props.location.pathname === '/hand/input-wizard'}
+      />
       <Switch>
 
         <Route exact path="/hand/manage-hole-cards" render={() =>
           <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} numCards={2} />
         }/>
 
-        <Route exact path="/hand/input-wizard" render={() =>
+        <Route path="/hand/input-wizard" render={() =>
           <Wizard
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
             onAction={(seatIndex, type, amount) => props.dispatch({ type: actionTypes.SET_NEW_ACTION, payload: { seatIndex, type, amount }})}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
+            deck={deck}
+            onSaveBoardCards={(cards) => console.log('onSaveBoardCards', cards)}
           />
         }/>
 
@@ -94,7 +109,11 @@ export default withRouter(connect((state) => ({
   hand: state.hand,
   // TODO: this can be removed when check for session happens in middleware
   deck: state.hand ? getDeck(state) : null,
-  session: state.session
+  session: state.session,
+  hasSession: state.session !== null,
+  currentBettingRound: state.hand !== null
+    ? state.hand.currentBettingRound
+    : null
 }))(Hand));
 
 const HandContainer = styled(Container)`
