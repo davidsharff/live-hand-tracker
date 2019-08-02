@@ -99,7 +99,7 @@ function Session(props) {
       props.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {
-          hand: {
+          handSessionDefaults: {
             heroSeatIndex: session.defaultHeroSeatIndex,
             seats: session.defaultSeats,
             smallBlind: session.smallBlind,

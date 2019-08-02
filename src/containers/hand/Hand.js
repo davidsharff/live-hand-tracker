@@ -36,7 +36,7 @@ function Hand(props) {
   // }
 
   if (
-   //false &&
+   // false &&
     session &&
     heroHoleCards.length < 2 &&
     props.location.pathname !== '/hand/manage-hole-cards'
@@ -47,11 +47,21 @@ function Hand(props) {
   }
 
   const handleSetHeroCards = (holeCards) => {
-
     props.dispatch({
       type: actionTypes.SET_HERO_CARDS,
       payload: {
-        holeCards: holeCards.map(({ value, suit}) => '' + value + suit)
+        holeCards
+      }
+    });
+
+    props.history.push('/hand/input-wizard');
+  };
+
+  const handleSaveBoardCards = (cards) => {
+    props.dispatch({
+      type: actionTypes.SET_BOARD_CARDS,
+      payload: {
+        cards
       }
     });
 
@@ -75,7 +85,7 @@ function Hand(props) {
         bigBlind={session.bigBlind}
         totalPlayers={_.sumBy(hand.seats, 'isActive')}
         bettingRound={hand.currentBettingRound}
-        shouldCollapse={props.location.pathname === '/hand/input-wizard'}
+        shouldCollapse={false}
       />
       <Switch>
 
@@ -90,7 +100,8 @@ function Hand(props) {
             onAction={(seatIndex, type, amount) => props.dispatch({ type: actionTypes.SET_NEW_ACTION, payload: { seatIndex, type, amount }})}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
             deck={deck}
-            onSaveBoardCards={(cards) => console.log('onSaveBoardCards', cards)}
+            onSaveBoardCards={handleSaveBoardCards}
+            board={hand.board}
           />
         }/>
 

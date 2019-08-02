@@ -33,7 +33,7 @@ export default store => next => action => {
       store.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {
-          hand: {
+          handSessionDefaults: {
             buttonSeatIndex: null,
             heroSeatIndex: payload.session.defaultHeroSeatIndex,
             seats: payload.session.defaultSeats,

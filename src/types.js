@@ -27,7 +27,9 @@ export const handType = PT.exact({
     bettingRound: PT.oneOf(_.values(bettingRounds)).isRequired,
     seatIndex: PT.number.isRequired,
     amount: PT.number
-  })).isRequired
+  })).isRequired,
+  // This may need to include objects with betting round and cards keys, however, it's necessarily ordered data so starting with strings for now.
+  board: PT.arrayOf(PT.oneOf(cards))
 });
 
 export const sessionType = PT.exact({

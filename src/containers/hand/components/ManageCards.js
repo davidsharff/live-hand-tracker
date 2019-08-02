@@ -68,6 +68,14 @@ export default function ManageCards(props) {
       c === (cardsMap.card2.value + cardsMap.card2.suit)
     ), [props.deck, cardsMap]);
 
+  //
+  const handleSave = () => props.onSave(
+    _.values(cardsMap) // TODO: another argument to either always use obj for cards or use array of strings here too.
+      .map(({ value, suit}) =>
+        '' + value + suit
+      )
+  );
+
   useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   return (
@@ -133,7 +141,7 @@ export default function ManageCards(props) {
           }
         </Row>
       </SuitContainer>
-      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cardsMap))} outline>
+      <Button className="mb-4" color="success" onClick={handleSave} outline>
         Submit
       </Button>
     </Col>

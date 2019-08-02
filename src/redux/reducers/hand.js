@@ -11,7 +11,12 @@ export default function handReducer(hand = initialState, action) {
   switch (type) {
 
     case actionTypes.CREATE_HAND:
-      return _.assign({}, payload.hand, { actions: [], positions: [], currentBettingRound: bettingRounds.PRE_FLOP }) ;
+      return _.assign({}, payload.handSessionDefaults, {
+        actions: [],
+        positions: [],
+        currentBettingRound: bettingRounds.PRE_FLOP,
+        board: []
+      });
 
     case actionTypes.SET_HERO_CARDS: {
       const { holeCards } = payload;
@@ -88,6 +93,14 @@ export default function handReducer(hand = initialState, action) {
 
       return _.assign({}, hand, {
         currentBettingRound: bettingRoundOrder[currentBettingRoundIndex + 1]
+      });
+    }
+
+    case actionTypes.SET_BOARD_CARDS: {
+      const { cards } = payload;
+
+      return _.assign({}, hand, {
+        board: cards
       });
     }
 

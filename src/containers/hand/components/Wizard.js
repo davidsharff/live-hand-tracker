@@ -64,7 +64,7 @@ export default function Wizard(props) {
               }
               return (
                 // TODO: Remove numCards in favor of constants lookup based on cards type.
-                <ManageCards cards={[]} deck={deck} onSave={() => ({})} numCards={3} cardsType={cardsInputType} />
+                <ManageCards cards={hand.board} deck={deck} onSave={props.onSaveBoardCards} numCards={3} cardsType={cardsInputType} />
               );
             }}/>
           )
