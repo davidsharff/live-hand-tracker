@@ -133,7 +133,7 @@ export default function ManageCards(props) {
           }
         </Row>
       </SuitContainer>
-      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cardsMap))}>
+      <Button className="mb-4" color="success" onClick={() => props.onSave(_.values(cardsMap))} outline>
         Submit
       </Button>
     </Col>

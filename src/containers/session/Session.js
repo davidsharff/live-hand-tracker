@@ -205,7 +205,7 @@ function Session(props) {
                 </Row>
               </Col>
               <Row className="justify-self-end">
-                <SubmitButton disabled={!isValidSession(session)} onClick={handleClickNext}>
+                <SubmitButton outline disabled={!isValidSession(session)} onClick={handleClickNext}>
                   Next
                 </SubmitButton>
               </Row>
