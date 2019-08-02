@@ -35,6 +35,7 @@ export default function Wizard(props) {
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
+  const selectedSeatPosLabel = selectedSeatIndex ? getPositionLabelForSeatIndex(hand, selectedSeatIndex) : null;
   // TODO: below sections should be their own components
   return (
     <Container className="flex-fill d-flex flex-column px-0">
@@ -46,17 +47,11 @@ export default function Wizard(props) {
       />
       <Row className="d-flex flex-row justify-content-center mt-2">
         {
-          !isInputtingCards && selectedSeatIndex &&
-          <h4>
-            {
-              getPositionLabelForSeatIndex(hand, selectedSeatIndex)
-            }
-            &nbsp;(Seat { (selectedSeatIndex + 1) })
-          </h4>
-        }
-        {
-          isInputtingCards &&
-          <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
+          isInputtingCards
+           ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
+           : selectedSeatIndex
+            ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
+            : null
         }
       </Row>
       <Switch>
@@ -64,9 +59,9 @@ export default function Wizard(props) {
           // TODO: use constant
           ['hole-cards', ..._.values(bettingRounds)].map((cardsInputType) =>
             <Route exact key={cardsInputType} path={`/hand/input-wizard/input-board-cards/${cardsInputType}`} render={() => {
-
-              setIsInputtingCards(true);
-
+              if (!isInputtingCards) {
+                setIsInputtingCards(true);
+              }
               return (
                 // TODO: Remove numCards in favor of constants lookup based on cards type.
                 <ManageCards cards={[]} deck={deck} onSave={() => ({})} numCards={3} cardsType={cardsInputType} />
@@ -75,9 +70,9 @@ export default function Wizard(props) {
           )
         }
         <Route exact path="/hand/input-wizard" render={() => {
-
-          setIsInputtingCards(false);
-
+          if (isInputtingCards) {
+            setIsInputtingCards(false);
+          }
           return (
             <ActionInputBody hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
           );
