@@ -210,7 +210,7 @@ export function getNextToActSeatIndex(hand) {
       .reject(({ seatIndex }) =>
         getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.FOLD
       )
-      .last()
+      .first()
       .seatIndex;
   }
 
