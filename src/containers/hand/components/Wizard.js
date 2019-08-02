@@ -3,18 +3,17 @@ import { Switch, Route } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
 
-import { Container, Row, Col, Button, Input } from 'reactstrap';
+import { Container, Row, Button, Input } from 'reactstrap';
 
 import {
   getAvailableActionForSeatIndex,
-  getCurrentActionsForSeat,
-  getCurrentAmountInvestedForSeat,
   getNextToActSeatIndex,
   getPositionLabelForSeatIndex,
 } from "../../../redux/reducers/hand";
 
 import { bettingRounds, handActionTypes } from "../../../constants";
 import ManageCards from "./ManageCards";
+import WizardHeader from "./WizardHeader";
 
 export default function Wizard(props) {
   const { hand, deck } = props;
@@ -39,69 +38,12 @@ export default function Wizard(props) {
   // TODO: below sections should be their own components
   return (
     <Container className="flex-fill d-flex flex-column px-0">
-      <Row className="mb-1 mx-0">
-        {
-          hand.seats.map((s, i) =>
-            <HeaderItem
-              key={i}
-              isButtonInputMode={hand.buttonSeatIndex === null}
-              onClick={() => hand.buttonSeatIndex === null && props.onSetButtonSeatIndex(i)}
-              className="d-flex flex-column justify-content-between"
-              isSelected={selectedSeatIndex === i}
-              shouldCollapse={isInputtingCards}
-            >
-              <Row className="d-flex flex-row justify-content-between m-0 flex-fill">
-                {
-                  s.isActive
-                    ? (
-                      <React.Fragment>
-                        <span>
-                          {
-                            i === hand.heroSeatIndex
-                              ? 'Hero'
-                              : `S${ i + 1 }`
-                          }
-                       </span>
-                        {
-                          hand.buttonSeatIndex !== null &&
-                          <span>
-                            { s.isActive
-                              ? getPositionLabelForSeatIndex(hand, i, s)
-                              : 'Empty'
-                            }
-                          </span>
-                        }
-                      </React.Fragment>
-                    )
-                    : <span>Empty</span>
-                }
-              </Row>
-              <ActionRow className="d-flex flex-row justify-content-around m-0 flex-fill align-items-start">
-                {
-                  hand.buttonSeatIndex !== null &&
-                  <div style={{fontSize: '12px'}}>
-                    {
-                      (() => {
-                        const action = _.last(getCurrentActionsForSeat(hand, i));
-
-                        return action && (
-                          <React.Fragment>
-                            <div>{_.capitalize(action.type)}</div>
-                            {
-                              (action.type !== handActionTypes.FOLD && action.type !== handActionTypes.CHECK) &&
-                              <div>${getCurrentAmountInvestedForSeat(hand, i)}</div>
-                            }
-                          </React.Fragment>
-                        );
-                      })()
-                    }
-                  </div>
-                }
-              </ActionRow>
-            </HeaderItem>
-          )
-        }
-      </Row>
+      <WizardHeader
+        hand={hand}
+        isInputtingCards={isInputtingCards}
+        selectedSeatIndex={selectedSeatIndex}
+        handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
+      />
       <Row className="d-flex flex-row justify-content-center mt-2">
         {
           !isInputtingCards && selectedSeatIndex &&
@@ -145,19 +87,6 @@ export default function Wizard(props) {
   );
 }
 
-const HeaderItem = styled(({ isButtonInputMode, shouldCollapse, isSelected, ...rest }) => <Col {...rest} />)`
-  max-height: ${p => p.shouldCollapse && '20px'};
-  flex-basis: 20%;
-  font-size: 12px;
-  height: 75px;
-  padding: 1px 1px 0 4px;
-  border: ${p => 
-    p.isButtonInputMode || p.isSelected
-      ? 'solid #28a745 2px'
-      : 'solid #eee 1px'
-  };
-`;
-
 const ActionInputBody = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
   <Row className="d-flex flex-row justify-content-center flex-fill mx-0">
 
@@ -193,7 +122,7 @@ function createActionComponentsMap(handleAction) {
 
   const CallComponent = ({ amount }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CALL)}>
+      <Button outline className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CALL)}>
         Call&nbsp;${ amount }
       </Button>
     </ActionButtonRow>
@@ -212,7 +141,7 @@ function createActionComponentsMap(handleAction) {
     return (
       <React.Fragment>
         <ActionButtonRow className="justify-content-center align-items-center">
-          <Button className="flex-fill" color="warning" onClick={() => handleAction(handActionTypes.RAISE, raiseAmount)}>
+          <Button outline className="flex-fill" color="info" onClick={() => handleAction(handActionTypes.RAISE, raiseAmount)}>
             <Row className="d-flex flex-row justify-content-center align-items-center">
               <span style={{ marginRight: '10px'}}>Raise</span>
               <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={raiseAmount} onChange={handleChange} />
@@ -236,7 +165,7 @@ function createActionComponentsMap(handleAction) {
     return (
       <React.Fragment>
         <ActionButtonRow className="justify-content-center align-items-center">
-          <Button className="flex-fill" color="warning" onClick={() => handleAction(handActionTypes.BET, betAmount)}>
+          <Button outline className="flex-fill" color="warning" onClick={() => handleAction(handActionTypes.BET, betAmount)}>
             <Row className="d-flex flex-row justify-content-center align-items-center">
               <span style={{ marginRight: '10px'}}>Bet</span>
               <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={betAmount} onChange={handleChange} />
@@ -249,7 +178,7 @@ function createActionComponentsMap(handleAction) {
 
   const FoldComponent = ({ onFold }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="danger" onClick={() => handleAction(handActionTypes.FOLD)}>
+      <Button outline className="flex-fill" color="danger" onClick={() => handleAction(handActionTypes.FOLD)}>
         Fold
       </Button>
     </ActionButtonRow>
@@ -257,7 +186,7 @@ function createActionComponentsMap(handleAction) {
 
   const CheckComponent = ({ onCheck }) => (
     <ActionButtonRow>
-      <Button className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CHECK)}>
+      <Button outline className="flex-fill" color="primary" onClick={() => handleAction(handActionTypes.CHECK)}>
         Check
       </Button>
     </ActionButtonRow>
@@ -271,10 +200,6 @@ function createActionComponentsMap(handleAction) {
     [handActionTypes.BET]: ({ amount }) => <BetComponent minBet={amount} />
   };
 }
-
-const ActionRow = styled(Row)`
-  margin-top: -12px !important;
-`;
 
 const ActionButtonRow = styled(Row)`
   display: flex;
