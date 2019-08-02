@@ -83,16 +83,16 @@ export default function WizardHeader(props) {
 }
 
 const HeaderItem = styled(({ isButtonInputMode, isInputtingBoardCards, isSelected, ...rest }) => <Col {...rest} />)`
-  max-height: ${p => p.isInputtingBoardCards && '20px'};
   flex-basis: 20%;
   font-size: 12px;
-  height: 75px;
+  height: ${p => p.isInputtingBoardCards ? '20px' : '75px'};
   padding: 1px 1px 0 4px;
   border: ${p =>
   !p.isInputtingBoardCards && (p.isButtonInputMode || p.isSelected)
     ? 'solid #28a745 2px'
     : 'solid #eee 1px'
   };
+  transition: height .25s;
 `;
 
 const ActionRow = styled(Row)`
