@@ -48,15 +48,12 @@ export default function Wizard(props) {
         selectedSeatIndex={selectedSeatIndex}
         handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
       />
-      <Row className="d-flex flex-row justify-content-center my-2">
-        {
-          isInputtingCards
-           ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
-           : selectedSeatIndex !== null
-            ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
-            : null
-        }
-      </Row>
+      <BodyHeader
+        isInputtingCards={isInputtingCards}
+        selectedSeatIndex={selectedSeatIndex}
+        currentBettingRound={hand.currentBettingRound}
+        selectedSeatPosLabel={selectedSeatPosLabel}
+      />
       <Switch>
         {
           // TODO: use constant
@@ -77,7 +74,7 @@ export default function Wizard(props) {
             setIsInputtingCards(false);
           }
           return (
-            <ActionInputBody hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
+            <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
           );
         }}/>
       </Switch>
@@ -85,7 +82,19 @@ export default function Wizard(props) {
   );
 }
 
-const ActionInputBody = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
+const BodyHeader = ({ isInputtingCards, selectedSeatIndex, currentBettingRound, selectedSeatPosLabel }) => (
+  <Row className="d-flex flex-row justify-content-center my-2">
+    {
+      isInputtingCards
+        ? <h4>{ _.capitalize(currentBettingRound) }</h4>
+        : selectedSeatIndex !== null
+        ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
+        : null
+    }
+  </Row>
+);
+
+const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
   <Row className="d-flex flex-row justify-content-center flex-fill mx-0">
 
     {
