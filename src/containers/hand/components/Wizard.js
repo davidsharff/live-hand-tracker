@@ -35,7 +35,10 @@ export default function Wizard(props) {
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
-  const selectedSeatPosLabel = selectedSeatIndex ? getPositionLabelForSeatIndex(hand, selectedSeatIndex) : null;
+  const selectedSeatPosLabel = selectedSeatIndex !== null
+    ? getPositionLabelForSeatIndex(hand, selectedSeatIndex)
+    : null;
+
   // TODO: below sections should be their own components
   return (
     <Container className="flex-fill d-flex flex-column px-0">
@@ -49,7 +52,7 @@ export default function Wizard(props) {
         {
           isInputtingCards
            ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
-           : selectedSeatIndex
+           : selectedSeatIndex !== null
             ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
             : null
         }
