@@ -49,3 +49,8 @@ export const positionLabelsMap = {
   '3': ['B', SB, BB],
   '2': ['B', BB]
 };
+
+export const cardInputTypes = {
+  HOLE_CARDS: 'hole-cards',
+  ...bettingRounds
+};

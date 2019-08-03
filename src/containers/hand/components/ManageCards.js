@@ -5,23 +5,38 @@ import styled from 'styled-components';
 
 import {  Col, Row, Button } from 'reactstrap';
 
-import { cardValues, suits } from '../../../constants';
-import { holeCardsType } from '../../../types';
+import {cardInputTypes, cardValues, suits} from '../../../constants';
+import {deckType, holeCardsType} from '../../../types';
 
 const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
 
 // TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
 export default function ManageCards(props) {
+  const { cards, deck, onSave, type } = props;
 
-  const [selectedCardKey, setSelectedCardKey] = useState('card1');
+  const [selectedCardKey, setSelectedCardKey] = useState(
+    type === cardInputTypes.TURN
+      ? 'card4'
+      : type === cardInputTypes.RIVER
+        ? 'card5'
+        : 'card1'
+  );
 
-  // TODO: should also check if props.cards is already filled out and use that instead.
+  const numCardSlots = type === cardInputTypes.HOLE_CARDS
+    ? 2
+    : 5;
 
+  // TODO: this is all horrible. Use an array.
+  // Even with an array, if only this round's cards are editable, we must also allow a way to force any edit.
   const [cardsMap, setCardsMap] = useState(
-    _.range(0, props.numCards).reduce((obj, i) =>
+    _.range(0, numCardSlots).reduce((obj, i) =>
         _.assign({}, obj, { ['card' + (i + 1)]: {
-            value: props.cards.length > i ? props.cards[i].slice(0, -1) : null,
-            suit: props.cards.length > i ? props.cards[i].slice(1, 2) : null,
+            value: cards.length > i ? cards[i].slice(0, -1) : null,
+            suit: cards.length > i ? cards[i].slice(1, 2) : null,
+            isDisabled: type !== cardInputTypes.HOLE_CARDS && (
+              (type === cardInputTypes.FLOP && i > 2) ||
+              (type === cardInputTypes.TURN && i > 3)
+            )
           }})
       , {})
   );
@@ -55,7 +70,9 @@ export default function ManageCards(props) {
 
       if (
         !!selectedCard.value && !!selectedCard.suit &&
-        nextCard.value === null && nextCard.suit === null
+        nextCard.value === null &&
+        nextCard.suit === null &&
+        !nextCard.isDisabled
       ) {
         setSelectedCardKey(nextCardKey);
       }
@@ -68,84 +85,90 @@ export default function ManageCards(props) {
       value + suit
     );
 
-    return _.reject(props.deck, (c) =>
+    return _.reject(deck, (c) =>
       _.includes(pendingCards, c)
     );
-  }, [props.deck, cardsMap]);
+  }, [deck, cardsMap]);
 
   //
-  const handleSave = () => props.onSave(
+  const handleSave = () => onSave(
     _.values(cardsMap) // TODO: another argument to either always use obj for cards or use array of strings here too.
-      .map(({ value, suit}) =>
+      .filter(({ value, suit }) => !!value && !!suit)
+      .map(({ value, suit }) =>
         '' + value + suit
       )
   );
 
   useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
+  const cardSlotClassName = 'd-flex flex-column justify-content-center align-items-center p-0 flex-grow-0 ' + (
+    type === cardInputTypes.HOLE_CARDS
+      ? 'mx-4 mb-2'
+      : 'mx-2 mb-1'
+  );
+
   return (
-    <Col className="mb-1 d-flex flex-column px-0">
-      <div>
-        <Row className="d-flex flex-row justify-content-around flex-nowrap mb-3">
-          {
-            _.map(cardsMap, ({ value, suit, }, cardKey) =>
-              <Col key={cardKey} className="d-flex flex-column align-items-center" style={{ maxHeight: '100px'}}>
-                <CardSlot
-                  className="mb-4 d-flex flex-column justify-content-center align-items-center"
-                  onClick={() => handleClickCard(cardKey)}
-                  isSelected={selectedCardKey === cardKey}
-                >
-                  <span>{ `${value || ''}${suit || ''}` }</span>
-                </CardSlot>
-              </Col>
-            )
-          }
-        </Row>
-      </div>
-      <SuitContainer>
-        <Row className="d-flex flex-row justify-content-between">
-          {
-            _.range(0, 4).map(i =>
-              <Suit
-                key={i}
-                className="d-flex flex-column justify-content-center align-items-center"
-                onClick={() =>
-                  !isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i]) &&
-                  handleClickSuit(suitAbbreviations[i])
-                }
-                isSelected={cardsMap[selectedCardKey].suit === suitAbbreviations[i]}
-                disabled={isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i])}
-              >
-                { suitAbbreviations[i] }
-              </Suit>
-            )
-          }
-        </Row>
-      </SuitContainer>
-      <Col className="my-2 d-flex flex-column flex-fill">
+    <Col className="mb-1 d-flex flex-column p-0">
+      <Row className="d-flex flex-row flex-nowrap mb-2 justify-content-center" style={{ flex: .4}}>
         {
-          _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
-            <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
-              {
-                chunk.map((cv) =>
-                  <ValueContainer
-                    className="d-flex flex-column align-items-center justify-content-center"
-                    key={cv}
-                    onClick={() =>
-                      !isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
-                      handleClickValue(cv)
-                    }
-                    disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
-                    isSelected={cardsMap[selectedCardKey].value === cv}
-                  >
-                    { cv }
-                  </ValueContainer>
-                )
-              }
-            </Row>
+          _.map(cardsMap, ({ value, suit, isDisabled}, cardKey) =>
+            <CardSlot
+              key={cardKey}
+              className={cardSlotClassName}
+              onClick={() => !isDisabled && handleClickCard(cardKey)}
+              isSelected={selectedCardKey === cardKey}
+              type={type}
+              isDisabled={isDisabled}
+            >
+              <span>{ `${value || ''}${suit || ''}` }</span>
+            </CardSlot>
           )
         }
-      </Col>
+      </Row>
+      <Row className="d-flex flex-row justify-content-between m-0">
+        {
+          _.range(0, 4).map(i =>
+            <Suit
+              key={i}
+              className="d-flex flex-column justify-content-center align-items-center"
+              onClick={() =>
+                !isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i]) &&
+                handleClickSuit(suitAbbreviations[i])
+              }
+              isSelected={cardsMap[selectedCardKey].suit === suitAbbreviations[i]}
+              disabled={isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i])}
+            >
+              { suitAbbreviations[i] }
+            </Suit>
+          )
+        }
+      </Row>
+      <Row className="flex-fill m-0 mb-4">
+        <Col className="my-4 d-flex flex-column flex-fill">
+          {
+            _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
+              <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
+                {
+                  chunk.map((cv) =>
+                    <ValueContainer
+                      className="d-flex flex-column align-items-center justify-content-center"
+                      key={cv}
+                      onClick={() =>
+                        !isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
+                        handleClickValue(cv)
+                      }
+                      disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
+                      isSelected={cardsMap[selectedCardKey].value === cv}
+                    >
+                      { cv }
+                    </ValueContainer>
+                  )
+                }
+              </Row>
+            )
+          }
+        </Col>
+      </Row>
       <Button className="mb-4" color="success" onClick={handleSave} outline>
         Submit
       </Button>
@@ -158,22 +181,25 @@ ManageCards.propTypes = {
   cards: holeCardsType,
   // TODO: define cb param types
   onSave: PropTypes.func.isRequired,
-  numCards: PropTypes.number.isRequired
+  type: PropTypes.string.isRequired,
+  deck: deckType.isRequired
 };
 
 // ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305
-const CardSlot = styled(({ isSelected, ...rest }) => <Col { ...rest }/>)`
+const CardSlot = styled(({ isSelected, type, isDisabled, ...rest }) => <Col { ...rest }/>)`
+  padding: 0;
   border: dotted 1px #333;
-  min-height: 100px;
-  width: 80px;
+  min-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
+  max-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
+  min-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
+  max-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
   ${p => p.isSelected && `
     border-color: #28a745;
     border-width: 3px;
   `};
-`;
-
-const SuitContainer = styled(Col)`
-  flex: .25
+  ${p => p.isDisabled && `
+    background-color: #ccc;    
+  `};                     
 `;
 
 const Suit = styled(({ disabled, isSelected, ...rest }) => <Col { ...rest }/>)`

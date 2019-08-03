@@ -12,7 +12,7 @@ import Header from './components/Header';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
-import { bettingRounds } from "../../constants";
+import {bettingRounds, cardInputTypes} from "../../constants";
 
 import { getDeck } from "../../redux/reducers/hand";
 
@@ -21,7 +21,7 @@ function Hand(props) {
 
   useEffect(() => {
     if (currentBettingRound && currentBettingRound !== bettingRounds.PRE_FLOP) {
-      props.history.push(`/hand/input-wizard/input-board-cards/${currentBettingRound}`);
+      props.history.push(`/hand/input-wizard/cards/${currentBettingRound}`);
     }
   }, [currentBettingRound, props.history]);
 
@@ -89,8 +89,9 @@ function Hand(props) {
       />
       <Switch>
 
+        {/* TODO: this can go away and be a step in the wizard instead like board cards. */}
         <Route exact path="/hand/manage-hole-cards" render={() =>
-          <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} numCards={2} />
+          <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} type={cardInputTypes.HOLE_CARDS} />
         }/>
 
         <Route path="/hand/input-wizard" render={() =>

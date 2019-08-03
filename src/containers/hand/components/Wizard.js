@@ -11,7 +11,7 @@ import {
   getPositionLabelForSeatIndex,
 } from "../../../redux/reducers/hand";
 
-import { bettingRounds, handActionTypes } from "../../../constants";
+import {cardInputTypes, handActionTypes} from "../../../constants";
 import ManageCards from "./ManageCards";
 import WizardHeader from "./WizardHeader";
 
@@ -57,14 +57,14 @@ export default function Wizard(props) {
       <Switch>
         {
           // TODO: use constant
-          ['hole-cards', ..._.values(bettingRounds)].map((cardsInputType) =>
-            <Route exact key={cardsInputType} path={`/hand/input-wizard/input-board-cards/${cardsInputType}`} render={() => {
+          _.values(cardInputTypes).map((cardsInputType) =>
+            <Route exact key={cardsInputType} path={`/hand/input-wizard/cards/${cardsInputType}`} render={() => {
               if (!isInputtingCards) {
                 setIsInputtingCards(true);
               }
               return (
                 // TODO: Remove numCards in favor of constants lookup based on cards type.
-                <ManageCards cards={hand.board} deck={deck} onSave={props.onSaveBoardCards} numCards={3} cardsType={cardsInputType} />
+                <ManageCards cards={hand.board} deck={deck} onSave={props.onSaveBoardCards} type={cardsInputType} />
               );
             }}/>
           )
