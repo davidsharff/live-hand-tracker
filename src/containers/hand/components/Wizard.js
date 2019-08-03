@@ -45,7 +45,7 @@ export default function Wizard(props) {
         selectedSeatIndex={selectedSeatIndex}
         handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
       />
-      <Row className="d-flex flex-row justify-content-center mt-2">
+      <Row className="d-flex flex-row justify-content-center my-2">
         {
           isInputtingCards
            ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>

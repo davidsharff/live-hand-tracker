@@ -97,6 +97,26 @@ export default function ManageCards(props) {
           }
         </Row>
       </div>
+      <SuitContainer>
+        <Row className="d-flex flex-row justify-content-between">
+          {
+            _.range(0, 4).map(i =>
+              <Suit
+                key={i}
+                className="d-flex flex-column justify-content-center align-items-center"
+                onClick={() =>
+                  !isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i]) &&
+                  handleClickSuit(suitAbbreviations[i])
+                }
+                isSelected={cardsMap[selectedCardKey].suit === suitAbbreviations[i]}
+                disabled={isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i])}
+              >
+                { suitAbbreviations[i] }
+              </Suit>
+            )
+          }
+        </Row>
+      </SuitContainer>
       <Col className="my-2 d-flex flex-column flex-fill">
         {
           _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
@@ -121,26 +141,6 @@ export default function ManageCards(props) {
           )
         }
       </Col>
-      <SuitContainer>
-        <Row className="d-flex flex-row justify-content-between">
-          {
-            _.range(0, 4).map(i =>
-              <Suit
-                key={i}
-                className="d-flex flex-column justify-content-center align-items-center"
-                onClick={() =>
-                  !isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i]) &&
-                  handleClickSuit(suitAbbreviations[i])
-                }
-                isSelected={cardsMap[selectedCardKey].suit === suitAbbreviations[i]}
-                disabled={isSuitDisabled(getPendingDeck(), cardsMap[selectedCardKey].value, suitAbbreviations[i])}
-              >
-                { suitAbbreviations[i] }
-              </Suit>
-            )
-          }
-        </Row>
-      </SuitContainer>
       <Button className="mb-4" color="success" onClick={handleSave} outline>
         Submit
       </Button>
@@ -168,8 +168,7 @@ const CardSlot = styled(({ isSelected, ...rest }) => <Col { ...rest }/>)`
 `;
 
 const SuitContainer = styled(Col)`
-  min-height: 100px;
-  max-height: 100px;
+  flex: .25
 `;
 
 const Suit = styled(({ disabled, isSelected, ...rest }) => <Col { ...rest }/>)`
