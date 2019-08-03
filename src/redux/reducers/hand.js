@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
-import { positionLabelsMap, bettingRounds, handActionTypes, bettingRoundOrder } from "../../constants";
+import {positionLabelsMap, bettingRounds, handActionTypes, bettingRoundOrder, cards} from "../../constants";
 
 const initialState = null;
 
@@ -108,6 +108,17 @@ export default function handReducer(hand = initialState, action) {
     default:
       return hand;
   }
+}
+
+export function getDeck(hand) {
+  return _.reject(cards, (c) =>
+    _.includes(getHoleCards(hand), c) ||
+    _.includes(hand.board, c)
+  );
+}
+
+export function getHoleCards(hand) {
+  return _.flatMap(hand.seats, 'holeCards');
 }
 
 export function getPositionLabelForSeatIndex(hand, seatIndex) {

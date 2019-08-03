@@ -62,11 +62,16 @@ export default function ManageCards(props) {
     }
   };
 
-  const getPendingDeck = useCallback(() =>
-    _.reject(props.deck, (c) =>
-      c === (cardsMap.card1.value + cardsMap.card1.suit) ||
-      c === (cardsMap.card2.value + cardsMap.card2.suit)
-    ), [props.deck, cardsMap]);
+  // TODO: dropping useState and directly updating redux would drop requirement to track pending deck.
+  const getPendingDeck = useCallback(() => {
+    const pendingCards = _.values(cardsMap).map(({ value, suit}) =>
+      value + suit
+    );
+
+    return _.reject(props.deck, (c) =>
+      _.includes(pendingCards, c)
+    );
+  }, [props.deck, cardsMap]);
 
   //
   const handleSave = () => props.onSave(
@@ -79,12 +84,12 @@ export default function ManageCards(props) {
   useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   return (
-    <Col className="pb-2 d-flex flex-column px-0">
+    <Col className="mb-1 d-flex flex-column px-0">
       <div>
-        <Row className="d-flex flex-row flex-fill justify-content-around flex-nowrap">
+        <Row className="d-flex flex-row justify-content-around flex-nowrap mb-3">
           {
             _.map(cardsMap, ({ value, suit, }, cardKey) =>
-              <Col key={cardKey} className="d-flex flex-column align-items-center">
+              <Col key={cardKey} className="d-flex flex-column align-items-center" style={{ maxHeight: '100px'}}>
                 <CardSlot
                   className="mb-4 d-flex flex-column justify-content-center align-items-center"
                   onClick={() => handleClickCard(cardKey)}

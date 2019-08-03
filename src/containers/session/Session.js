@@ -7,7 +7,7 @@ import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownIte
 
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
-import { isValidSession} from '../../selectors';
+import { isValidSession } from "../../redux/reducers/session";
 
 import connect from "react-redux/es/connect/connect";
 

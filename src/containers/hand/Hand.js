@@ -6,8 +6,6 @@ import { connect } from 'react-redux';
 import { Container } from 'reactstrap';
 import styled from 'styled-components';
 
-import { getDeck } from "../../selectors";
-
 import ManageHoleCards from './components/ManageCards';
 import Wizard from './components/Wizard';
 import Header from './components/Header';
@@ -15,6 +13,8 @@ import Header from './components/Header';
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 import { bettingRounds } from "../../constants";
+
+import { getDeck } from "../../redux/reducers/hand";
 
 function Hand(props) {
   const { session, hand, deck, currentBettingRound } = props;
@@ -119,7 +119,7 @@ Hand.propTypes = {
 export default withRouter(connect((state) => ({
   hand: state.hand,
   // TODO: this can be removed when check for session happens in middleware
-  deck: state.hand ? getDeck(state) : null,
+  deck: state.hand ? getDeck(state.hand) : null,
   session: state.session,
   hasSession: state.session !== null,
   currentBettingRound: state.hand !== null

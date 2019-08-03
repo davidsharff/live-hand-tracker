@@ -81,3 +81,7 @@ export default function session(state = null, action) {
       return state;
   }
 }
+
+export function isValidSession(session) {
+  return session.smallBlind && session.bigBlind && session.defaultSeats.length && session.defaultHeroSeatIndex;
+}
