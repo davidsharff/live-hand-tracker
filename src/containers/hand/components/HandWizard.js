@@ -13,9 +13,9 @@ import {
 
 import {cardInputTypes, handActionTypes} from "../../../constants";
 import ManageCards from "./ManageCards";
-import WizardHeader from "./WizardHeader";
+import HandWizardHeader from "./HandWizardHeader";
 
-export default function Wizard(props) {
+export default function HandWizard(props) {
   const { hand, deck } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
@@ -42,13 +42,13 @@ export default function Wizard(props) {
   // TODO: below sections should be their own components
   return (
     <Container className="flex-fill d-flex flex-column px-0">
-      <WizardHeader
+      <HandWizardHeader
         hand={hand}
         isInputtingCards={isInputtingCards}
         selectedSeatIndex={selectedSeatIndex}
         handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
       />
-      <BodyHeader
+      <BodyTitle
         isInputtingCards={isInputtingCards}
         selectedSeatIndex={selectedSeatIndex}
         currentBettingRound={hand.currentBettingRound}
@@ -58,6 +58,7 @@ export default function Wizard(props) {
         {
           // TODO: use constant
           _.values(cardInputTypes).map((cardsInputType) =>
+            // TOO: bug. Handle if they manually return to prior board input url.
             <Route exact key={cardsInputType} path={`/hand/input-wizard/cards/${cardsInputType}`} render={() => {
               if (!isInputtingCards) {
                 setIsInputtingCards(true);
@@ -82,7 +83,7 @@ export default function Wizard(props) {
   );
 }
 
-const BodyHeader = ({ isInputtingCards, selectedSeatIndex, currentBettingRound, selectedSeatPosLabel }) => (
+const BodyTitle = ({ isInputtingCards, selectedSeatIndex, currentBettingRound, selectedSeatPosLabel }) => (
   <Row className="d-flex flex-row justify-content-center my-2">
     {
       isInputtingCards

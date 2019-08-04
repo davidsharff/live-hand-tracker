@@ -7,8 +7,8 @@ import { Container } from 'reactstrap';
 import styled from 'styled-components';
 
 import ManageHoleCards from './components/ManageCards';
-import Wizard from './components/Wizard';
-import Header from './components/Header';
+import HandWizard from './components/HandWizard';
+import HandHeader from './components/HandHeader';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
@@ -21,6 +21,7 @@ function Hand(props) {
   const { session, hand, deck, currentBettingRound } = props;
 
   useEffect(() => {
+    // TODO: this prevents returning to any step prior to latest data.
     if (
       _.includes(props.history.location, '/hand/input-wizard') &&
       currentBettingRound &&
@@ -100,7 +101,7 @@ function Hand(props) {
   // TODO: all routes below should use handId param
   return (
     <HandContainer fluid className="d-flex flex-column">
-      <Header
+      <HandHeader
         location={session.location}
         smallBlind={session.smallBlind}
         bigBlind={session.bigBlind}
@@ -109,14 +110,13 @@ function Hand(props) {
         shouldCollapse={false}
       />
       <Switch>
-
-        {/* TODO: this can go away and be a step in the wizard instead like board cards. */}
+        {/* TODO: this can go away and be a step in the wizard instead like board cards. Remove "input-wizard" from route when this happens." */}
         <Route exact path="/hand/manage-hole-cards" render={() =>
           <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} type={cardInputTypes.HOLE_CARDS} />
         }/>
 
         <Route path="/hand/input-wizard" render={() =>
-          <Wizard
+          <HandWizard
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
             onAction={handleAddAction}
