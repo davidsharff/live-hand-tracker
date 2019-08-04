@@ -15,12 +15,17 @@ import { handType, deckType, sessionType } from '../../types';
 import {bettingRounds, cardInputTypes} from "../../constants";
 
 import { getDeck } from "../../redux/reducers/hand";
+import Overview from "./components/Overview";
 
 function Hand(props) {
   const { session, hand, deck, currentBettingRound } = props;
 
   useEffect(() => {
-    if (currentBettingRound && currentBettingRound !== bettingRounds.PRE_FLOP) {
+    if (
+      _.includes(props.history.location, '/hand/input-wizard') &&
+      currentBettingRound &&
+      currentBettingRound !== bettingRounds.PRE_FLOP
+    ) {
       props.history.push(`/hand/input-wizard/cards/${currentBettingRound}`);
     }
   }, [currentBettingRound, props.history]);
@@ -92,6 +97,7 @@ function Hand(props) {
     });
   }
 
+  // TODO: all routes below should use handId param
   return (
     <HandContainer fluid className="d-flex flex-column">
       <Header
@@ -119,6 +125,9 @@ function Hand(props) {
             onSaveBoardCards={handleSaveBoardCards}
             board={hand.board}
           />
+        }/>
+        <Route exact path="/hand/overview" render={() =>
+          <Overview hand={hand} />
         }/>
 
       </Switch>

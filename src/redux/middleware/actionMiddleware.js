@@ -40,7 +40,7 @@ export default store => next => action => {
           const nextToActLastAction = _.last(getCurrentActionsForSeat(store.getState().hand, nextToActSeatIndex));
 
           if (store.getState().hand.currentBettingRound === bettingRounds.RIVER) {
-            action.aux.redirectToFn('/overview');
+            action.aux.redirectToFn('/hand/overview');
           } else if (nextToActLastAction.type !== handActionTypes.POST){
             next({
               type: actionTypes.ADVANCE_BETTING_ROUND

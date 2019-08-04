@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 
 import Hand from './hand/Hand';
 import Session from "./session/Session";
-import Overview from "./overview/Overview";
-
 
 export default function Routes() {
   return (
@@ -16,8 +14,6 @@ export default function Routes() {
         )}/>
         <Route path="/hand" component={Hand} />
         <Route exact path="/session" component={Session} />
-        {/* TODO: this should use route param for handId */}
-        <Route exact path="/overview" component={Overview} />
       </Switch>
     </Router>
   );
