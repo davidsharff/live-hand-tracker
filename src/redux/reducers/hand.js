@@ -302,3 +302,20 @@ export function getBoardForRound(hand, round) {
       throw new Error(`Could not get board for round: ${round}`);
   }
 }
+
+export function isCurrentRoundComplete(hand) {
+  const nextToActSeatIndex = getNextToActSeatIndex(hand);
+  const nextSeatRoundActions = getCurrentActionsForSeat(hand, nextToActSeatIndex);
+  if (nextSeatRoundActions.length) {
+    const amountToContinue = getAmountToContinue(hand);
+    const nextToActSeatIndex = getNextToActSeatIndex(hand);
+    const nextToActAmountInvested = getCurrentAmountInvestedForSeat(hand, nextToActSeatIndex);
+
+    if (amountToContinue === nextToActAmountInvested) {
+      const nextToActLastAction = _.last(getCurrentActionsForSeat(hand, nextToActSeatIndex));
+      return nextToActLastAction.type !== handActionTypes.POST;
+    }
+  }
+
+  return false;
+}
