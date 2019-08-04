@@ -82,11 +82,10 @@ function Session(props) {
       // TODO: fire update hand action
     } else {
       props.dispatch({
-        type: actionTypes.CREATE_HAND,
-        aux: {
-          redirectToFn: (pathName) => props.history.push(pathName)
-        }
+        type: actionTypes.CREATE_HAND
       });
+      props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
+
     }
   };
 

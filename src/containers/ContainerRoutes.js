@@ -10,7 +10,7 @@ export default function Routes() {
       <Switch>
         <Route exact path="/" render={(props) => (
           // TODO: this can remove "exact" and handle all logic for sending to session or hand if applicable
-          <Redirect to="/hand"/>
+          <Redirect to="/hand/actions"/>
         )}/>
         <Route path="/hand" component={Hand} />
         <Route exact path="/session" component={Session} />

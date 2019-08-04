@@ -33,7 +33,6 @@ export default store => next => action => {
           }
         }
       });
-      action.aux.redirectToFn(`/hand/cards/seat/${store.getState().hand.heroSeatIndex}`);
       return;
     }
 

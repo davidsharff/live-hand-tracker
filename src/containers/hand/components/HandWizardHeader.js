@@ -25,7 +25,7 @@ export default function WizardHeader(props) {
               key={i}
               isButtonInputMode={hand.buttonSeatIndex === null}
               onClick={() => hand.buttonSeatIndex === null && handleSetButtonSeatIndex(i)}
-              className="d-flex flex-column justify-content-between"
+              className="d-flex flex-column justify-content-between pt-0"
               isSelected={selectedSeatIndex === i}
               shouldCollapse={shouldCollapse}
               isInactive={!s.isActive || (lastAction && lastAction.type === handActionTypes.FOLD)}
@@ -36,7 +36,7 @@ export default function WizardHeader(props) {
                     ? (
                       <React.Fragment>
                         {
-                            !shouldCollapse &&
+                          (!shouldCollapse || hand.buttonSeatIndex === null) &&
                           <span>
                             { isHero ? 'Hero' : `S${ i + 1 }` }
                           </span>
@@ -91,9 +91,9 @@ const HeaderItem = styled(({ isButtonInputMode, isInactive, shouldCollapse, isSe
   height: ${p => p.shouldCollapse ? '20px' : '75px'};
   padding: 1px 1px 0 4px;
   border: ${p =>
-  !p.shouldCollapse && (p.isButtonInputMode || p.isSelected)
-    ? 'solid #28a745 2px'
-    : 'solid #eee 1px'
+    p.isSelected
+      ? 'solid #28a745 2px'
+      : 'solid #eee 1px'
   };
   transition: height .25s;
   background-color: ${p => p.isInactive && '#ccc'};

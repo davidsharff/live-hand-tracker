@@ -24,7 +24,7 @@ export default function HandWizard(props) {
   const isInputtingHoleCards = matchParams.inputStepType === 'cards';
 
   const nextToActSeatIndex = hand.buttonSeatIndex !== null
-    ? getNextToActSeatIndex(hand, selectedSeatIndex)
+    ? getNextToActSeatIndex(hand)
     : null;
 
   useEffect(() => {
@@ -37,8 +37,8 @@ export default function HandWizard(props) {
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
-  const selectedSeatPosLabel = selectedSeatIndex !== null && hand.buttonSeatIndex !== null
-    ? getPositionLabelForSeatIndex(hand, selectedSeatIndex)
+  const selectedSeatPosLabel = selectedSeatIndex !== null
+    ? selectedSeatIndex === hand.heroSeatIndex ? 'Hero' : getPositionLabelForSeatIndex(hand, selectedSeatIndex)
     : null;
 
   // TODO: below sections should be their own components
@@ -47,7 +47,7 @@ export default function HandWizard(props) {
       <HandWizardHeader
         hand={hand}
         shouldCollapse={isInputtingHoleCards || isInputtingBoardCards}
-        selectedSeatIndex={selectedSeatIndex}
+        selectedSeatIndex={isInputtingBoardCards ? null : selectedSeatIndex}
         handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
       />
       <Row className="d-flex flex-row justify-content-center my-2">
@@ -68,9 +68,22 @@ export default function HandWizard(props) {
             }/>
           )
         }
-        <Route exact path="/hand/cards/seat/:seatIndex" render={(routerProps) =>
-          <ManageCards cards={hand.seats[1].holeCards} deck={deck} onSave={(cards) => props.onSaveHoleCards(1, cards)} type={cardInputTypes.HOLE_CARDS} />
-        }/>
+        <Route exact path="/hand/cards/seat/:seatIndex" render={(routerProps) => {
+          const matchedSeatIndex = parseInt(routerProps.match.params.seatIndex, 10);
+          // TODO: re-route if invalid seat index somewhere.
+          setSelectedSeatIndex(matchedSeatIndex);
+          return (
+            <ManageCards
+              cards={hand.seats[matchedSeatIndex].holeCards}
+              deck={deck}
+              type={cardInputTypes.HOLE_CARDS}
+              onSave={(cards) => {
+                props.onSaveHoleCards(matchedSeatIndex, cards);
+                setSelectedSeatIndex(null);
+              }}
+            />
+          );
+        }}/>
         {/* TODO: optimally this would be /hand/action/bettingRound/seatIndex */}
         <Route exact path="/hand/actions" render={() =>
           <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
