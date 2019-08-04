@@ -10,7 +10,7 @@ const baseSession =  {
   bigBlind: null
 };
 
-const cachedSession = JSON.parse(localStorage.getItem('hand'));
+const cachedSession = JSON.parse(localStorage.getItem('savedSession'));
 const initialState = cachedSession || null;
 
 // TODO: consider renaming file to sessionDefaults or add default suffix to overrideable fields
