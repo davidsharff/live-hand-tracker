@@ -3,17 +3,21 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 
 import Hand from './hand/Hand';
 import Session from "./session/Session";
+import Overview from "./overview/Overview";
+
 
 export default function Routes() {
   return (
     <Router>
       <Switch>
         <Route exact path="/" render={(props) => (
-          // TODO: currently hand will handle redirecting to session if it hasn't been created yet. Should we send to /session instead?
+          // TODO: this can remove "exact" and handle all logic for sending to session or hand if applicable
           <Redirect to="/hand"/>
         )}/>
         <Route path="/hand" component={Hand} />
         <Route exact path="/session" component={Session} />
+        {/* TODO: this should use route param for handId */}
+        <Route exact path="/overview" component={Overview} />
       </Switch>
     </Router>
   );

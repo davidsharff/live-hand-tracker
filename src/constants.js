@@ -12,7 +12,7 @@ export const bettingRounds = {
 };
 
 // TODO: there could be better way to define these.
-export const bettingRoundOrder = [bettingRounds.PRE_FLOP, bettingRounds.FLOP, bettingRounds.TURN, bettingRounds.RIVER];
+export const sortedBettingRounds = [bettingRounds.PRE_FLOP, bettingRounds.FLOP, bettingRounds.TURN, bettingRounds.RIVER];
 export const suits = ['club', 'heart', 'diamond', 'spade'];
 
 export const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];

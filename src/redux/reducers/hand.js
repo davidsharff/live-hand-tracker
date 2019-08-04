@@ -1,9 +1,13 @@
 import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
-import {positionLabelsMap, bettingRounds, handActionTypes, bettingRoundOrder, cards} from "../../constants";
 
-const initialState = null;
+import {
+  positionLabelsMap, bettingRounds, handActionTypes, sortedBettingRounds, cards
+} from "../../constants";
+
+const cachedHand = JSON.parse(localStorage.getItem('hand'));
+const initialState = cachedHand || null;
 
 export default function handReducer(hand = initialState, action) {
   const { type, payload } = action;
@@ -89,10 +93,10 @@ export default function handReducer(hand = initialState, action) {
     case actionTypes.ADVANCE_BETTING_ROUND: {
       // TODO: validate that it isn't the river
       const { currentBettingRound } = hand;
-      const currentBettingRoundIndex = bettingRoundOrder.indexOf(currentBettingRound);
+      const currentBettingRoundIndex = sortedBettingRounds.indexOf(currentBettingRound);
 
       return _.assign({}, hand, {
-        currentBettingRound: bettingRoundOrder[currentBettingRoundIndex + 1]
+        currentBettingRound: sortedBettingRounds[currentBettingRoundIndex + 1]
       });
     }
 
@@ -283,4 +287,18 @@ export function getAmountToContinue(hand) {
     .map((seat, i) => ({amountInvested: getCurrentAmountInvestedForSeat(hand, i)}))
     .maxBy('amountInvested')
     .amountInvested;
+}
+
+export function getBoardForRound(hand, round) {
+  // TODO: consider if makes sense for board to be collection of objects with round field.
+  switch (round) {
+    case bettingRounds.FLOP:
+      return hand.board.slice(0, 3);
+    case bettingRounds.TURN:
+      return hand.board.slice(0, 4);
+    case bettingRounds.RIVER:
+      return hand.board.slice(0, 5);
+    default:
+      throw new Error(`Could not get board for round: ${round}`);
+  }
 }

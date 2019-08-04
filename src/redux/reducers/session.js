@@ -10,16 +10,16 @@ const baseSession =  {
   bigBlind: null
 };
 
+const cachedSession = JSON.parse(localStorage.getItem('hand'));
+const initialState = cachedSession || null;
+
 // TODO: consider renaming file to sessionDefaults or add default suffix to overrideable fields
-export default function session(state = null, action) {
+export default function session(state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
     case actionTypes.CREATE_SESSION:
       return baseSession;
-
-    case actionTypes.LOAD_SESSION:
-      return payload.session;
 
     case actionTypes.UPDATE_SESSION_LOCATION: {
       return _.assign({}, state, {

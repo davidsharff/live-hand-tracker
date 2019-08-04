@@ -19,23 +19,9 @@ function Session(props) {
 
   useEffect(() => {
     if (session === null) {
-      const storedSessionStr = localStorage.getItem('savedSession');
-
-      if (storedSessionStr) {
-        props.dispatch({
-          type: actionTypes.LOAD_SESSION,
-          payload: {
-            session: JSON.parse(storedSessionStr)
-          },
-          aux: {
-            redirectToFn: (pathName) => props.history.push(pathName)
-          }
-        });
-      } else {
-        props.dispatch({
-          type: actionTypes.CREATE_SESSION
-        });
-      }
+      props.dispatch({
+        type: actionTypes.CREATE_SESSION
+      });
     }
   });
 
@@ -95,7 +81,6 @@ function Session(props) {
     if (props.hasHand) {
       // TODO: fire update hand action
     } else {
-      localStorage.setItem('savedSession', JSON.stringify(session));
       props.dispatch({
         type: actionTypes.CREATE_HAND,
         payload: {

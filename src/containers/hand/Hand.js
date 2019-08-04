@@ -68,6 +68,20 @@ function Hand(props) {
     props.history.push('/hand/input-wizard');
   };
 
+  const handleAddAction = (seatIndex, type, amount) => {
+    props.dispatch({
+      type: actionTypes.SET_NEW_ACTION,
+      payload: {
+        seatIndex,
+        type,
+        amount
+      },
+      aux: {
+        redirectToFn: (path) => props.history.push(path)
+      }
+    });
+  };
+
   // TODO: explore / decide between const and named functions.
   function handleSetButtonIndex(buttonSeatIndex) {
     props.dispatch({
@@ -77,6 +91,7 @@ function Hand(props) {
       }
     });
   }
+
   return (
     <HandContainer fluid className="d-flex flex-column">
       <Header
@@ -98,7 +113,7 @@ function Hand(props) {
           <Wizard
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
-            onAction={(seatIndex, type, amount) => props.dispatch({ type: actionTypes.SET_NEW_ACTION, payload: { seatIndex, type, amount }})}
+            onAction={handleAddAction}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
             deck={deck}
             onSaveBoardCards={handleSaveBoardCards}
