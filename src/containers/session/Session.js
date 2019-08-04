@@ -83,14 +83,6 @@ function Session(props) {
     } else {
       props.dispatch({
         type: actionTypes.CREATE_HAND,
-        payload: {
-          handSessionDefaults: {
-            heroSeatIndex: session.defaultHeroSeatIndex,
-            seats: session.defaultSeats,
-            smallBlind: session.smallBlind,
-            bigBlind: session.bigBlind
-          }
-        },
         aux: {
           redirectToFn: (pathName) => props.history.push(pathName)
         }

@@ -21,9 +21,19 @@ export default store => next => action => {
     }
 
     case actionTypes.CREATE_HAND: {
-      localStorage.setItem('savedSession', JSON.stringify(store.getState().session));
-      next(action);
-      action.aux.redirectToFn('/hand');
+      const session = store.getState().session;
+      next({
+        type,
+        payload: {
+          handSessionDefaults: {
+            heroSeatIndex: session.defaultHeroSeatIndex,
+            seats: session.defaultSeats,
+            smallBlind: session.smallBlind,
+            bigBlind: session.bigBlind
+          }
+        }
+      });
+      action.aux.redirectToFn(`/hand/cards/seat/${store.getState().hand.heroSeatIndex}`);
       return;
     }
 

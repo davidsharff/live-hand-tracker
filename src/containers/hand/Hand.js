@@ -6,13 +6,12 @@ import { connect } from 'react-redux';
 import { Container } from 'reactstrap';
 import styled from 'styled-components';
 
-import ManageHoleCards from './components/ManageCards';
 import HandWizard from './components/HandWizard';
 import HandHeader from './components/HandHeader';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
-import {bettingRounds, cardInputTypes} from "../../constants";
+import { bettingRounds } from "../../constants";
 
 import { getDeck } from "../../redux/reducers/hand";
 import Overview from "./components/Overview";
@@ -21,46 +20,39 @@ function Hand(props) {
   const { session, hand, deck, currentBettingRound } = props;
 
   useEffect(() => {
+
     // TODO: this prevents returning to any step prior to latest data.
     if (
-      _.includes(props.history.location, '/hand/input-wizard') &&
       currentBettingRound &&
       currentBettingRound !== bettingRounds.PRE_FLOP
     ) {
-      props.history.push(`/hand/input-wizard/cards/${currentBettingRound}`);
+      props.history.push(`/hand/board/${currentBettingRound}`);
     }
   }, [currentBettingRound, props.history]);
 
   if (session === null) {
     return <Redirect to="/session" />;
-  }
-
-  const heroHoleCards = hand.seats[props.hand.heroSeatIndex].holeCards;
-
-  // if (!_.includes(props.history.location.pathname, 'input-wizard')) {
-  //   props.history.push('/hand/input-wizard');
-  // }
-
-  if (
-   // false &&
-    session &&
-    heroHoleCards.length < 2 &&
-    props.location.pathname !== '/hand/manage-hole-cards'
-  ) {
-    return (
-      <Redirect to="/hand/manage-hole-cards" />
-    );
-  }
-
-  const handleSetHeroCards = (holeCards) => {
+  } else if (hand === null) {
     props.dispatch({
-      type: actionTypes.SET_HERO_CARDS,
+      type: actionTypes.CREATE_HAND,
+      aux: {
+        redirectToFn: (pathName) => props.history.push(pathName)
+      }
+    });
+    // TODO: real UI
+    return <div>Loading hand...</div>;
+  }
+
+  const handleSaveHoleCards = (seatIndex, holeCards) => {
+    props.dispatch({
+      type: actionTypes.SET_HOLE_CARDS,
       payload: {
+        seatIndex,
         holeCards
       }
     });
 
-    props.history.push('/hand/input-wizard');
+    props.history.push('/hand/actions');
   };
 
   const handleSaveBoardCards = (cards) => {
@@ -71,7 +63,7 @@ function Hand(props) {
       }
     });
 
-    props.history.push('/hand/input-wizard');
+    props.history.push('/hand/actions');
   };
 
   const handleAddAction = (seatIndex, type, amount) => {
@@ -110,26 +102,22 @@ function Hand(props) {
         shouldCollapse={false}
       />
       <Switch>
-        {/* TODO: this can go away and be a step in the wizard instead like board cards. Remove "input-wizard" from route when this happens." */}
-        <Route exact path="/hand/manage-hole-cards" render={() =>
-          <ManageHoleCards deck={deck} onSave={handleSetHeroCards} cards={heroHoleCards} type={cardInputTypes.HOLE_CARDS} />
+        <Route exact path="/hand/overview" render={() =>
+          <Overview hand={hand} />
         }/>
-
-        <Route path="/hand/input-wizard" render={() =>
+        <Route path="/hand/:inputStepType" render={({ match }) =>
           <HandWizard
+            matchParams={match.params}
             hand={hand}
             onSetButtonSeatIndex={handleSetButtonIndex}
             onAction={handleAddAction}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
             deck={deck}
             onSaveBoardCards={handleSaveBoardCards}
+            onSaveHoleCards={handleSaveHoleCards}
             board={hand.board}
           />
         }/>
-        <Route exact path="/hand/overview" render={() =>
-          <Overview hand={hand} />
-        }/>
-
       </Switch>
     </HandContainer>
   );

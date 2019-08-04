@@ -11,15 +11,17 @@ import {
   getPositionLabelForSeatIndex,
 } from "../../../redux/reducers/hand";
 
-import {cardInputTypes, handActionTypes} from "../../../constants";
+import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
 import ManageCards from "./ManageCards";
 import HandWizardHeader from "./HandWizardHeader";
 
 export default function HandWizard(props) {
-  const { hand, deck } = props;
+  const { hand, deck, matchParams } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
-  const [isInputtingCards, setIsInputtingCards] = useState(false);
+  // TODO: I don't think we need this anymore
+  const isInputtingBoardCards = matchParams.inputStepType === 'board';
+  const isInputtingHoleCards = matchParams.inputStepType === 'cards';
 
   const nextToActSeatIndex = hand.buttonSeatIndex !== null
     ? getNextToActSeatIndex(hand, selectedSeatIndex)
@@ -35,7 +37,7 @@ export default function HandWizard(props) {
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
-  const selectedSeatPosLabel = selectedSeatIndex !== null
+  const selectedSeatPosLabel = selectedSeatIndex !== null && hand.buttonSeatIndex !== null
     ? getPositionLabelForSeatIndex(hand, selectedSeatIndex)
     : null;
 
@@ -44,56 +46,39 @@ export default function HandWizard(props) {
     <Container className="flex-fill d-flex flex-column px-0">
       <HandWizardHeader
         hand={hand}
-        isInputtingCards={isInputtingCards}
+        shouldCollapse={isInputtingHoleCards || isInputtingBoardCards}
         selectedSeatIndex={selectedSeatIndex}
         handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
       />
-      <BodyTitle
-        isInputtingCards={isInputtingCards}
-        selectedSeatIndex={selectedSeatIndex}
-        currentBettingRound={hand.currentBettingRound}
-        selectedSeatPosLabel={selectedSeatPosLabel}
-      />
+      <Row className="d-flex flex-row justify-content-center my-2">
+        {
+          isInputtingBoardCards
+            ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
+            : selectedSeatIndex !== null
+              ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
+              : null
+        }
+      </Row>
       <Switch>
         {
-          // TODO: use constant
-          _.values(cardInputTypes).map((cardsInputType) =>
+          _.values(bettingRounds).map((bettingRound) =>
             // TOO: bug. Handle if they manually return to prior board input url.
-            <Route exact key={cardsInputType} path={`/hand/input-wizard/cards/${cardsInputType}`} render={() => {
-              if (!isInputtingCards) {
-                setIsInputtingCards(true);
-              }
-              return (
-                // TODO: Remove numCards in favor of constants lookup based on cards type.
-                <ManageCards cards={hand.board} deck={deck} onSave={props.onSaveBoardCards} type={cardsInputType} />
-              );
-            }}/>
+            <Route exact key={bettingRound} path={`/hand/board/${bettingRound}`} render={() =>
+              <ManageCards cards={hand.board} deck={deck} onSave={props.onSaveBoardCards} type={bettingRound} />
+            }/>
           )
         }
-        <Route exact path="/hand/input-wizard" render={() => {
-          if (isInputtingCards) {
-            setIsInputtingCards(false);
-          }
-          return (
-            <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
-          );
-        }}/>
+        <Route exact path="/hand/cards/seat/:seatIndex" render={(routerProps) =>
+          <ManageCards cards={hand.seats[1].holeCards} deck={deck} onSave={(cards) => props.onSaveHoleCards(1, cards)} type={cardInputTypes.HOLE_CARDS} />
+        }/>
+        {/* TODO: optimally this would be /hand/action/bettingRound/seatIndex */}
+        <Route exact path="/hand/actions" render={() =>
+          <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
+        }/>
       </Switch>
     </Container>
   );
 }
-
-const BodyTitle = ({ isInputtingCards, selectedSeatIndex, currentBettingRound, selectedSeatPosLabel }) => (
-  <Row className="d-flex flex-row justify-content-center my-2">
-    {
-      isInputtingCards
-        ? <h4>{ _.capitalize(currentBettingRound) }</h4>
-        : selectedSeatIndex !== null
-        ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
-        : null
-    }
-  </Row>
-);
 
 const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
   <Row className="d-flex flex-row justify-content-center flex-fill mx-0">

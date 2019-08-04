@@ -16,20 +16,21 @@ export default function handReducer(hand = initialState, action) {
 
     case actionTypes.CREATE_HAND:
       return _.assign({}, payload.handSessionDefaults, {
+        buttonSeatIndex: null,
         actions: [],
         positions: [],
         currentBettingRound: bettingRounds.PRE_FLOP,
         board: []
       });
 
-    case actionTypes.SET_HERO_CARDS: {
-      const { holeCards } = payload;
+    case actionTypes.SET_HOLE_CARDS: {
+      const { seatIndex, holeCards } = payload;
       return _.assign({}, hand, {
-        seats: [
-          ...hand.seats.slice(0, hand.heroSeatIndex),
-          _.assign({}, hand.seats[hand.heroSeatIndex], { holeCards }),
-          ...hand.seats.slice(hand.heroSeatIndex + 1)
-        ]
+        seats: hand.seats.map((s, i) =>
+          i === seatIndex
+            ? _.assign({}, s, { holeCards })
+            : s
+        )
       });
     }
 
@@ -38,8 +39,8 @@ export default function handReducer(hand = initialState, action) {
         _.assign({}, s, { seatIndex })
       );
 
-      const sortedActiveSeats = _(decoratedSeats.slice(payload.buttonSeatIndex))
-        .concat(decoratedSeats.slice(0, payload.buttonSeatIndex))
+      const sortedActiveSeats = _(decoratedSeats.slice(payload.buttonSeatIndex + 1))
+        .concat(decoratedSeats.slice(0, payload.buttonSeatIndex + 1))
         .filter('isActive')
         .value();
 
@@ -57,13 +58,13 @@ export default function handReducer(hand = initialState, action) {
           {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
-            seatIndex: positions[1].seatIndex, // TODO: special case two-handed
+            seatIndex: positions[0].seatIndex, // TODO: special case two-handed
             amount: hand.smallBlind
           },
           {
             type: handActionTypes.POST,
             bettingRound: bettingRounds.PRE_FLOP,
-            seatIndex: positions[2].seatIndex,
+            seatIndex: positions[1].seatIndex,
             amount: hand.bigBlind
           }
         ]
@@ -219,7 +220,6 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 
 export function getNextToActSeatIndex(hand) {
   const roundActions = getCurrentActions(hand);
-
   if (roundActions.length === 0) {
     return _(hand.positions) // TODO: duplication with activePositions logic below.
       .reject(({ seatIndex }) =>

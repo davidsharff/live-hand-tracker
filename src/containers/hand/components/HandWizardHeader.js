@@ -10,7 +10,7 @@ import { handActionTypes } from "../../../constants";
 import styled from "styled-components";
 
 export default function WizardHeader(props) {
-  const { hand, isInputtingCards, selectedSeatIndex, handleSetButtonSeatIndex } = props;
+  const { hand, shouldCollapse, selectedSeatIndex, handleSetButtonSeatIndex } = props;
 
   return (
     <Row className="mb-1 mx-0">
@@ -27,16 +27,16 @@ export default function WizardHeader(props) {
               onClick={() => hand.buttonSeatIndex === null && handleSetButtonSeatIndex(i)}
               className="d-flex flex-column justify-content-between"
               isSelected={selectedSeatIndex === i}
-              isInputtingBoardCards={isInputtingCards}
+              shouldCollapse={shouldCollapse}
               isInactive={!s.isActive || (lastAction && lastAction.type === handActionTypes.FOLD)}
             >
-              <Row className={`d-flex flex-row m-0 flex-fill justify-content-${isInputtingCards ? 'center' : 'between'}`}>
+              <Row className={`d-flex flex-row m-0 flex-fill justify-content-${shouldCollapse ? 'center' : 'between'}`}>
                 {
                   s.isActive
                     ? (
                       <React.Fragment>
                         {
-                          !isInputtingCards &&
+                            !shouldCollapse &&
                           <span>
                             { isHero ? 'Hero' : `S${ i + 1 }` }
                           </span>
@@ -46,7 +46,7 @@ export default function WizardHeader(props) {
                           <span>
                             {
                               s.isActive
-                                ? getPositionLabelForSeatIndex(hand, i, s) + ( isInputtingCards && isHero ? ' (H)' : '')
+                                ? getPositionLabelForSeatIndex(hand, i, s) + ( shouldCollapse && isHero ? ' (H)' : '')
                                 : 'Empty'
                             }
                           </span>
@@ -57,7 +57,7 @@ export default function WizardHeader(props) {
                 }
               </Row>
               {
-                !isInputtingCards &&
+                !shouldCollapse &&
                 <ActionRow className="d-flex flex-row justify-content-around m-0 flex-fill align-items-start">
                   {
                     hand.buttonSeatIndex !== null &&
@@ -85,13 +85,13 @@ export default function WizardHeader(props) {
   );
 }
 
-const HeaderItem = styled(({ isButtonInputMode, isInactive, isInputtingBoardCards, isSelected, ...rest }) => <Col {...rest} />)`
+const HeaderItem = styled(({ isButtonInputMode, isInactive, shouldCollapse, isSelected, ...rest }) => <Col {...rest} />)`
   flex-basis: 20%;
   font-size: 12px;
-  height: ${p => p.isInputtingBoardCards ? '20px' : '75px'};
+  height: ${p => p.shouldCollapse ? '20px' : '75px'};
   padding: 1px 1px 0 4px;
   border: ${p =>
-  !p.isInputtingBoardCards && (p.isButtonInputMode || p.isSelected)
+  !p.shouldCollapse && (p.isButtonInputMode || p.isSelected)
     ? 'solid #28a745 2px'
     : 'solid #eee 1px'
   };
