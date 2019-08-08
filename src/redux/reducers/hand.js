@@ -304,18 +304,23 @@ export function getBoardForRound(hand, round) {
 }
 
 export function isCurrentRoundComplete(hand) {
-  const nextToActSeatIndex = getNextToActSeatIndex(hand);
-  const nextSeatRoundActions = getCurrentActionsForSeat(hand, nextToActSeatIndex);
-  if (nextSeatRoundActions.length) {
-    const amountToContinue = getAmountToContinue(hand);
+  if (hand.buttonSeatIndex !== null) {
     const nextToActSeatIndex = getNextToActSeatIndex(hand);
-    const nextToActAmountInvested = getCurrentAmountInvestedForSeat(hand, nextToActSeatIndex);
+    const nextSeatRoundActions = getCurrentActionsForSeat(hand, nextToActSeatIndex);
+    if (nextSeatRoundActions.length) {
+      const amountToContinue = getAmountToContinue(hand);
+      const nextToActSeatIndex = getNextToActSeatIndex(hand);
+      const nextToActAmountInvested = getCurrentAmountInvestedForSeat(hand, nextToActSeatIndex);
 
-    if (amountToContinue === nextToActAmountInvested) {
-      const nextToActLastAction = _.last(getCurrentActionsForSeat(hand, nextToActSeatIndex));
-      return nextToActLastAction.type !== handActionTypes.POST;
+      if (amountToContinue === nextToActAmountInvested) {
+        const nextToActLastAction = _.last(getCurrentActionsForSeat(hand, nextToActSeatIndex));
+        return nextToActLastAction.type !== handActionTypes.POST;
+      }
     }
   }
-
   return false;
+}
+
+export function isHandComplete(hand) {
+  return isCurrentRoundComplete(hand) && hand.currentBettingRound === bettingRounds.RIVER;
 }

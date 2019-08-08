@@ -20,6 +20,13 @@ export default function WizardHeader(props) {
           const lastAction =  _.last(getCurrentActionsForSeat(hand, i));
           const isHero = i === hand.heroSeatIndex;
 
+          // TODO: this needs to be updated if support is added for revisiting earlier hand states in wizard.
+          const foldedInPriorRound = (
+            !!lastAction &&
+            lastAction.type === handActionTypes.FOLD &&
+            lastAction.bettingRound !== hand.currentBettingRound
+          );
+
           return (
             <HeaderItem
               key={i}
@@ -63,9 +70,9 @@ export default function WizardHeader(props) {
                     hand.buttonSeatIndex !== null &&
                     <div style={{fontSize: '12px'}}>
                       {
-                        lastAction && (
+                        lastAction && !foldedInPriorRound && (
                         <React.Fragment>
-                          <div>{_.capitalize(lastAction.type)}</div>
+                          <div>{ _.capitalize(lastAction.type) }</div>
                           {
                             (lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
                             <div>${getCurrentAmountInvestedForSeat(hand, i)}</div>

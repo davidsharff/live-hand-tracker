@@ -16,7 +16,7 @@ import ManageCards from "./ManageCards";
 import HandWizardHeader from "./HandWizardHeader";
 
 export default function HandWizard(props) {
-  const { hand, deck, matchParams } = props;
+  const { hand, deck, matchParams, isHandComplete } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
   // TODO: I don't think we need this anymore
@@ -86,43 +86,55 @@ export default function HandWizard(props) {
         }}/>
         {/* TODO: optimally this would be /hand/action/bettingRound/seatIndex */}
         <Route exact path="/hand/actions" render={() =>
-          <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} />
+          <ActionInput hand={hand} selectedSeatIndex={selectedSeatIndex} actionComponentMap={actionComponentMap} isHandComplete={isHandComplete} />
         }/>
       </Switch>
     </Container>
   );
 }
 
-const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, }) => (
-  <Row className="d-flex flex-row justify-content-center flex-fill mx-0">
-
-    {
-      // TODO: need input for selecting Button position and consider expandable editable session details.
-      // TODO: also consider editable session details on action input (expandable or otherwise out of the way as well)
-    }
-    <div className="flex-fill">
-
-      {
-        hand.buttonSeatIndex === null &&
-        <React.Fragment>
-          <div>Where's the button?</div>
+const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, isHandComplete}) => {
+  const rowClassName = "d-flex flex-row justify-content-center flex-fill mx-0";
+  // TODO: instead of flex-fill divs below can't the row have 100% height?
+  if (hand.buttonSeatIndex === null) {
+    return (
+      <Row className={rowClassName}>
+        <div className="flex-fill">
+          <h4>Where's the button?</h4>
           <div>Tap seat above to set position</div>
-        </React.Fragment>
+        </div>
+      </Row>
+    );
+  } else if (isHandComplete) {
+    return (
+      <Row className={rowClassName}>
+        <div className="flex-fill text-center">
+          <h4>Hand Complete</h4>
+          <div>Tap any seat above to input known hole cards.</div>
+        </div>
+      </Row>
+    );
+  }
 
-      }
+  return (
+    <Row className={rowClassName}>
       {
-        hand.buttonSeatIndex !== null &&
-        _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents).map(availableAction => {
-          const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
-
-          return (
-            <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
-          );
-        })
+        // TODO: Consider editable session details on action input (expandable or otherwise out of the way as well)
       }
-    </div>
-  </Row>
-);
+      <div className="flex-fill">
+        {
+          _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents).map(availableAction => {
+            const ThisActionComponent = actionComponentMap[availableAction.type]; // TODO: use props below instead.
+
+            return (
+              <ThisActionComponent key={availableAction.type} amount={availableAction.amount} />
+            );
+          })
+        }
+      </div>
+    </Row>
+  );
+};
 
 function createActionComponentsMap(handleAction) {
 

@@ -32,17 +32,14 @@ export default store => next => action => {
 
     case actionTypes.SET_NEW_ACTION: {
       next(action);
-      if (isCurrentRoundComplete(store.getState().hand)) {
-
-        const { currentBettingRound } = store.getState().hand;
-
-        if (currentBettingRound === bettingRounds.RIVER) {
-          action.aux.redirectToFn('/hand/overview');
-        } else {
-          next({
-            type: actionTypes.ADVANCE_BETTING_ROUND
-          });
-        }
+      const { hand } = store.getState();
+      if (
+        isCurrentRoundComplete(hand) &&
+        hand.currentBettingRound !== bettingRounds.RIVER
+      ) {
+        next({
+          type: actionTypes.ADVANCE_BETTING_ROUND
+        });
       }
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
