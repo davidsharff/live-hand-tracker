@@ -31,7 +31,7 @@ export default function WizardHeader(props) {
             <HeaderItem
               key={i}
               isButtonInputMode={hand.buttonSeatIndex === null}
-              onClick={() => props.onClickSeat(i)}
+              onClick={() => s.isActive && props.onClickSeat(i)}
               className="d-flex flex-column justify-content-between pt-0"
               isSelected={selectedSeatIndex === i}
               shouldCollapse={shouldCollapse}
