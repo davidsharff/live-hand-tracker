@@ -80,6 +80,7 @@ function Session(props) {
     // TODO: this should be in middleware that inspects the action type fire by next button
     if (props.hasHand) {
       // TODO: fire update hand action
+      props.history.push('/hand');
     } else {
       props.dispatch({
         type: actionTypes.CREATE_HAND
