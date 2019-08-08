@@ -76,7 +76,7 @@ function Session(props) {
 
   // TODO: refeator to named functions?
   const handleClickNext = () => {
-
+    localStorage.setItem('savedSession', JSON.stringify(session));
     // TODO: this should be in middleware that inspects the action type fire by next button
     if (props.hasHand) {
       // TODO: fire update hand action
@@ -85,7 +85,6 @@ function Session(props) {
         type: actionTypes.CREATE_HAND
       });
       props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
-
     }
   };
 
