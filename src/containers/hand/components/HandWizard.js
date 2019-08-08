@@ -19,6 +19,7 @@ export default function HandWizard(props) {
   const { hand, deck, matchParams, isHandComplete } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
+
   // TODO: I don't think we need this anymore
   const isInputtingBoardCards = matchParams.inputStepType === 'board';
   const isInputtingHoleCards = matchParams.inputStepType === 'cards';
@@ -36,6 +37,7 @@ export default function HandWizard(props) {
   const handleAction = (actionType, amount) => props.onAction(selectedSeatIndex, actionType, amount);
 
   const handleClickSeat = (seatIndex) => {
+    // TODO: lookup url to make sure we aren't inputting hero hole cards.
     if (hand.buttonSeatIndex === null) {
       props.onSetButtonSeatIndex(seatIndex);
     } else if (isHandComplete) {
@@ -102,6 +104,8 @@ export default function HandWizard(props) {
 }
 
 const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, isHandComplete}) => {
+  // TODO: handle showing last action type and betting round if inputting hole cards.
+  //       at that point, it's probably best to move titles into body components.
   const rowClassName = "d-flex flex-row justify-content-center flex-fill mx-0";
   // TODO: instead of flex-fill divs below can't the row have 100% height?
   if (hand.buttonSeatIndex === null) {

@@ -324,3 +324,17 @@ export function isCurrentRoundComplete(hand) {
 export function isHandComplete(hand) {
   return isCurrentRoundComplete(hand) && hand.currentBettingRound === bettingRounds.RIVER;
 }
+
+export function getNextSeatIndex(hand, startingSeatIndex) {
+  const naiveNextSeatIndex = (startingSeatIndex + 1) === hand.seats.length
+    ? 0
+    : (startingSeatIndex + 1);
+
+  const naiveNextSeat = hand.seats[naiveNextSeatIndex];
+
+  if (!naiveNextSeat.isActive) {
+    return getNextSeatIndex(hand, naiveNextSeatIndex);
+  }
+
+  return naiveNextSeatIndex;
+}

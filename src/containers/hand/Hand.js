@@ -13,7 +13,7 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 import { bettingRounds } from "../../constants";
 
-import {getDeck, isHandComplete} from "../../redux/reducers/hand";
+import {getDeck, getNextSeatIndex, isHandComplete} from "../../redux/reducers/hand";
 import Overview from "./components/Overview";
 
 function Hand(props) {
@@ -50,7 +50,12 @@ function Hand(props) {
       }
     });
 
-    props.history.push('/hand/actions');
+    if (isHandComplete(hand)) {
+      const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
+      handleNavToSeatHoleCards(nextSeatIndex);
+    } else {
+      props.history.push('/hand/actions');
+    }
   };
 
   const handleSaveBoardCards = (cards) => {

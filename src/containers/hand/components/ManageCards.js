@@ -30,12 +30,17 @@ export default function ManageCards(props) {
   // Even with an array, if only this round's cards are editable, we must also allow a way to force any edit.
   const [cardsMap, setCardsMap] = useState(createCardsMap(cards, type, numCardSlots));
 
-  useEffect(() =>
+  useEffect(() => {
     // TODO: unfortunate that this will always set the state twice on mount
     setCardsMap(
       createCardsMap(cards, type, numCardSlots)
-    )
-    , [cards, numCardSlots, type]);
+    );
+
+    if (type === cardInputTypes.HOLE_CARDS) {
+      setSelectedCardKey('card1');
+    }
+
+  }, [cards, numCardSlots, type]);
 
   // TODO: dropping useState and directly updating redux would drop requirement to track pending deck.
   const getPendingDeck = useCallback(() => {
