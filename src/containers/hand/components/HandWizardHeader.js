@@ -10,7 +10,7 @@ import { handActionTypes } from "../../../constants";
 import styled from "styled-components";
 
 export default function WizardHeader(props) {
-  const { hand, shouldCollapse, selectedSeatIndex, handleSetButtonSeatIndex } = props;
+  const { hand, shouldCollapse, selectedSeatIndex } = props;
 
   return (
     <Row className="mb-1 mx-0">
@@ -31,7 +31,7 @@ export default function WizardHeader(props) {
             <HeaderItem
               key={i}
               isButtonInputMode={hand.buttonSeatIndex === null}
-              onClick={() => hand.buttonSeatIndex === null && handleSetButtonSeatIndex(i)}
+              onClick={() => props.onClickSeat(i)}
               className="d-flex flex-column justify-content-between pt-0"
               isSelected={selectedSeatIndex === i}
               shouldCollapse={shouldCollapse}

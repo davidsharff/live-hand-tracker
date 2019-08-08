@@ -36,7 +36,7 @@ function Hand(props) {
     props.dispatch({
       type: actionTypes.CREATE_HAND
     });
-    props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
+    handleNavToSeatHoleCards(session.defaultHeroSeatIndex);
     // TODO: real UI
     return <div>Loading hand...</div>;
   }
@@ -78,6 +78,10 @@ function Hand(props) {
     });
   };
 
+  function handleNavToSeatHoleCards(seatIndex) {
+    props.history.push(`/hand/cards/seat/${seatIndex}`);
+  }
+
   // TODO: explore / decide between const and named functions.
   function handleSetButtonIndex(buttonSeatIndex) {
     props.dispatch({
@@ -116,6 +120,7 @@ function Hand(props) {
             onSaveHoleCards={handleSaveHoleCards}
             board={hand.board}
             isHandComplete={isHandComplete(hand)}
+            onNavToSeatHoleCards={handleNavToSeatHoleCards}
           />
         }/>
       </Switch>

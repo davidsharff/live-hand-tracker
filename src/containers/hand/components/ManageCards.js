@@ -28,18 +28,27 @@ export default function ManageCards(props) {
 
   // TODO: this is all horrible. Use an array.
   // Even with an array, if only this round's cards are editable, we must also allow a way to force any edit.
-  const [cardsMap, setCardsMap] = useState(
-    _.range(0, numCardSlots).reduce((obj, i) =>
-        _.assign({}, obj, { ['card' + (i + 1)]: {
-            value: cards.length > i ? cards[i].slice(0, -1) : null,
-            suit: cards.length > i ? cards[i].slice(1, 2) : null,
-            isDisabled: type !== cardInputTypes.HOLE_CARDS && (
-              (type === cardInputTypes.FLOP && i > 2) ||
-              (type === cardInputTypes.TURN && i > 3)
-            )
-          }})
-      , {})
-  );
+  const [cardsMap, setCardsMap] = useState(createCardsMap(cards, type, numCardSlots));
+
+  useEffect(() =>
+    // TODO: unfortunate that this will always set the state twice on mount
+    setCardsMap(
+      createCardsMap(cards, type, numCardSlots)
+    )
+    , [cards, numCardSlots, type]);
+
+  // TODO: dropping useState and directly updating redux would drop requirement to track pending deck.
+  const getPendingDeck = useCallback(() => {
+    const pendingCards = _.values(cardsMap).map(({ value, suit}) =>
+      value + suit
+    );
+
+    return _.reject(deck, (c) =>
+      _.includes(pendingCards, c)
+    );
+  }, [deck, cardsMap]);
+
+  useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   const handleClickCard = (cardKey) => setSelectedCardKey(cardKey);
 
@@ -57,7 +66,17 @@ export default function ManageCards(props) {
     }));
   };
 
-  const toggleCardIfComplete = () => {
+  //
+  const handleSave = () => onSave(
+    _.values(cardsMap) // TODO: another argument to either always use obj for cards or use array of strings here too.
+      .filter(({ value, suit }) => !!value && !!suit)
+      .map(({ value, suit }) =>
+        '' + value + suit
+      )
+  );
+
+
+  function toggleCardIfComplete() {
     const selectedCardNum = parseInt(selectedCardKey.slice(-1), 10);
 
     // Auto-toggle selected card the first time they fill out card1
@@ -78,28 +97,6 @@ export default function ManageCards(props) {
       }
     }
   };
-
-  // TODO: dropping useState and directly updating redux would drop requirement to track pending deck.
-  const getPendingDeck = useCallback(() => {
-    const pendingCards = _.values(cardsMap).map(({ value, suit}) =>
-      value + suit
-    );
-
-    return _.reject(deck, (c) =>
-      _.includes(pendingCards, c)
-    );
-  }, [deck, cardsMap]);
-
-  //
-  const handleSave = () => onSave(
-    _.values(cardsMap) // TODO: another argument to either always use obj for cards or use array of strings here too.
-      .filter(({ value, suit }) => !!value && !!suit)
-      .map(({ value, suit }) =>
-        '' + value + suit
-      )
-  );
-
-  useEffect(toggleCardIfComplete, [toggleCardIfComplete, cardsMap]);
 
   const cardSlotClassName = 'd-flex flex-column justify-content-center align-items-center p-0 flex-grow-0 ' + (
     type === cardInputTypes.HOLE_CARDS
@@ -232,4 +229,17 @@ function isCardValueDisabled(deck, selectedSuit, cardValue) {
 
 function isSuitDisabled(deck, selectedValue, suit) {
   return !!selectedValue && !_.includes(deck, (selectedValue + suit));
+}
+
+function createCardsMap(cards, type, numCardSlots) {
+  return _.range(0, numCardSlots).reduce((obj, i) =>
+      _.assign({}, obj, { ['card' + (i + 1)]: {
+          value: cards.length > i ? cards[i].slice(0, -1) : null,
+          suit: cards.length > i ? cards[i].slice(1, 2) : null,
+          isDisabled: type !== cardInputTypes.HOLE_CARDS && (
+            (type === cardInputTypes.FLOP && i > 2) ||
+            (type === cardInputTypes.TURN && i > 3)
+          )
+        }})
+    , {});
 }

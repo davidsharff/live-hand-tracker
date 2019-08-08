@@ -35,6 +35,14 @@ export default function HandWizard(props) {
 
   const handleAction = (actionType, amount) => props.onAction(selectedSeatIndex, actionType, amount);
 
+  const handleClickSeat = (seatIndex) => {
+    if (hand.buttonSeatIndex === null) {
+      props.onSetButtonSeatIndex(seatIndex);
+    } else if (isHandComplete) {
+      props.onNavToSeatHoleCards(seatIndex);
+    }
+  };
+
   const actionComponentMap = createActionComponentsMap(handleAction);
 
   const selectedSeatPosLabel = selectedSeatIndex !== null
@@ -48,7 +56,7 @@ export default function HandWizard(props) {
         hand={hand}
         shouldCollapse={isInputtingHoleCards || isInputtingBoardCards}
         selectedSeatIndex={isInputtingBoardCards ? null : selectedSeatIndex}
-        handleSetButtonSeatIndex={props.onSetButtonSeatIndex}
+        onClickSeat={handleClickSeat}
       />
       <Row className="d-flex flex-row justify-content-center my-2">
         {
