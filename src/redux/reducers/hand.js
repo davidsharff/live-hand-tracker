@@ -282,11 +282,15 @@ export function getCurrentActionsForSeat(hand, seatIndex) {
   );
 }
 
-export function getAmountToContinue(hand) {
-  return _(hand.seats)
-    .map((seat, i) => ({amountInvested: getCurrentAmountInvestedForSeat(hand, i)}))
-    .maxBy('amountInvested')
-    .amountInvested;
+export function getAmountToContinueForSeatIndex(hand, seatIndex) {
+  const maxAmountPosition = _(getCurrentActivePositions(hand))
+    .reject({ seatIndex })
+    .map((p) => ({ amountInvested: getCurrentAmountInvestedForSeat(hand, p.seatIndex) }))
+    .maxBy('amountInvested');
+
+    return maxAmountPosition
+      ? maxAmountPosition.amountInvested
+      : 0;
 }
 
 export function getBoardForRound(hand, round) {
@@ -308,14 +312,19 @@ export function isCurrentRoundComplete(hand) {
     const nextToActSeatIndex = getNextToActSeatIndex(hand);
     const nextSeatRoundActions = getCurrentActionsForSeat(hand, nextToActSeatIndex);
     if (nextSeatRoundActions.length) {
-      const amountToContinue = getAmountToContinue(hand);
       const nextToActSeatIndex = getNextToActSeatIndex(hand);
+      const amountToContinue = getAmountToContinueForSeatIndex(hand, nextToActSeatIndex);
       const nextToActAmountInvested = getCurrentAmountInvestedForSeat(hand, nextToActSeatIndex);
 
-      if (amountToContinue === nextToActAmountInvested) {
-        const nextToActLastAction = _.last(getCurrentActionsForSeat(hand, nextToActSeatIndex));
-        return nextToActLastAction.type !== handActionTypes.POST;
-      }
+      return (
+        (
+          nextToActAmountInvested > 0 && amountToContinue === 0
+        ) ||
+        (
+          amountToContinue === nextToActAmountInvested &&
+          _.last(nextSeatRoundActions).type !== handActionTypes.POST
+        )
+      );
     }
   }
   return false;
@@ -324,14 +333,14 @@ export function isCurrentRoundComplete(hand) {
 export function getIsHandComplete(hand) {
   return isCurrentRoundComplete(hand) && (
     hand.currentBettingRound === bettingRounds.RIVER ||
-    getCurrentActiveSeatsLength(hand) === 1
+    getCurrentActivePositions(hand).length === 1
   );
 }
 
-export function getCurrentActiveSeatsLength(hand) {
-  return hand.seats.filter(({ isActive }, i) =>
-    isActive && !_.some(hand.actions, { seatIndex: i, type: handActionTypes.FOLD })
-  ).length;
+export function getCurrentActivePositions(hand) {
+  return hand.positions.filter(({ seatIndex }) =>
+    hand.seats[seatIndex].isActive && !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD })
+  );
 }
 
 export function getNextSeatIndex(hand, startingSeatIndex) {
