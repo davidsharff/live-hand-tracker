@@ -304,7 +304,7 @@ export function getBoardForRound(hand, round) {
 }
 
 export function isCurrentRoundComplete(hand) {
-  if (hand.buttonSeatIndex !== null) {
+  if (hand !== null && hand.buttonSeatIndex !== null) {
     const nextToActSeatIndex = getNextToActSeatIndex(hand);
     const nextSeatRoundActions = getCurrentActionsForSeat(hand, nextToActSeatIndex);
     if (nextSeatRoundActions.length) {
@@ -321,8 +321,17 @@ export function isCurrentRoundComplete(hand) {
   return false;
 }
 
-export function isHandComplete(hand) {
-  return isCurrentRoundComplete(hand) && hand.currentBettingRound === bettingRounds.RIVER;
+export function getIsHandComplete(hand) {
+  return isCurrentRoundComplete(hand) && (
+    hand.currentBettingRound === bettingRounds.RIVER ||
+    getCurrentActiveSeatsLength(hand) === 1
+  );
+}
+
+export function getCurrentActiveSeatsLength(hand) {
+  return hand.seats.filter(({ isActive }, i) =>
+    isActive && !_.some(hand.actions, { seatIndex: i, type: handActionTypes.FOLD })
+  ).length;
 }
 
 export function getNextSeatIndex(hand, startingSeatIndex) {

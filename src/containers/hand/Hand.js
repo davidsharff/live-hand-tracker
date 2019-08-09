@@ -13,11 +13,11 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 import { bettingRounds } from "../../constants";
 
-import {getDeck, getNextSeatIndex, isHandComplete} from "../../redux/reducers/hand";
+import {getDeck, getNextSeatIndex, getIsHandComplete} from "../../redux/reducers/hand";
 import Overview from "./components/Overview";
 
 function Hand(props) {
-  const { session, hand, deck, currentBettingRound } = props;
+  const { session, hand, deck, currentBettingRound, isHandComplete } = props;
 
   useEffect(() => {
 
@@ -50,7 +50,7 @@ function Hand(props) {
       }
     });
 
-    if (isHandComplete(hand)) {
+    if (isHandComplete) {
       const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
       handleNavToSeatHoleCards(nextSeatIndex);
     } else {
@@ -124,7 +124,7 @@ function Hand(props) {
             onSaveBoardCards={handleSaveBoardCards}
             onSaveHoleCards={handleSaveHoleCards}
             board={hand.board}
-            isHandComplete={isHandComplete(hand)}
+            isHandComplete={isHandComplete}
             onNavToSeatHoleCards={handleNavToSeatHoleCards}
           />
         }/>
@@ -147,7 +147,8 @@ export default withRouter(connect((state) => ({
   hasSession: state.session !== null,
   currentBettingRound: state.hand !== null
     ? state.hand.currentBettingRound
-    : null
+    : null,
+  isHandComplete: getIsHandComplete(state.hand)
 }))(Hand));
 
 const HandContainer = styled(Container)`
