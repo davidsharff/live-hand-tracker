@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
-import styled from 'styled-components';
+import { withRouter } from 'react-router-dom';
+import TextField from '@material-ui/core/TextField';
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
+import InputLabel from '@material-ui/core/InputLabel';
 import PropTypes from 'prop-types';
-import { Button, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem, Col, Container, Row, Card, CardHeader, CardTitle, CardBody, Table, Input, InputGroup, InputGroupAddon } from 'reactstrap';
+import styled from 'styled-components';
 
+import Header from '../../components/Header';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
-import { isValidSession } from "../../redux/reducers/session";
+//import { isValidSession } from "../../redux/reducers/session";
 
 import connect from "react-redux/es/connect/connect";
 
@@ -39,157 +43,92 @@ function Session(props) {
     }
   });
 
-  const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
-    payload: {
-      seatIndex
-    }
-  });
+  // const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
+  //   type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
+  //   payload: {
+  //     seatIndex
+  //   }
+  // });
+  //
+  // const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
+  //   type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
+  //   payload: {
+  //     change: newTotalSeats - props.session.defaultSeats.length
+  //   }
+  // });
+  //
+  // const handleToggleActiveSeat = (seatIndex) => props.dispatch({
+  //   type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
+  //   payload: {
+  //     seatIndex
+  //   }
+  // });
 
-  const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
-    payload: {
-      change: newTotalSeats - props.session.defaultSeats.length
-    }
-  });
-
-  const handleToggleActiveSeat = (seatIndex) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
-    payload: {
-      seatIndex
-    }
-  });
-
-  const handleChangeSmallBlind = (e) => props.dispatch({
+  const handleChangeSmallBlind = (smallBlind) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_SMALL_BLIND,
     payload: {
-      smallBlind: parseInt(e.target.value, 10)
+      smallBlind
     }
   });
 
-  const handleChangeBigBlind = (e) => props.dispatch({
+  const handleChangeBigBlind = (bigBlind) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_BIG_BLIND,
     payload: {
-      bigBlind: parseInt(e.target.value, 10)
+      bigBlind
     }
   });
 
-  // TODO: refeator to named functions?
-  const handleClickNext = () => {
-    localStorage.setItem('savedSession', JSON.stringify(session));
-    // TODO: this should be in middleware that inspects the action type fire by next button
-    if (props.hasHand) {
-      // TODO: fire update hand action
-      props.history.push('/hand');
-    } else {
-      props.dispatch({
-        type: actionTypes.CREATE_HAND
-      });
-      props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
-    }
-  };
+  // // TODO: refeator to named functions?
+  // const handleClickNext = () => {
+  //   localStorage.setItem('savedSession', JSON.stringify(session));
+  //   // TODO: this should be in middleware that inspects the action type fire by next button
+  //   if (props.hasHand) {
+  //     // TODO: fire update hand action
+  //     props.history.push('/hand');
+  //   } else {
+  //     props.dispatch({
+  //       type: actionTypes.CREATE_HAND
+  //     });
+  //     props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
+  //   }
+  // };
 
   // TODO: consider breaking into discreet steps
   return(
-    <Container fluid>
-      <Row>
-        <Col>
-          <Card style={{minHeight: '100vh'}}>
-            <CardHeader>
-              <CardTitle>
-                Configure Session
-              </CardTitle>
-            </CardHeader>
-            <CardBody className="d-flex flex-column justify-content-between">
-              {/* TODO: use past locations one day. */}
-              <Col className="p-0">
-                <Row className="pb-2">
-                  <InputGroup size="sm">
-                    <InputGroupAddon addonType="prepend">Location</InputGroupAddon>
-                    <Input
-                      value={ session.location }
-                      onChange={(e) => handleChangeLocation(e.target.value)}
-                    />
-                  </InputGroup>
-                </Row>
-                <Row className="py-2">
-                  <BlindInputGroup size="sm">
-                    <InputGroupAddon addonType="prepend" type="number">SB</InputGroupAddon>
-                    <Input type="number" value={session.smallBlind || ''} onChange={handleChangeSmallBlind} />
-                  </BlindInputGroup>
-                  <BlindInputGroup size="sm">
-                    <InputGroupAddon addonType="prepend">BB</InputGroupAddon>
-                    <Input type="number" value={session.bigBlind || ''} onChange={handleChangeBigBlind} />
-                  </BlindInputGroup>
-                </Row>
-                <Row className="py-2">
-                  <UncontrolledDropdown size="sm">
-                    <DropdownToggle caret>
-                      {
-                        session.defaultSeats.length === 0
-                          ? 'Set Table Size'
-                          : `${session.defaultSeats.length} Total Seats`
-                      }
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {
-                        _.range(2, 11).reverse().map((num) =>
-                          num !== session.defaultSeats.length &&
-                          <DropdownItem key={num} onClick={() => handleChangeMaxSeats(num)}>
-                            { num } Total Seats
-                          </DropdownItem>
-                        )
-                      }
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
-                </Row>
-                <Row className="py-2">
-                  <Table>
-                    <thead>
-                    <tr>
-                      <th>Seat</th>
-                      <CheckBoxCellHeader>Occupied</CheckBoxCellHeader>
-                      <CheckBoxCellHeader>Hero?</CheckBoxCellHeader>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {
-                      !!session.defaultSeats.length &&
-                      // TODO: consider dropping defaultSeats constants if we can dynamically create based on numeric input
-                      session.defaultSeats.map(({ isActive }, i) =>
-                        <tr key={i}>
-                          <td>Seat: { i + 1 }</td>
-                          <CheckBoxCell>
-                            <Input
-                              type="checkbox"
-                              checked={isActive}
-                              onChange={() => handleToggleActiveSeat(i)}
-                              disabled={session.defaultHeroSeatIndex === i}
-                            />
-                          </CheckBoxCell>
-                          <CheckBoxCell>
-                            <Input
-                              type="checkbox"
-                              checked={ session.defaultHeroSeatIndex === i }
-                              onChange={() => handleSetHeroSeatIndex(i) }/>
-                          </CheckBoxCell>
-                        </tr>
-                      )
-                    }
-                    </tbody>
-                  </Table>
-                </Row>
-              </Col>
-              <Row className="justify-self-end">
-                <SubmitButton outline disabled={!isValidSession(session)} onClick={handleClickNext}>
-                  Next
-                </SubmitButton>
-              </Row>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+    <React.Fragment>
+      <Header />
+      <Container>
+        <SessionField>
+          <TextField
+            label="Location"
+            //className={classes.textField}
+            value={session.location}
+            onChange={(e) => handleChangeLocation(e.target.value)}
+            margin="normal"
+          />
+        </SessionField>
+        <SessionField>
+          <InputLabel>Small Blind</InputLabel>
+          <BlindSelect
+            defaultValues={[1, 2, 5, 10]}
+            currentValue={session.smallBlind}
+            onChange={handleChangeSmallBlind}
+            minValue={null}
+            maxValue={session.bigBlind}
+          />
+        </SessionField>
+        <SessionField>
+          <InputLabel>Big Blind</InputLabel>
+          <BlindSelect
+            defaultValues={[2, 3, 5, 10]}
+            currentValue={session.bigBlind}
+            onChange={handleChangeBigBlind}
+            minValue={session.smallBlind}
+            maxValue={null}
+          />
+        </SessionField>
+      </Container>
+    </React.Fragment>
   );
 }
 
@@ -203,19 +142,84 @@ export default withRouter(connect((state) => ({
   hasHand: state.hand !== null
 }))(Session));
 
-const BlindInputGroup = styled(InputGroup)`
-  max-width: 65px;
-  margin-right: 10px;
+const SessionField = styled.div`
+  margin-bottom: 20px;
 `;
 
-const SubmitButton = styled(Button)`
-  min-width: 100%;
-`;
+const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue }) => {
 
-const CheckBoxCellHeader = styled.th`
-  text-align: center;
-`;
+  const [otherValue, setOtherValue] = useState(null);
 
-const CheckBoxCell = styled.td`
-  text-align: center;
+  // TODO: determine if empty array really is best practice for ComponentDidMount and then silence this warning.
+  useEffect(() => {
+    if (!_.includes(defaultValues, currentValue)) {
+      setOtherValue(currentValue);
+    }
+  }, []);
+
+  const handleSelectDefault = (val) => {
+    setOtherValue(null);
+    onChange(val);
+  };
+
+  const handleChangeOtherValue = (e) => {
+    const parsedVal = parseInt(e.target.value, 10);
+    const val = isNaN(parsedVal)
+      ? null
+      : parsedVal;
+
+    onChange(val);
+    setOtherValue(val);
+  };
+
+  const isDefaultDisabled = (v) => (
+    (!!minValue && v < minValue) ||
+    (maxValue && v > maxValue)
+  );
+
+  return (
+    <BlindsRow>
+      {
+        defaultValues.map((blind) =>
+          <Button
+            key={blind}
+            disabled={isDefaultDisabled(blind)}
+            color="primary"
+            onClick={() => handleSelectDefault(blind)}
+            // TODO: disable this outline globally
+            style={{ marginRight: '5px', outline: 'none' }}
+            variant={
+              currentValue === blind && otherValue === null
+                ? 'contained'
+                : 'outlined'
+            }
+          >
+            { blind }
+          </Button>
+        )
+      }
+      <TextField
+        style={{ flexBasis: '20%'}}
+        value={otherValue !== null ? otherValue : ''}
+        onChange={handleChangeOtherValue}
+        margin="none"
+        type="number"
+        label="Other"
+        inputProps={{
+          style: { textAlign: 'center' }
+        }}
+        inputLabelProps={{
+          style: { textAlign: 'center' }
+        }}
+      />
+
+    </BlindsRow>
+  );
+};
+
+const BlindsRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
 `;
