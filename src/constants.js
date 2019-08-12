@@ -39,11 +39,11 @@ const { SB, BB } = positionLabels;
 
 export const positionLabelsMap = {
   // TODO: get feedback/lookup what labels should be for smaller tables.
-  '10':[SB, BB, 'EP1', 'EP2', 'MP1', 'MP2', 'MP3', 'HJ', 'CO', 'B'],
-  '9': [SB, BB, 'EP1', 'EP2', 'MP1', 'MP2', 'HJ', 'CO', 'B'],
-  '8': [SB, BB, 'EP1', 'MP1', 'MP2', 'HJ', 'CO', 'B'],
-  '7': [SB, BB, 'EP1', 'MP1', 'HJ', 'CO', 'B'],
-  '6': [SB, BB, 'MP1', 'HJ', 'CO', 'B'],
+  '10':[SB, BB, 'E1', 'E2', 'M1', 'M2', 'M3', 'HJ', 'CO', 'B'],
+  '9': [SB, BB, 'E1', 'E2', 'M1', 'M2', 'HJ', 'CO', 'B'],
+  '8': [SB, BB, 'E1', 'M1', 'M2', 'HJ', 'CO', 'B'],
+  '7': [SB, BB, 'E1', 'M1', 'HJ', 'CO', 'B'],
+  '6': [SB, BB, 'M1', 'HJ', 'CO', 'B'],
   '5': [SB, BB, 'HJ', 'CO', 'B'],
   '4': [SB, BB, 'CO', 'B'],
   '3': [SB, BB, 'B'],

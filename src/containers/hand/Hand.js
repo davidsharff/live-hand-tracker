@@ -3,11 +3,9 @@ import React, { useEffect }  from 'react';
 import _ from 'lodash';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Container } from 'reactstrap';
-import styled from 'styled-components';
 
 import HandWizard from './components/HandWizard';
-import HandHeader from './components/HandHeader';
+import Header from '../../components/Header';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
@@ -100,8 +98,8 @@ function Hand(props) {
 
   // TODO: all routes below should use handId param
   return (
-    <HandContainer fluid className="d-flex flex-column">
-      <HandHeader
+    <React.Fragment>
+      <Header
         location={session.location}
         smallBlind={session.smallBlind}
         bigBlind={session.bigBlind}
@@ -129,7 +127,7 @@ function Hand(props) {
           />
         }/>
       </Switch>
-    </HandContainer>
+    </React.Fragment>
   );
 }
 
@@ -150,8 +148,3 @@ export default withRouter(connect((state) => ({
     : null,
   isHandComplete: getIsHandComplete(state.hand)
 }))(Hand));
-
-const HandContainer = styled(Container)`
-  height: 100%;
-`;
-

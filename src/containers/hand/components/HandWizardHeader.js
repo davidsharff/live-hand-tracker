@@ -27,6 +27,8 @@ export default function WizardHeader(props) {
             lastAction.bettingRound !== hand.currentBettingRound
           );
 
+          // TODO: don't collapse when inputting cards or potentially only don't collapse on hole cards. When inputting hole cards
+          // show hole cards for other seats in header and consider showing board somewhere on the page.
           return (
             <HeaderItem
               key={i}

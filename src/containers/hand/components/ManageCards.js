@@ -145,8 +145,8 @@ export default function ManageCards(props) {
           )
         }
       </Row>
-      <Row className="flex-fill m-0 mb-4">
-        <Col className="my-4 d-flex flex-column flex-fill">
+      <Row className="flex-fill m-0 my-3">
+        <Col className="m-0 d-flex flex-column flex-fill">
           {
             _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
               <Row className="d-flex flex-row flex-fill justify-content-between" key={i}>
@@ -191,10 +191,14 @@ ManageCards.propTypes = {
 const CardSlot = styled(({ isSelected, type, isDisabled, ...rest }) => <Col { ...rest }/>)`
   padding: 0;
   border: dotted 1px #333;
-  min-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
-  max-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
-  min-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
-  max-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
+  // min-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
+  // max-height: ${ p => p.type === cardInputTypes.HOLE_CARDS ? '100px' : '55px'};
+  // min-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
+  // max-width:  ${ p => p.type === cardInputTypes.HOLE_CARDS ? '80px'  : '45px'};
+  min-height: 55px;
+  max-height: 55px;
+  min-width: 45px;
+  max-width: 45px;
   ${p => p.isSelected && `
     border-color: #28a745;
     border-width: 3px;
@@ -208,6 +212,7 @@ const Suit = styled(({ disabled, isSelected, ...rest }) => <Col { ...rest }/>)`
   padding: 5px;
   border: solid 1px #333;
   max-width: 24%;
+  max-height: 24px;
   background-color: ${p => !p.isSelected && p.disabled && '#eee'};
   ${p => p.isSelected && `
     border-color: #28a745;

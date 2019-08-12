@@ -128,6 +128,7 @@ const ActionInput = ({ hand, selectedSeatIndex, actionComponentMap, isHandComple
     );
   }
 
+  // TODO: we are flashing some intervening state showing a Bet button on mobile.
   return (
     <Row className={rowClassName}>
       {

@@ -12,5 +12,5 @@ function App() {
     </Provider>
   );
 }
-
+// TODO: material ui setup reccomends adding a meta tag in the index.html for responsiveness that's slightly different than current tag.
 export default App;
