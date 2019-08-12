@@ -5,6 +5,17 @@ import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
+
+// TODO: move to another component, particularly since it has more usecases after redesign and may be fancy poker table display.
+import Paper from '@material-ui/core/Paper';
+import Table from '@material-ui/core/Table';
+import TableHead from '@material-ui/core/TableHead';
+import TableBody from '@material-ui/core/TableBody';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import Checkbox from '@material-ui/core/Checkbox';
+
+
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -43,26 +54,26 @@ function Session(props) {
     }
   });
 
-  // const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
-  //   type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
-  //   payload: {
-  //     seatIndex
-  //   }
-  // });
-  //
-  // const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
-  //   type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
-  //   payload: {
-  //     change: newTotalSeats - props.session.defaultSeats.length
-  //   }
-  // });
-  //
-  // const handleToggleActiveSeat = (seatIndex) => props.dispatch({
-  //   type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
-  //   payload: {
-  //     seatIndex
-  //   }
-  // });
+  const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
+    payload: {
+      seatIndex
+    }
+  });
+
+  const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
+    payload: {
+      change: newTotalSeats - props.session.defaultSeats.length
+    }
+  });
+
+  const handleToggleActiveSeat = (seatIndex) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
+    payload: {
+      seatIndex
+    }
+  });
 
   const handleChangeSmallBlind = (smallBlind) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_SMALL_BLIND,
@@ -109,7 +120,7 @@ function Session(props) {
         </SessionField>
         <SessionField>
           <InputLabel>Small Blind</InputLabel>
-          <BlindSelect
+          <NumberSelector
             defaultValues={[1, 2, 5, 10]}
             currentValue={session.smallBlind}
             onChange={handleChangeSmallBlind}
@@ -119,13 +130,65 @@ function Session(props) {
         </SessionField>
         <SessionField>
           <InputLabel>Big Blind</InputLabel>
-          <BlindSelect
+          <NumberSelector
             defaultValues={[2, 3, 5, 10]}
             currentValue={session.bigBlind}
             onChange={handleChangeBigBlind}
             minValue={session.smallBlind}
             maxValue={null}
           />
+        </SessionField>
+        <SessionField>
+          <InputLabel>Table Size (total seats)</InputLabel>
+          <NumberSelector
+            defaultValues={[6, 9, 10]}
+            currentValue={session.defaultSeats.length || null}
+            onChange={handleChangeMaxSeats}
+            minValue={2}
+            maxValue={10}
+          />
+        </SessionField>
+        <SessionField>
+          <InputLabel>Configure Seats</InputLabel>
+          <Paper>
+            <Table>
+              <TableHead>
+              <TableRow>
+                <TableCell>Seat</TableCell>
+                <TableCell >Occupied</TableCell>
+                <TableCell>Hero?</TableCell>
+              </TableRow>
+              </TableHead>
+              <TableBody>
+              {
+                !!session.defaultSeats.length &&
+                // TODO: consider dropping defaultSeats constants if we can dynamically create based on numeric input
+                session.defaultSeats.map(({ isActive }, i) =>
+                  <TableRow key={i}>
+                    <TableCell>Seat: { i + 1 }</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={isActive}
+                        onChange={() => handleToggleActiveSeat(i)}
+                        disabled={session.defaultHeroSeatIndex === i}
+                      />
+                      {/*<Input*/}
+                        {/*type="checkbox"*/}
+
+                      {/*/>*/}
+                    </TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={ session.defaultHeroSeatIndex === i }
+                        onChange={() => handleSetHeroSeatIndex(i)
+                        }/>
+                    </TableCell>
+                  </TableRow>
+                )
+              }
+              </TableBody>
+            </Table>
+          </Paper>
         </SessionField>
       </Container>
     </React.Fragment>
@@ -146,16 +209,8 @@ const SessionField = styled.div`
   margin-bottom: 20px;
 `;
 
-const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue }) => {
-
-  const [otherValue, setOtherValue] = useState(null);
-
-  // TODO: determine if empty array really is best practice for ComponentDidMount and then silence this warning.
-  useEffect(() => {
-    if (!_.includes(defaultValues, currentValue)) {
-      setOtherValue(currentValue);
-    }
-  }, []);
+const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxValue }) => {
+  const [otherValue, setOtherValue] = useState(_.includes(defaultValues, currentValue) ? null : currentValue);
 
   const handleSelectDefault = (val) => {
     setOtherValue(null);
@@ -163,13 +218,16 @@ const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue
   };
 
   const handleChangeOtherValue = (e) => {
+    // TODO: incorporate min/max validation here too
+    // TODO: look in the mirror and deeply reflect if the cause of such madness with number type inputs
+    // is in nature of the spec itself, or a personal flaw that needs conquering.
     const parsedVal = parseInt(e.target.value, 10);
     const val = isNaN(parsedVal)
       ? null
       : parsedVal;
 
     onChange(val);
-    setOtherValue(val);
+    setOtherValue(val === null ? '' : val);
   };
 
   const isDefaultDisabled = (v) => (
@@ -177,29 +235,31 @@ const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue
     (maxValue && v > maxValue)
   );
 
+  // TODO: other input is broken on iphone 5. Idea: use "Other" button that replaces button row with an input and then turns the value back into the button label on submit.
+  // TODO: this should use an Input not TextField
   return (
     <BlindsRow>
       {
-        defaultValues.map((blind) =>
+        defaultValues.map((value) =>
           <Button
-            key={blind}
-            disabled={isDefaultDisabled(blind)}
+            key={value}
+            disabled={isDefaultDisabled(value)}
             color="primary"
-            onClick={() => handleSelectDefault(blind)}
+            onClick={() => handleSelectDefault(value)}
             // TODO: disable this outline globally
             style={{ marginRight: '5px', outline: 'none' }}
             variant={
-              currentValue === blind && otherValue === null
+              currentValue === value && otherValue === null
                 ? 'contained'
                 : 'outlined'
             }
           >
-            { blind }
+            { value }
           </Button>
         )
       }
       <TextField
-        style={{ flexBasis: '20%'}}
+        style={{ flexBasis: '20%' }}
         value={otherValue !== null ? otherValue : ''}
         onChange={handleChangeOtherValue}
         margin="none"
@@ -208,11 +268,7 @@ const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue
         inputProps={{
           style: { textAlign: 'center' }
         }}
-        inputLabelProps={{
-          style: { textAlign: 'center' }
-        }}
       />
-
     </BlindsRow>
   );
 };
@@ -220,6 +276,7 @@ const BlindSelect = ({ defaultValues, currentValue, onChange, minValue, maxValue
 const BlindsRow = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  min-height: 48px;
+  //justify-content: space-between;
   align-items: baseline;
 `;
