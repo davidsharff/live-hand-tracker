@@ -181,7 +181,6 @@ function Session(props) {
                     </TableCell>
                     <TableCell>
                       <Radio
-                        color="primary"
                         checked={ session.defaultHeroSeatIndex === i }
                         onChange={() => handleSetHeroSeatIndex(i)
                         }/>
