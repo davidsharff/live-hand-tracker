@@ -151,12 +151,12 @@ function Session(props) {
         </SessionField>
         <SessionField>
           <InputLabel>Configure Seats</InputLabel>
-          <Paper>
+          <Paper style={{ marginTop: '21px'}}>
             <Table>
               <TableHead>
               <TableRow>
                 <TableCell>Seat</TableCell>
-                <TableCell >Occupied</TableCell>
+                <TableCell padding="none">Occupied</TableCell>
                 <TableCell>Hero?</TableCell>
               </TableRow>
               </TableHead>
@@ -167,7 +167,7 @@ function Session(props) {
                 session.defaultSeats.map(({ isActive }, i) =>
                   <TableRow key={i}>
                     <TableCell>Seat: { i + 1 }</TableCell>
-                    <TableCell>
+                    <TableCell padding="none">
                       <Checkbox
                         color="primary"
                         checked={isActive}
@@ -278,7 +278,6 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
 const BlindsRow = styled.div`
   display: flex;
   flex-direction: row;
-  min-height: 48px;
   justify-content: space-between;
   align-items: baseline;
 `;
