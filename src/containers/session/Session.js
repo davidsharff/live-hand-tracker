@@ -14,6 +14,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
+import Radio from '@material-ui/core/Radio';
 
 
 import PropTypes from 'prop-types';
@@ -168,6 +169,7 @@ function Session(props) {
                     <TableCell>Seat: { i + 1 }</TableCell>
                     <TableCell>
                       <Checkbox
+                        color="primary"
                         checked={isActive}
                         onChange={() => handleToggleActiveSeat(i)}
                         disabled={session.defaultHeroSeatIndex === i}
@@ -178,7 +180,8 @@ function Session(props) {
                       {/*/>*/}
                     </TableCell>
                     <TableCell>
-                      <Checkbox
+                      <Radio
+                        color="primary"
                         checked={ session.defaultHeroSeatIndex === i }
                         onChange={() => handleSetHeroSeatIndex(i)
                         }/>
@@ -235,29 +238,29 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
     (maxValue && v > maxValue)
   );
 
-  // TODO: other input is broken on iphone 5. Idea: use "Other" button that replaces button row with an input and then turns the value back into the button label on submit.
+  const pctWidthVal = 100 / (defaultValues.length + 1);
   // TODO: this should use an Input not TextField
   return (
     <BlindsRow>
       {
         defaultValues.map((value) =>
-          <Button
+          <BlindButton
             key={value}
             disabled={isDefaultDisabled(value)}
             color="primary"
             onClick={() => handleSelectDefault(value)}
-            // TODO: disable this outline globally
-            style={{ marginRight: '5px', outline: 'none' }}
             variant={
               currentValue === value && otherValue === null
                 ? 'contained'
                 : 'outlined'
             }
+            pctWidth={pctWidthVal+ '%'}
           >
             { value }
-          </Button>
+          </BlindButton>
         )
       }
+      {/* TODO: use input components instead of textfield to get rid of shrunk label */}
       <TextField
         style={{ flexBasis: '20%' }}
         value={otherValue !== null ? otherValue : ''}
@@ -277,6 +280,18 @@ const BlindsRow = styled.div`
   display: flex;
   flex-direction: row;
   min-height: 48px;
-  //justify-content: space-between;
+  justify-content: space-between;
   align-items: baseline;
+`;
+
+const BlindButton = styled(({ pctWidth, ...rest}) => <Button { ...rest }/>)`
+  && {
+    min-width: unset;
+    //padding: 10px;
+    min-width: ${p => `calc(${p.pctWidth} - 5px)`};
+    max-width: ${p => `calc(${p.pctWidth} - 5px)`};
+    padding: 5px 25px;
+    // TODO: disable this outline globally
+    outline: none;
+  }
 `;
