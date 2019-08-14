@@ -1,31 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
+import { connect } from "react-redux";
 import { withRouter } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
 import TextField from '@material-ui/core/TextField';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 
-// TODO: move to another component, particularly since it has more usecases after redesign and may be fancy poker table display.
-import Paper from '@material-ui/core/Paper';
-import Table from '@material-ui/core/Table';
-import TableHead from '@material-ui/core/TableHead';
-import TableBody from '@material-ui/core/TableBody';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import Checkbox from '@material-ui/core/Checkbox';
-import Radio from '@material-ui/core/Radio';
-
-
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import Header from '../../components/Header';
+import PokerTable from '../../components/PokerTable';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
-//import { isValidSession } from "../../redux/reducers/session";
 
-import connect from "react-redux/es/connect/connect";
+import { isValidSession } from "../../redux/reducers/session";
 
 // TODO: seat selection defaults to two rows with two column radio buttons: empty | hero and third option on last item X remove.
 // TODO: after initial setup, show num seats/players with potentially collapsed edit table, blinds, hero seat, and other details that have to be confirmed at start of each hand.
@@ -90,20 +81,19 @@ function Session(props) {
     }
   });
 
-  // // TODO: refeator to named functions?
-  // const handleClickNext = () => {
-  //   localStorage.setItem('savedSession', JSON.stringify(session));
-  //   // TODO: this should be in middleware that inspects the action type fire by next button
-  //   if (props.hasHand) {
-  //     // TODO: fire update hand action
-  //     props.history.push('/hand');
-  //   } else {
-  //     props.dispatch({
-  //       type: actionTypes.CREATE_HAND
-  //     });
-  //     props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
-  //   }
-  // };
+  const handleClickNext = () => {
+    localStorage.setItem('savedSession', JSON.stringify(session));
+    // TODO: this should be in middleware that inspects the action type fire by next button
+    if (props.hasHand) {
+      // TODO: fire update hand action
+      props.history.push('/hand');
+    } else {
+      props.dispatch({
+        type: actionTypes.CREATE_HAND
+      });
+      props.history.push(`/hand/cards/seat/${session.defaultHeroSeatIndex}`);
+    }
+  };
 
   // TODO: consider breaking into discreet steps
   return(
@@ -151,46 +141,23 @@ function Session(props) {
         </SessionField>
         <SessionField>
           <InputLabel>Configure Seats</InputLabel>
-          <Paper style={{ marginTop: '21px'}}>
-            <Table>
-              <TableHead>
-              <TableRow>
-                <TableCell>Seat</TableCell>
-                <TableCell padding="none">Occupied</TableCell>
-                <TableCell>Hero?</TableCell>
-              </TableRow>
-              </TableHead>
-              <TableBody>
-              {
-                !!session.defaultSeats.length &&
-                // TODO: consider dropping defaultSeats constants if we can dynamically create based on numeric input
-                session.defaultSeats.map(({ isActive }, i) =>
-                  <TableRow key={i}>
-                    <TableCell>Seat: { i + 1 }</TableCell>
-                    <TableCell padding="none">
-                      <Checkbox
-                        color="primary"
-                        checked={isActive}
-                        onChange={() => handleToggleActiveSeat(i)}
-                        disabled={session.defaultHeroSeatIndex === i}
-                      />
-                      {/*<Input*/}
-                        {/*type="checkbox"*/}
-
-                      {/*/>*/}
-                    </TableCell>
-                    <TableCell>
-                      <Radio
-                        checked={ session.defaultHeroSeatIndex === i }
-                        onChange={() => handleSetHeroSeatIndex(i)
-                        }/>
-                    </TableCell>
-                  </TableRow>
-                )
-              }
-              </TableBody>
-            </Table>
-          </Paper>
+          <PokerTable
+            seats={session.defaultSeats}
+            onToggleActiveSeat={handleToggleActiveSeat}
+            onSetHeroSeatIndex={handleSetHeroSeatIndex}
+            heroSeatIndex={session.defaultHeroSeatIndex}
+          />
+        </SessionField>
+        <SessionField>
+          <Button
+            disabled={!isValidSession(session)}
+            color="primary"
+            onClick={handleClickNext}
+            variant="outlined"
+            fullWidth
+          >
+            Next
+          </Button>
         </SessionField>
       </Container>
     </React.Fragment>
