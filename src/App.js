@@ -1,14 +1,18 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-
+import { ThemeProvider } from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 import store from './redux/store';
-
 import ContainerRoutes from './containers/ContainerRoutes';
+
+const theme = createMuiTheme({});
 
 function App() {
   return (
     <Provider store={store}>
-      <ContainerRoutes />
+      <ThemeProvider theme={theme}>
+        <ContainerRoutes />
+      </ThemeProvider>
     </Provider>
   );
 }
