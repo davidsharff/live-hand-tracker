@@ -21,17 +21,17 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
    return null;
   }
 
-  // const handleClick = (seatIndex) => {
-  //   if (seatIndex === heroSeatIndex) {
-  //     onSetHeroSeatIndex(null);
-  //   } else  {
-  //     if (seats[seatIndex].isActive && heroSeatIndex === null) {
-  //       onSetHeroSeatIndex(seatIndex);
-  //     } else {
-  //       onToggleActiveSeat(seatIndex);
-  //     }
-  //   }
-  // };
+  const handleClick = (seatIndex) => {
+    if (seatIndex === heroSeatIndex) {
+      onSetHeroSeatIndex(null);
+    } else  {
+      if (seats[seatIndex].isActive && heroSeatIndex === null) {
+        onSetHeroSeatIndex(seatIndex);
+      } else {
+        onToggleActiveSeat(seatIndex);
+      }
+    }
+  };
 
   const getAvatar = (seatIndex) => {
     const isActive = seats[seatIndex].isActive;
@@ -140,6 +140,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
                 label={getLabel(seatIndex)}
                 clickable
                 color={getColor(seatIndex)}
+                onClick={() => handleClick(seatIndex)}
               />
             )
           }
@@ -162,6 +163,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
                     label={getLabel(seatIndex)}
                     clickable
                     color={getColor(seatIndex)}
+                    onClick={() => handleClick(seatIndex)}
                   />
                 )
               }
@@ -184,6 +186,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
                 label={getLabel(seatIndex)}
                 clickable
                 color={getColor(seatIndex)}
+                onClick={() => handleClick(seatIndex)}
               />
             )
           }
