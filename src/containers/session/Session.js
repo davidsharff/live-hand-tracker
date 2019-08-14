@@ -137,6 +137,7 @@ function Session(props) {
             onChange={handleChangeMaxSeats}
             minValue={2}
             maxValue={10}
+            hideOtherInput
           />
         </SessionField>
         <SessionField>
@@ -178,7 +179,7 @@ const SessionField = styled.div`
   margin-bottom: 20px;
 `;
 
-const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxValue }) => {
+const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxValue, hideOtherInput }) => {
   const [otherValue, setOtherValue] = useState(_.includes(defaultValues, currentValue) ? null : currentValue);
 
   const handleSelectDefault = (val) => {
@@ -204,7 +205,7 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
     (maxValue && v > maxValue)
   );
 
-  const pctWidthVal = 100 / (defaultValues.length + 1);
+  const pctWidthVal = 100 / (defaultValues.length + (hideOtherInput ? 0 : 1));
   // TODO: this should use an Input not TextField
   return (
     <BlindsRow>
@@ -227,17 +228,20 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
         )
       }
       {/* TODO: use input components instead of textfield to get rid of shrunk label */}
-      <TextField
-        style={{ flexBasis: '20%' }}
-        value={otherValue !== null ? otherValue : ''}
-        onChange={handleChangeOtherValue}
-        margin="none"
-        type="number"
-        label="Other"
-        inputProps={{
-          style: { textAlign: 'center' }
-        }}
-      />
+      {
+        !hideOtherInput &&
+        <TextField
+          style={{ flexBasis: '20%' }}
+          value={otherValue !== null ? otherValue : ''}
+          onChange={handleChangeOtherValue}
+          margin="none"
+          type="number"
+          label="Other"
+          inputProps={{
+            style: { textAlign: 'center' }
+          }}
+        />
+      }
     </BlindsRow>
   );
 };
@@ -246,7 +250,8 @@ const BlindsRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-end;
+  height: 50px;
 `;
 
 const BlindButton = styled(({ pctWidth, ...rest}) => <Button { ...rest }/>)`

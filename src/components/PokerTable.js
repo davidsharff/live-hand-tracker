@@ -30,7 +30,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
   // };
 
   const getIcon = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive && seatIndex !== 7;
+    const isActive = seats[seatIndex].isActive;
 
     return (
       <Avatar>
@@ -46,7 +46,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
   };
 
   const getColor = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive && seatIndex !== 7;
+    const isActive = seats[seatIndex].isActive;
 
     return (
       seatIndex === heroSeatIndex
@@ -58,7 +58,7 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
   };
 
   const getLabel = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive && seatIndex !== 7;
+    const isActive = seats[seatIndex].isActive;
 
     return (
       isActive
