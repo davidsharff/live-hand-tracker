@@ -21,7 +21,7 @@ export default function HandHeader(props) {
 
   const handleCloseDrawer = () => setIsDrawerOpen(false);
   return (
-    <div style={{ flex: 1, marginBottom: '10px' }}>
+    <div style={{ marginBottom: '10px' }}>
       <AppBar position="static" >
         <StyledToolbar disableGutters >
           <LeftItems>

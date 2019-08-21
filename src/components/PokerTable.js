@@ -69,7 +69,7 @@ export default function PokerTable(props) {
         </React.Fragment>
         )
       }
-      <div>
+      <div style={{ width: '100%'}}>
         {
           true
             ? <SquareTable
