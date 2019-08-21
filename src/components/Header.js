@@ -21,7 +21,7 @@ export default function HandHeader(props) {
 
   const handleCloseDrawer = () => setIsDrawerOpen(false);
   return (
-    <div style={{ flex: 1 }}>
+    <div style={{ flex: 1, marginBottom: '10px' }}>
       <AppBar position="static" >
         <StyledToolbar disableGutters >
           <LeftItems>
@@ -53,6 +53,7 @@ const LeftItems = styled.div`
 
 const StyledToolbar = styled(Toolbar)`
   justify-content: space-between;
+  min-height: 42px !important;
 `;
 
 const DrawerContents = ({ onClose }) => (

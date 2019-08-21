@@ -13,7 +13,8 @@ import { isTinyScreen } from "../utils";
 import PokerTableSeat from "./PokerTableSeat";
 
 
-export default function PokerTable({ seats, heroSeatIndex, onToggleActiveSeat, onSetHeroSeatIndex }) {
+export default function PokerTable(props) {
+  const { seats, heroSeatIndex, onToggleActiveSeat, onSetHeroSeatIndex, showLegend } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -50,19 +51,25 @@ export default function PokerTable({ seats, heroSeatIndex, onToggleActiveSeat, o
 
   return (
     <React.Fragment>
-      <InputLabel shrink>Tap to Change</InputLabel>
-      <LegendRow>
-        <LegendAvatar label="Hero" backgroundColor={palette.secondary.dark}>
-          <FaceIcon fontSize="small" />
-        </LegendAvatar>
-        <LegendAvatar label="Filled" backgroundColor={palette.primary.dark}>
-          <PersonIcon fontSize="small" />
-        </LegendAvatar>
-        <LegendAvatar label="Empty">
-          <PersonOutlineIcon fontSize="small" />
-        </LegendAvatar>
-      </LegendRow>
-      <div style={{ marginTop: '20px'  }}>
+      {
+        showLegend && (
+        <React.Fragment>
+          <InputLabel shrink>Tap to Change</InputLabel>
+          <LegendRow style={{ marginBottom: '10px'}}>
+            <LegendAvatar label="Hero" backgroundColor={palette.secondary.dark}>
+              <FaceIcon fontSize="small" />
+            </LegendAvatar>
+            <LegendAvatar label="Filled" backgroundColor={palette.primary.dark}>
+              <PersonIcon fontSize="small" />
+            </LegendAvatar>
+            <LegendAvatar label="Empty">
+              <PersonOutlineIcon fontSize="small" />
+            </LegendAvatar>
+          </LegendRow>
+        </React.Fragment>
+        )
+      }
+      <div>
         {
           true
             ? <SquareTable

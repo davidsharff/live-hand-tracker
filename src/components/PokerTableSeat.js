@@ -13,9 +13,6 @@ import { formatSeatIndexLabel } from "../utils";
 export default function PokerTableSeat(props) {
   const { type, onClick, seatIndex, isActive, isHero } = props;
 
-  const theme = useTheme();
-  const { palette } = theme;
-
   const GetAvatar = (props) => {
     return (
       <Avatar {...props}>
@@ -26,6 +23,11 @@ export default function PokerTableSeat(props) {
                 ? <PersonIcon />
                 : <PersonOutlineIcon />
         }
+        {/*<span style={{ fontSize: '13px' }}>*/}
+          {/*{*/}
+            {/*positionLabelsMap['10'][seatIndex]*/}
+          {/*}*/}
+        {/*</span>*/}
       </Avatar>
     );
   };
@@ -49,6 +51,7 @@ export default function PokerTableSeat(props) {
     );
   };
 
+  // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
     type === 'badge'
       ? (
@@ -66,27 +69,43 @@ export default function PokerTableSeat(props) {
         ? (
           <SquareSeat
             onClick={onClick}
-            borderColor={palette.primary.dark}
-          >
-            <GetAvatar
-              style={{
-                height: isHero ? '26px' : '24px',
-                width:  isHero ? '26px' : '24px',
-                // TODO: extract. This is ugly and bad.
-                backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined
-              }}
-            />
-            <div style={{ color: palette.text.secondary }}>
-              Seat&nbsp;{ seatIndex + 1}
-            </div>
-          </SquareSeat>
+            isHero={isHero}
+            isActive={isActive}
+            Avatar={GetAvatar}
+            seatIndex={seatIndex}
+          />
         )
         : null // TODO: consider validation / typing
 
   );
 }
 
-const SquareSeat = styled(({ borderColor, ...rest}) => <div {...rest} />)`
+function SquareSeat(props) {
+  const { onClick, isHero, isActive, seatIndex, Avatar } = props;
+  const theme = useTheme();
+  const { palette } = theme;
+
+  return (
+    <SquareSeatContainer
+      onClick={onClick}
+      borderColor={palette.primary.dark}
+    >
+      <Avatar
+        style={{
+          height: '24px',
+          width:  '24px',
+          // TODO: extract. This is ugly and bad.
+          backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined
+        }}
+      />
+      <div style={{ color: palette.text.secondary }}>
+        Seat&nbsp;{ seatIndex + 1}
+      </div>
+    </SquareSeatContainer>
+  );
+}
+
+const SquareSeatContainer = styled(({ borderColor, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
   justify-content: space-around;

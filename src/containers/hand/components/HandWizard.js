@@ -3,7 +3,9 @@ import { Switch, Route } from 'react-router-dom';
 import _ from 'lodash';
 import styled from 'styled-components';
 
-import { Container, Row, Button, Input } from 'reactstrap';
+import Container from '@material-ui/core/Container';
+
+import { Row, Button, Input } from 'reactstrap';
 
 import {
   getAvailableActionForSeatIndex,
@@ -13,7 +15,7 @@ import {
 
 import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
 import ManageCards from "./ManageCards";
-import HandWizardHeader from "./HandWizardHeader";
+import PokerTable from "../../../components/PokerTable";
 
 export default function HandWizard(props) {
   const { hand, deck, matchParams, isHandComplete } = props;
@@ -22,7 +24,7 @@ export default function HandWizard(props) {
 
   // TODO: I don't think we need this anymore
   const isInputtingBoardCards = matchParams.inputStepType === 'board';
-  const isInputtingHoleCards = matchParams.inputStepType === 'cards';
+  //const isInputtingHoleCards = matchParams.inputStepType === 'cards';
 
   const nextToActSeatIndex = hand.buttonSeatIndex !== null
     ? getNextToActSeatIndex(hand)
@@ -36,14 +38,14 @@ export default function HandWizard(props) {
 
   const handleAction = (actionType, amount) => props.onAction(selectedSeatIndex, actionType, amount);
 
-  const handleClickSeat = (seatIndex) => {
-    // TODO: lookup url to make sure we aren't inputting hero hole cards.
-    if (hand.buttonSeatIndex === null) {
-      props.onSetButtonSeatIndex(seatIndex);
-    } else if (isHandComplete) {
-      props.onNavToSeatHoleCards(seatIndex);
-    }
-  };
+  // const handleClickSeat = (seatIndex) => {
+  //   // TODO: lookup url to make sure we aren't inputting hero hole cards.
+  //   if (hand.buttonSeatIndex === null) {
+  //     props.onSetButtonSeatIndex(seatIndex);
+  //   } else if (isHandComplete) {
+  //     props.onNavToSeatHoleCards(seatIndex);
+  //   }
+  // };
 
   const actionComponentMap = createActionComponentsMap(handleAction);
 
@@ -53,19 +55,28 @@ export default function HandWizard(props) {
 
   // TODO: below sections should be their own components
   return (
-    <Container className="flex-fill d-flex flex-column px-0">
-      <HandWizardHeader
-        hand={hand}
-        shouldCollapse={isInputtingHoleCards || isInputtingBoardCards}
-        selectedSeatIndex={isInputtingBoardCards ? null : selectedSeatIndex}
-        onClickSeat={handleClickSeat}
+    <Container>
+      {/*<HandWizardHeader*/}
+        {/*hand={hand}*/}
+        {/*shouldCollapse={isInputtingHoleCards || isInputtingBoardCards}*/}
+        {/*selectedSeatIndex={isInputtingBoardCards ? null : selectedSeatIndex}*/}
+        {/*onClickSeat={handleClickSeat}*/}
+      {/*/>*/}
+
+      {/* TODO: convert to onClick*/}
+      <PokerTable
+        seats={hand.seats}
+        onToggleActiveSeat={() => ({})}
+        onSetHeroSeatIndex={() => ({})}
+        heroSeatIndex={hand.heroSeatIndex}
+        showLegend={false}
       />
-      <Row className="d-flex flex-row justify-content-center my-2">
+      <Row className="d-flex flex-row justify-content-center my-1">
         {
           isInputtingBoardCards
             ? <h4>{ _.capitalize(hand.currentBettingRound) }</h4>
             : selectedSeatIndex !== null
-              ? <h4>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h4>
+              ? <h6>{selectedSeatPosLabel}&nbsp;(Seat {(selectedSeatIndex + 1)})</h6>
               : null
         }
       </Row>

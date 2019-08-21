@@ -108,6 +108,7 @@ function Session(props) {
             value={session.location}
             onChange={(e) => handleChangeLocation(e.target.value)}
             margin="normal"
+            style={{ marginTop: 0}}
           />
         </SessionField>
         <SessionField>
@@ -148,6 +149,7 @@ function Session(props) {
             onToggleActiveSeat={handleToggleActiveSeat}
             onSetHeroSeatIndex={handleSetHeroSeatIndex}
             heroSeatIndex={session.defaultHeroSeatIndex}
+            showLegend
           />
         </SessionField>
         <SessionField>
