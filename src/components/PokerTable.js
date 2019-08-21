@@ -48,6 +48,54 @@ export default function PokerTable({ seats, heroSeatIndex, onToggleActiveSeat, o
     </LegendItem>
   );
 
+  return (
+    <React.Fragment>
+      <InputLabel shrink>Tap to Change</InputLabel>
+      <LegendRow>
+        <LegendAvatar label="Hero" backgroundColor={palette.secondary.dark}>
+          <FaceIcon fontSize="small" />
+        </LegendAvatar>
+        <LegendAvatar label="Filled" backgroundColor={palette.primary.dark}>
+          <PersonIcon fontSize="small" />
+        </LegendAvatar>
+        <LegendAvatar label="Empty">
+          <PersonOutlineIcon fontSize="small" />
+        </LegendAvatar>
+      </LegendRow>
+      <div style={{ marginTop: '20px'  }}>
+        {
+          true
+            ? <SquareTable
+                onClick={handleClick}
+                seats={seats}
+                heroSeatIndex={heroSeatIndex}
+              />
+            : <CircularTable
+                onClick={handleClick}
+                seats={seats}
+                heroSeatIndex={heroSeatIndex}
+              />
+        }
+      </div>
+    </React.Fragment>
+  );
+}
+
+const LegendRow = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const LegendItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 20px;
+`;
+
+function CircularTable(props) {
+  const { onClick, seats, heroSeatIndex } = props;
+
   // TODO: all of the below need serious refactor once/if general approach is confirmed.
   // TODO: can seat 1 position choice be improved?
   const topRowSeats = seats.length === 6
@@ -72,99 +120,104 @@ export default function PokerTable({ seats, heroSeatIndex, onToggleActiveSeat, o
 
   return (
     <React.Fragment>
-      <InputLabel shrink>Tap to Change</InputLabel>
-      <LegendRow>
-        <LegendAvatar label="Hero" backgroundColor={palette.secondary.dark}>
-          <FaceIcon fontSize="small" />
-        </LegendAvatar>
-        <LegendAvatar label="Filled" backgroundColor={palette.primary.dark}>
-          <PersonIcon fontSize="small" />
-        </LegendAvatar>
-        <LegendAvatar label="Empty">
-          <PersonOutlineIcon fontSize="small" />
-        </LegendAvatar>
-      </LegendRow>
-      <div style={{ marginTop: '20px'  }}>
-        <TableRow style={{ justifyContent: 'space-around' }}>
-          {
-            topRowSeats.map((seatIndex, i) =>
-              <PokerTableSeat
-                key={seatIndex}
-                style={{
-                  marginLeft: i === 0 ? outerRowPadding : 'unset',
-                  marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
-                  marginTop: topRowSeats.length === 3 && (i === 0 || i === 2) && '25px'
-                }}
-                type="badge"
-                onClick={() => handleClick(seatIndex)}
-                isActive={_.get(seats[seatIndex], 'isActive')}
-                isHero={console.log('seatIndex === heroSeatIndex', seatIndex === heroSeatIndex, seatIndex, heroSeatIndex) || seatIndex === heroSeatIndex}
-                seatIndex={seatIndex}
-              />
-            )
-          }
-        </TableRow>
+      <CircularTableRow style={{ justifyContent: 'space-around' }}>
         {
-          _.flatMap(midRowsSeats, (seatIndicies, i) =>
-            // TODO: screen size change could break this key by index.
-            <TableRow key={i} style={{
-              justifyContent: 'space-between',
-              paddingLeft: midRowsSeats.length === 3 && i !== 1 && midRowPadding,
-              paddingRight: midRowsSeats.length === 3 && i !== 1 && midRowPadding}
-            }>
-              {
-                seatIndicies.map((seatIndex) =>
-                  <PokerTableSeat
-                    key={seatIndex}
-                    type="badge"
-                    onClick={() => handleClick(seatIndex)}
-                    isActive={_.get(seats[seatIndex], 'isActive')}
-                    isHero={seatIndex === heroSeatIndex}
-                    seatIndex={seatIndex}
-                />
-                )
-              }
-            </TableRow>
+          topRowSeats.map((seatIndex, i) =>
+            <PokerTableSeat
+              key={seatIndex}
+              style={{
+                marginLeft: i === 0 ? outerRowPadding : 'unset',
+                marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
+                marginTop: topRowSeats.length === 3 && (i === 0 || i === 2) && '25px'
+              }}
+              type="badge"
+              onClick={() => onClick(seatIndex)}
+              isActive={_.get(seats[seatIndex], 'isActive')}
+              isHero={console.log('seatIndex === heroSeatIndex', seatIndex === heroSeatIndex, seatIndex, heroSeatIndex) || seatIndex === heroSeatIndex}
+              seatIndex={seatIndex}
+            />
           )
         }
-        <TableRow style={{ justifyContent: 'space-around' }}>
-          {
-            bottomRowSeats.map((seatIndex, i) =>
-              <PokerTableSeat
-                key={seatIndex}
-                style={{
-                  marginLeft: i === 0 && outerRowPadding,
-                  marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
-                  marginTop: bottomRowLen === 3 && i === 1 && '25px'
-                }}
-                type="badge"
-                onClick={() => handleClick(seatIndex)}
-                isActive={_.get(seats[seatIndex], 'isActive')}
-                isHero={seatIndex === heroSeatIndex}
-                seatIndex={seatIndex}
-              />
-            )
-          }
-        </TableRow>
-      </div>
+      </CircularTableRow>
+      {
+        _.flatMap(midRowsSeats, (seatIndicies, i) =>
+          // TODO: screen size change could break this key by index.
+          <CircularTableRow key={i} style={{
+            justifyContent: 'space-between',
+            paddingLeft: midRowsSeats.length === 3 && i !== 1 && midRowPadding,
+            paddingRight: midRowsSeats.length === 3 && i !== 1 && midRowPadding}
+          }>
+            {
+              seatIndicies.map((seatIndex) =>
+                <PokerTableSeat
+                  key={seatIndex}
+                  type="badge"
+                  onClick={() => onClick(seatIndex)}
+                  isActive={_.get(seats[seatIndex], 'isActive')}
+                  isHero={seatIndex === heroSeatIndex}
+                  seatIndex={seatIndex}
+                />
+              )
+            }
+          </CircularTableRow>
+        )
+      }
+      <CircularTableRow style={{ justifyContent: 'space-around' }}>
+        {
+          bottomRowSeats.map((seatIndex, i) =>
+            <PokerTableSeat
+              key={seatIndex}
+              style={{
+                marginLeft: i === 0 && outerRowPadding,
+                marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
+                marginTop: bottomRowLen === 3 && i === 1 && '25px'
+              }}
+              type="badge"
+              onClick={() => onClick(seatIndex)}
+              isActive={_.get(seats[seatIndex], 'isActive')}
+              isHero={seatIndex === heroSeatIndex}
+              seatIndex={seatIndex}
+            />
+          )
+        }
+      </CircularTableRow>
     </React.Fragment>
   );
 }
 
-const TableRow = styled.div`
+const CircularTableRow = styled.div`
   display: flex;
   flex-direction: row;
   margin-bottom: 20px;
 `;
 
-const LegendRow = styled.div`
+function SquareTable(props) {
+  const { onClick, seats, heroSeatIndex } = props;
+
+  return  _.flatMap(_.chunk(seats, 5), (seatsRow, rowIndex) =>
+    <SquareTableRow key={rowIndex}>
+      {
+        seatsRow.map(({ isActive }, seatRowIndex) => {
+          const seatIndex = seatRowIndex + ( rowIndex === 1 ? 5 : 0);
+          return (
+            <PokerTableSeat
+              key={seatIndex}
+              type="square"
+              onClick={() => onClick(seatIndex)}
+              isActive={_.get(seats[seatIndex], 'isActive')}
+              isHero={seatIndex === heroSeatIndex}
+              seatIndex={seatIndex}
+            />
+          );
+        })
+      }
+    </SquareTableRow>
+  );
+}
+
+const SquareTableRow = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const LegendItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-right: 20px;
+  justify-content: space-between;
+  //margin: 0 -16px; // TODO: if revived, it'd be better to share style value with mui-root container class padding.
 `;

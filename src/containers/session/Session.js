@@ -74,6 +74,7 @@ function Session(props) {
     }
   });
 
+  // TODO: handle blur on enter
   const handleChangeBigBlind = (bigBlind) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_BIG_BLIND,
     payload: {
