@@ -91,7 +91,8 @@ const SquareSeat = styled(({ borderColor, ...rest}) => <div {...rest} />)`
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  flex-basis: 19%;
+  flex-basis: calc(20% - 5px);
+  margin-right: 5px;
   margin-bottom: 5px;
   height: 70px;
   //background-color: #303f9f;

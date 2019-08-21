@@ -218,6 +218,4 @@ function SquareTable(props) {
 const SquareTableRow = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  //margin: 0 -16px; // TODO: if revived, it'd be better to share style value with mui-root container class padding.
 `;
