@@ -3,7 +3,6 @@ import React, { useEffect }  from 'react';
 import _ from 'lodash';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-
 import HandWizard from './components/HandWizard';
 import Header from '../../components/Header';
 
@@ -16,6 +15,8 @@ import Overview from "./components/Overview";
 
 function Hand(props) {
   const { session, hand, deck, currentBettingRound, isHandComplete } = props;
+
+  useEffect(() => window.scrollTo(0, 0), []);
 
   useEffect(() => {
 
@@ -34,7 +35,6 @@ function Hand(props) {
     props.dispatch({
       type: actionTypes.CREATE_HAND
     });
-    handleNavToSeatHoleCards(session.defaultHeroSeatIndex);
     // TODO: real UI
     return <div>Loading hand...</div>;
   }
