@@ -2,7 +2,6 @@ import React from "react";
 import _ from 'lodash';
 import InputLabel from "@material-ui/core/InputLabel";
 import Avatar from '@material-ui/core/Avatar';
-import Chip from '@material-ui/core/Chip';
 import FaceIcon from '@material-ui/icons/Face';
 import PersonIcon from '@material-ui/icons/Person';
 import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
@@ -10,10 +9,11 @@ import { useTheme } from '@material-ui/styles';
 
 
 import styled from 'styled-components';
-import {formatSeatIndexLabel, isTinyScreen} from "../utils";
+import { isTinyScreen } from "../utils";
+import PokerTableSeat from "./PokerTableSeat";
 
 
-export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatIndex, heroSeatIndex }) {
+export default function PokerTable({ seats, heroSeatIndex, onToggleActiveSeat, onSetHeroSeatIndex }) {
   const theme = useTheme();
   const { palette } = theme;
 
@@ -31,44 +31,6 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
         onToggleActiveSeat(seatIndex);
       }
     }
-  };
-
-  const getAvatar = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive;
-
-    return (
-      <Avatar>
-        {
-          seatIndex === heroSeatIndex
-            ? <FaceIcon />
-            : isActive
-              ? <PersonIcon />
-              : <PersonOutlineIcon />
-        }
-      </Avatar>
-    );
-  };
-
-  const getColor = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive;
-
-    return (
-      seatIndex === heroSeatIndex
-        ? 'secondary' // TODO: I don't really like red as a secondary color.
-        : isActive
-          ? 'primary'
-          : ''
-    );
-  };
-
-  const getLabel = (seatIndex) => {
-    const isActive = seats[seatIndex].isActive;
-
-    return (
-      isActive
-        ? formatSeatIndexLabel(seatIndex) // TODO: consider having this handle Empty label
-        : <span style={{ width: '49px'}}>Empty</span>
-    );
   };
 
   const LegendAvatar = ({ children, label, backgroundColor, ...rest }) => (
@@ -108,7 +70,6 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
     ? '40px'
     : '60px';
 
-  console.log('thme', theme);
   return (
     <React.Fragment>
       <InputLabel shrink>Tap to Change</InputLabel>
@@ -127,26 +88,24 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
         <TableRow style={{ justifyContent: 'space-around' }}>
           {
             topRowSeats.map((seatIndex, i) =>
-              <Chip
+              <PokerTableSeat
+                key={seatIndex}
                 style={{
                   marginLeft: i === 0 ? outerRowPadding : 'unset',
                   marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
                   marginTop: topRowSeats.length === 3 && (i === 0 || i === 2) && '25px'
                 }}
-                key={seatIndex}
-                avatar={getAvatar(seatIndex)}
-                variant="outlined"
-                size="small"
-                label={getLabel(seatIndex)}
-                clickable
-                color={getColor(seatIndex)}
+                type="badge"
                 onClick={() => handleClick(seatIndex)}
+                isActive={_.get(seats[seatIndex], 'isActive')}
+                isHero={console.log('seatIndex === heroSeatIndex', seatIndex === heroSeatIndex, seatIndex, heroSeatIndex) || seatIndex === heroSeatIndex}
+                seatIndex={seatIndex}
               />
             )
           }
         </TableRow>
         {
-          _.flatMap(midRowsSeats, (seats, i) =>
+          _.flatMap(midRowsSeats, (seatIndicies, i) =>
             // TODO: screen size change could break this key by index.
             <TableRow key={i} style={{
               justifyContent: 'space-between',
@@ -154,17 +113,15 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
               paddingRight: midRowsSeats.length === 3 && i !== 1 && midRowPadding}
             }>
               {
-                seats.map((seatIndex) =>
-                  <Chip
+                seatIndicies.map((seatIndex) =>
+                  <PokerTableSeat
                     key={seatIndex}
-                    variant="outlined"
-                    size="small"
-                    avatar={getAvatar(seatIndex)}
-                    label={getLabel(seatIndex)}
-                    clickable
-                    color={getColor(seatIndex)}
+                    type="badge"
                     onClick={() => handleClick(seatIndex)}
-                  />
+                    isActive={_.get(seats[seatIndex], 'isActive')}
+                    isHero={seatIndex === heroSeatIndex}
+                    seatIndex={seatIndex}
+                />
                 )
               }
             </TableRow>
@@ -173,20 +130,18 @@ export default function PokerTable({ seats, onToggleActiveSeat, onSetHeroSeatInd
         <TableRow style={{ justifyContent: 'space-around' }}>
           {
             bottomRowSeats.map((seatIndex, i) =>
-              <Chip
+              <PokerTableSeat
+                key={seatIndex}
                 style={{
                   marginLeft: i === 0 && outerRowPadding,
                   marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
                   marginTop: bottomRowLen === 3 && i === 1 && '25px'
                 }}
-                key={seatIndex}
-                variant="outlined"
-                size="small"
-                avatar={getAvatar(seatIndex)}
-                label={getLabel(seatIndex)}
-                clickable
-                color={getColor(seatIndex)}
+                type="badge"
                 onClick={() => handleClick(seatIndex)}
+                isActive={_.get(seats[seatIndex], 'isActive')}
+                isHero={seatIndex === heroSeatIndex}
+                seatIndex={seatIndex}
               />
             )
           }
