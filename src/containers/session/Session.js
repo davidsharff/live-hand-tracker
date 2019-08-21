@@ -98,7 +98,9 @@ function Session(props) {
   // TODO: consider breaking into discreet steps
   return(
     <React.Fragment>
-      <Header />
+      <Header
+        mainLabel="Session"
+      />
       <Container>
         <SessionField>
           <TextField

@@ -100,7 +100,8 @@ function Hand(props) {
   return (
     <React.Fragment>
       <Header
-        location={session.location}
+        mainLabel="Hand #1"
+        subLabel={session.location}
         smallBlind={session.smallBlind}
         bigBlind={session.bigBlind}
         totalPlayers={_.sumBy(hand.seats, 'isActive')}

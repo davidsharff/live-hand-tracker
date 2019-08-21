@@ -11,6 +11,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import Typography from "@material-ui/core/Typography/Typography";
+import { useTheme } from '@material-ui/styles';
 
 import styled from 'styled-components';
 
@@ -18,6 +20,10 @@ import styled from 'styled-components';
 
 export default function HandHeader(props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { mainLabel, subLabel } = props;
+
+  const theme = useTheme();
+  const { palette } = theme;
 
   const handleCloseDrawer = () => setIsDrawerOpen(false);
   return (
@@ -26,9 +32,17 @@ export default function HandHeader(props) {
         <StyledToolbar disableGutters >
           <LeftItems>
             <ArrowLeft fontSize="large" />
-            <span>
-              Session
-            </span>
+            <div>
+              {
+                subLabel &&
+                <Typography variant="caption" style={{ color: palette.grey[400] }} >
+                  { subLabel }
+                </Typography>
+              }
+              <Typography variant="subtitle1" style={{ maxHeight: '26px', marginTop: subLabel && '-6px'}}>
+                { mainLabel }
+              </Typography>
+            </div>
           </LeftItems>
           <MoreVert edge="end" onClick={() => setIsDrawerOpen(true)}/>
           <Drawer
@@ -53,7 +67,7 @@ const LeftItems = styled.div`
 
 const StyledToolbar = styled(Toolbar)`
   justify-content: space-between;
-  min-height: 42px !important;
+  min-height: 52px !important;
 `;
 
 const DrawerContents = ({ onClose }) => (
