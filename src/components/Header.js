@@ -19,8 +19,9 @@ import styled from 'styled-components';
 
 
 export default function HandHeader(props) {
+  const { mainLabel, subLabel, onGoBack } = props;
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { mainLabel, subLabel } = props;
 
   const theme = useTheme();
   const { palette } = theme;
@@ -31,7 +32,7 @@ export default function HandHeader(props) {
       <AppBar position="static" >
         <StyledToolbar disableGutters >
           <LeftItems>
-            <ArrowLeft fontSize="large" />
+            <ArrowLeft fontSize="large" onClick={onGoBack} />
             <div>
               {
                 subLabel &&

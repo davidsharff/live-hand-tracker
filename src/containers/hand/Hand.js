@@ -1,6 +1,5 @@
 // TODO: clicking create hand button should move existing hand into a "hands" session collection and reset hand state with defaults
 import React, { useEffect }  from 'react';
-import _ from 'lodash';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
 import HandWizard from './components/HandWizard';
@@ -102,11 +101,7 @@ function Hand(props) {
       <Header
         mainLabel="Hand #1"
         subLabel={session.location}
-        smallBlind={session.smallBlind}
-        bigBlind={session.bigBlind}
-        totalPlayers={_.sumBy(hand.seats, 'isActive')}
-        bettingRound={hand.currentBettingRound}
-        shouldCollapse={false}
+        onGoBack={() => props.history.push('/session/')}
       />
       <Switch>
         <Route exact path="/hand/overview" render={() =>
