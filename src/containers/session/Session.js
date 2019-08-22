@@ -82,6 +82,19 @@ function Session(props) {
     }
   });
 
+  const handleClickSeat = (seatIndex) => {
+    const { defaultHeroSeatIndex } = session;
+    if (seatIndex === defaultHeroSeatIndex) {
+      handleSetHeroSeatIndex(null);
+    } else  {
+      if (defaultHeroSeatIndex === null) {
+        handleSetHeroSeatIndex(seatIndex);
+      } else {
+        handleToggleActiveSeat(seatIndex);
+      }
+    }
+  };
+
   const handleClickNext = () => {
     localStorage.setItem('savedSession', JSON.stringify(session));
     // TODO: this should be in middleware that inspects the action type fire by next button
@@ -150,6 +163,7 @@ function Session(props) {
             onToggleActiveSeat={handleToggleActiveSeat}
             onSetHeroSeatIndex={handleSetHeroSeatIndex}
             heroSeatIndex={session.defaultHeroSeatIndex}
+            onClickSeat={handleClickSeat}
             showLegend
           />
         </SessionField>

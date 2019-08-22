@@ -80,6 +80,15 @@ function Hand(props) {
     });
   };
 
+  const handleClickSeat = (seatIndex) => {
+    // TODO: lookup url to make sure we aren't inputting hero hole cards.
+    if (hand.buttonSeatIndex === null) {
+      handleSetButtonIndex(seatIndex);
+    } else if (isHandComplete) {
+      handleNavToSeatHoleCards(seatIndex);
+    }
+  };
+
   function handleNavToSeatHoleCards(seatIndex) {
     props.history.push(`/hand/cards/seat/${seatIndex}`);
   }
@@ -111,7 +120,6 @@ function Hand(props) {
           <HandWizard
             matchParams={match.params}
             hand={hand}
-            onSetButtonSeatIndex={handleSetButtonIndex}
             onAction={handleAddAction}
             blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
             deck={deck}
@@ -119,7 +127,7 @@ function Hand(props) {
             onSaveHoleCards={handleSaveHoleCards}
             board={hand.board}
             isHandComplete={isHandComplete}
-            onNavToSeatHoleCards={handleNavToSeatHoleCards}
+            onClickSeat={handleClickSeat}
           />
         }/>
       </Switch>

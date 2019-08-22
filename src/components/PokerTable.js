@@ -14,25 +14,13 @@ import PokerTableSeat from "./PokerTableSeat";
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, onToggleActiveSeat, onSetHeroSeatIndex, showLegend } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat } = props;
   const theme = useTheme();
   const { palette } = theme;
 
   if (!seats.length) {
    return null;
   }
-
-  const handleClick = (seatIndex) => {
-    if (seatIndex === heroSeatIndex) {
-      onSetHeroSeatIndex(null);
-    } else  {
-      if (seats[seatIndex].isActive && heroSeatIndex === null) {
-        onSetHeroSeatIndex(seatIndex);
-      } else {
-        onToggleActiveSeat(seatIndex);
-      }
-    }
-  };
 
   const LegendAvatar = ({ children, label, backgroundColor, ...rest }) => (
     <LegendItem>
@@ -73,12 +61,12 @@ export default function PokerTable(props) {
         {
           true
             ? <SquareTable
-                onClick={handleClick}
+                onClick={onClickSeat}
                 seats={seats}
                 heroSeatIndex={heroSeatIndex}
               />
             : <CircularTable
-                onClick={handleClick}
+                onClick={onClickSeat}
                 seats={seats}
                 heroSeatIndex={heroSeatIndex}
               />

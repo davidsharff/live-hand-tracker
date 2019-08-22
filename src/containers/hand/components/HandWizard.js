@@ -8,7 +8,7 @@ import PokerTable from "../../../components/PokerTable";
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete } = props;
 
-  const { hand } = props;
+  const { hand, onClickSeat } = props;
 
   // TODO: below sections should be their own components
   return (
@@ -16,8 +16,7 @@ export default function HandWizard(props) {
       {/* TODO: convert to onClick*/}
       <PokerTable
         seats={hand.seats}
-        onToggleActiveSeat={() => ({})}
-        onSetHeroSeatIndex={() => ({})}
+        onClickSeat={onClickSeat}
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
       />
