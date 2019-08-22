@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { formatSeatIndexLabel } from "../utils";
 
 export default function PokerTableSeat(props) {
-  const { type, onClick, seatIndex, isActive, isHero } = props;
+  const { type, onClick, seatIndex, isActive, isHero, isSelected } = props;
 
   const GetAvatar = (props) => {
     return (
@@ -73,6 +73,7 @@ export default function PokerTableSeat(props) {
             isActive={isActive}
             Avatar={GetAvatar}
             seatIndex={seatIndex}
+            isSelected={isSelected}
           />
         )
         : null // TODO: consider validation / typing
@@ -81,14 +82,15 @@ export default function PokerTableSeat(props) {
 }
 
 function SquareSeat(props) {
-  const { onClick, isHero, isActive, seatIndex, Avatar } = props;
+  const { onClick, isHero, isActive, seatIndex, Avatar, isSelected } = props;
   const theme = useTheme();
   const { palette } = theme;
 
   return (
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={palette.primary.dark}
+      borderColor={isSelected ? palette.primary.light : palette.primary.dark}
+      heavyBorder={isSelected}
     >
       <Avatar
         style={{
@@ -105,7 +107,7 @@ function SquareSeat(props) {
   );
 }
 
-const SquareSeatContainer = styled(({ borderColor, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ borderColor, heavyBorder, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -115,7 +117,7 @@ const SquareSeatContainer = styled(({ borderColor, ...rest}) => <div {...rest} /
   margin-bottom: 5px;
   height: 70px;
   //background-color: #303f9f;
-  border: ${p => `solid ${p.borderColor} 1px`};
+  border: ${p => `solid ${p.borderColor} ${p.heavyBorder ? '3px' : '1px'}`};
   border-radius: 5px;
   font-size: 12px;
 `;

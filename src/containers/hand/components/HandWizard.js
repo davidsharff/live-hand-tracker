@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Route } from 'react-router-dom';
+
 import styled from 'styled-components';
 import Container from '@material-ui/core/Container';
 import Typography from "@material-ui/core/Typography/Typography";
 
 import PokerTable from "../../../components/PokerTable";
+import ManageCards from "./ManageCards";
+import { cardInputTypes } from "../../../constants";
 
 export default function HandWizard(props) {
-  //const { hand, deck, matchParams, isHandComplete } = props;
+  //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, onClickSeat } = props;
+  const { hand, deck, onClickSeat } = props;
+
+  const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   // TODO: below sections should be their own components
   return (
@@ -19,11 +25,43 @@ export default function HandWizard(props) {
         onClickSeat={onClickSeat}
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
+        selectedSeatIndex={selectedSeatIndex}
       />
       {
         hand.buttonSeatIndex === null &&
         <InitialHandBody />
       }
+
+      {/*{*/}
+        {/*_.values(bettingRounds).map((bettingRound) =>*/}
+          {/*// TOO: bug. Handle if they manually return to prior board input url.*/}
+          {/*<Route exact key={bettingRound} path={`/hand/board/${bettingRound}`} render={() => {*/}
+            {/*if (hand.buttonSeatIndex === null) {*/}
+              {/*return <Redirect to="/hand/actions" />;*/}
+            {/*}*/}
+
+            {/*return <ManageCards cards={hand.board} deck={deck} onSave={onSaveBoardCards} type={bettingRound} />*/}
+          {/*}}/>*/}
+        {/*)*/}
+      {/*}*/}
+
+      <Route exact path="/hand/cards/seat/:seatIndex" render={(routerProps) => {
+        // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
+        const matchedSeatIndex = parseInt(routerProps.match.params.seatIndex, 10);
+        setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
+        return (
+          <ManageCards
+            cards={hand.seats[matchedSeatIndex].holeCards}
+            deck={deck}
+            type={cardInputTypes.HOLE_CARDS}
+            onSave={(cards) => {
+              props.onSaveHoleCards(matchedSeatIndex, cards);
+              setSelectedSeatIndex(null);
+            }}
+            header={matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`}
+          />
+        );
+      }}/>
     </StyledContainer>
   );
 }

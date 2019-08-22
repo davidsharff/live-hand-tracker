@@ -14,7 +14,7 @@ import PokerTableSeat from "./PokerTableSeat";
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -64,6 +64,7 @@ export default function PokerTable(props) {
                 onClick={onClickSeat}
                 seats={seats}
                 heroSeatIndex={heroSeatIndex}
+                selectedSeatIndex={selectedSeatIndex}
               />
             : <CircularTable
                 onClick={onClickSeat}
@@ -75,7 +76,6 @@ export default function PokerTable(props) {
     </React.Fragment>
   );
 }
-
 const LegendRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -86,6 +86,36 @@ const LegendItem = styled.div`
   flex-direction: column;
   align-items: center;
   padding-right: 20px;
+`;
+
+function SquareTable(props) {
+  const { onClick, seats, heroSeatIndex, selectedSeatIndex } = props;
+
+  return  _.flatMap(_.chunk(seats, 5), (seatsRow, rowIndex) =>
+    <SquareTableRow key={rowIndex}>
+      {
+        seatsRow.map(({ isActive }, seatRowIndex) => {
+          const seatIndex = seatRowIndex + ( rowIndex === 1 ? 5 : 0);
+          return (
+            <PokerTableSeat
+              key={seatIndex}
+              type="square"
+              onClick={() => onClick(seatIndex)}
+              isActive={_.get(seats[seatIndex], 'isActive')}
+              isHero={seatIndex === heroSeatIndex}
+              isSelected={seatIndex === selectedSeatIndex}
+              seatIndex={seatIndex}
+            />
+          );
+        })
+      }
+    </SquareTableRow>
+  );
+}
+
+const SquareTableRow = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
 function CircularTable(props) {
@@ -184,33 +214,4 @@ const CircularTableRow = styled.div`
   display: flex;
   flex-direction: row;
   margin-bottom: 20px;
-`;
-
-function SquareTable(props) {
-  const { onClick, seats, heroSeatIndex } = props;
-
-  return  _.flatMap(_.chunk(seats, 5), (seatsRow, rowIndex) =>
-    <SquareTableRow key={rowIndex}>
-      {
-        seatsRow.map(({ isActive }, seatRowIndex) => {
-          const seatIndex = seatRowIndex + ( rowIndex === 1 ? 5 : 0);
-          return (
-            <PokerTableSeat
-              key={seatIndex}
-              type="square"
-              onClick={() => onClick(seatIndex)}
-              isActive={_.get(seats[seatIndex], 'isActive')}
-              isHero={seatIndex === heroSeatIndex}
-              seatIndex={seatIndex}
-            />
-          );
-        })
-      }
-    </SquareTableRow>
-  );
-}
-
-const SquareTableRow = styled.div`
-  display: flex;
-  flex-direction: row;
 `;

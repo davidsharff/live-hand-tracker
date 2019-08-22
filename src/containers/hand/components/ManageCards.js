@@ -7,12 +7,13 @@ import {  Col, Row, Button } from 'reactstrap';
 
 import {cardInputTypes, cardValues, suits} from '../../../constants';
 import {deckType, holeCardsType} from '../../../types';
+import Typography from "@material-ui/core/Typography/Typography";
 
 const suitAbbreviations = _.map(suits, s => s.slice(0, 1));
 
 // TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
 export default function ManageCards(props) {
-  const { cards, deck, onSave, type } = props;
+  const { cards, deck, onSave, type, header } = props;
 
   const [selectedCardKey, setSelectedCardKey] = useState(
     type === cardInputTypes.TURN
@@ -111,6 +112,9 @@ export default function ManageCards(props) {
 
   return (
     <Col className="mb-1 d-flex flex-column p-0">
+      <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0'}}>
+        { header }
+      </Typography>
       <Row className="d-flex flex-row flex-nowrap mb-2 justify-content-center" style={{ flex: .4}}>
         {
           _.map(cardsMap, ({ value, suit, isDisabled}, cardKey) =>

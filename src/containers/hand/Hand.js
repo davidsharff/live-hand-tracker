@@ -51,6 +51,7 @@ function Hand(props) {
       const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
       handleNavToSeatHoleCards(nextSeatIndex);
     } else {
+      // TODO: this should just go to /hand
       props.history.push('/hand/actions');
     }
   };
@@ -84,6 +85,7 @@ function Hand(props) {
     // TODO: lookup url to make sure we aren't inputting hero hole cards.
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
+      props.history.push(`/hand/cards/seat/${hand.heroSeatIndex}`);
     } else if (isHandComplete) {
       handleNavToSeatHoleCards(seatIndex);
     }
