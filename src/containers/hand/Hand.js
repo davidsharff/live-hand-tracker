@@ -13,7 +13,7 @@ import {getDeck, getNextSeatIndex, getIsHandComplete} from "../../redux/reducers
 import Overview from "./components/Overview";
 
 function Hand(props) {
-  const { session, hand, deck, currentBettingRound, isHandComplete } = props;
+  const { session, hand, deck, currentBettingRound, isHandComplete, history } = props;
 
   useEffect(() => window.scrollTo(0, 0), []);
 
@@ -24,9 +24,9 @@ function Hand(props) {
       currentBettingRound &&
       currentBettingRound !== bettingRounds.PRE_FLOP
     ) {
-      props.history.push(`/hand/board/${currentBettingRound}`);
+      history.push(`/hand/board/${currentBettingRound}`);
     }
-  }, [currentBettingRound, props.history]);
+  }, [currentBettingRound, history]);
 
   if (session === null) {
     return <Redirect to="/session" />;
@@ -35,6 +35,10 @@ function Hand(props) {
       type: actionTypes.CREATE_HAND
     });
     // TODO: real UI
+
+    if (history.location.pathname !== '/hand/actions') {
+      history.push('/hand/actions'); // Move routes into constants file
+    }
     return <div>Loading hand...</div>;
   }
 
@@ -52,7 +56,7 @@ function Hand(props) {
       handleNavToSeatHoleCards(nextSeatIndex);
     } else {
       // TODO: this should just go to /hand
-      props.history.push('/hand/actions');
+      history.push('/hand/actions');
     }
   };
 
@@ -64,7 +68,7 @@ function Hand(props) {
       }
     });
 
-    props.history.push('/hand/actions');
+    history.push('/hand/actions');
   };
 
   const handleAddAction = (seatIndex, type, amount) => {
@@ -76,7 +80,7 @@ function Hand(props) {
         amount
       },
       aux: {
-        redirectToFn: (path) => props.history.push(path)
+        redirectToFn: (path) => history.push(path)
       }
     });
   };
@@ -85,14 +89,14 @@ function Hand(props) {
     // TODO: lookup url to make sure we aren't inputting hero hole cards.
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
-      props.history.push(`/hand/cards/seat/${hand.heroSeatIndex}`);
+      history.push(`/hand/cards/seat/${hand.heroSeatIndex}`);
     } else if (isHandComplete) {
       handleNavToSeatHoleCards(seatIndex);
     }
   };
 
   function handleNavToSeatHoleCards(seatIndex) {
-    props.history.push(`/hand/cards/seat/${seatIndex}`);
+    history.push(`/hand/cards/seat/${seatIndex}`);
   }
 
   // TODO: explore / decide between const and named functions.
@@ -103,7 +107,7 @@ function Hand(props) {
         buttonSeatIndex
       }
     });
-    props.history.push('/hand/actions');
+    history.push('/hand/actions');
   }
 
   // TODO: all routes below should use handId param
@@ -112,7 +116,7 @@ function Hand(props) {
       <Header
         mainLabel="Hand #1"
         subLabel={session.location}
-        onGoBack={() => props.history.push('/session/')}
+        onGoBack={() => history.push('/session/')}
       />
       <Switch>
         <Route exact path="/hand/overview" render={() =>

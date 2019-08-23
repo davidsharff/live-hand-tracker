@@ -58,7 +58,7 @@ export default function HandWizard(props) {
               props.onSaveHoleCards(matchedSeatIndex, cards);
               setSelectedSeatIndex(null);
             }}
-            header={matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`}
+            header={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}
           />
         );
       }}/>

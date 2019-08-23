@@ -89,7 +89,7 @@ function SquareSeat(props) {
   return (
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={isSelected ? palette.primary.light : palette.primary.dark}
+      borderColor={isSelected ? palette.action.active : palette.primary.dark}
       heavyBorder={isSelected}
     >
       <Avatar
