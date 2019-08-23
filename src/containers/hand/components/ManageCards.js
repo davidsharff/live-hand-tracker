@@ -6,17 +6,23 @@ import styled from 'styled-components';
 import Typography from "@material-ui/core/Typography/Typography";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
+import Grow from '@material-ui/core/Grow';
+//import Collapse from '@material-ui/core/Collapse';
+import Slide from '@material-ui/core/Slide';
+
+import ArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 
 
 import { cardInputTypes, cardValues } from '../../../constants';
 import { deckType, holeCardsType } from '../../../types';
 
+// TODO: if a react web app is used in production, need to be smart about when to load these.
 import cardImages from '../../../assets/cards';
 
 // TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
 export default function ManageCards(props) {
   //const { deck, onSave, type, header } = props;
-  const { type, header } = props;
+  const { type, header, cards } = props;
 
   const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(type));
 
@@ -26,7 +32,7 @@ export default function ManageCards(props) {
     _(Array(totalCardsLenForType))
       .fill('') // Create applicable num of empty slots
       .map((emptyCardVal, i) => // Override empty slot if props card exists.
-        props.cards[i] || emptyCardVal
+        cards[i] || emptyCardVal
       )
       .value()
   );
@@ -35,17 +41,27 @@ export default function ManageCards(props) {
 
   const canSubmit = false;
 
-  const handleClickCard = (cardIndex) => setSelectedCardIndex(cardIndex);
+  const handleClickCardSlot = (cardIndex) => {
+    const targetPendingCard = pendingCards[cardIndex];
 
-  const handleClickValue = (value) =>
-    setPendingCards(pendingCards.map((c, i) =>
-      i === selectedCardIndex
-        ? '' + value
+    if (!!targetPendingCard) {
+      handleChangeCardValue(cardIndex, targetPendingCard[0]); // They clicked on populated card, remove suit to trigger card image selection display.
+    }
+
+    setSelectedCardIndex(cardIndex);
+  };
+
+  const handleClickValue = (value) => handleChangeCardValue(selectedCardIndex, value);
+
+  const handleChangeCardValue = (targetIndex, value) => console.log('changing card value', value, selectedCardIndex) || setPendingCards(
+    pendingCards.map((c, i) =>
+      i === targetIndex
+        ?  ('' + value)
         : c
     )
   );
 
-  const handleSelectCard = (card) => {
+  const handlePickCard = (card) => {
     setPendingCards(
       pendingCards.map((c, i) =>
         i === selectedCardIndex
@@ -61,8 +77,6 @@ export default function ManageCards(props) {
     }
   };
 
-  //const Card = Cards.clubs[0];
-
   if (canSubmit) {
     return (
       <Button
@@ -76,13 +90,17 @@ export default function ManageCards(props) {
     );
   }
 
+  const showCardImageSelection = !!selectedCard && (
+    selectedCard.length === 1
+  );
+
   return (
     <React.Fragment>
       {/*<CardsSurface>*/}
         {/**/}
       {/*</CardsSurface>*/}
       <CardsSurface>
-        <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0' }}>
+        <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
           { header }
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>
@@ -90,7 +108,7 @@ export default function ManageCards(props) {
         pendingCards.map((card, i) =>
         <CardSlot
           key={i}
-          onClick={() => !getIsCardIndexDisabled(type, i) && handleClickCard(i)}
+          onClick={() => !getIsCardIndexDisabled(type, i) && handleClickCardSlot(i)}
           isEmpty={!card || card.length === 1}
           isSelected={i === selectedCardIndex}
           type={type}
@@ -107,50 +125,70 @@ export default function ManageCards(props) {
       </div>
       </CardsSurface>
       {
-        selectedCard && selectedCard.length === 1 &&
-        <div style={{ display: 'flex', width: '100%', margin: '10px 0'}}>
-          {
-            _(cardImages)
-              .keys()
-              .filter(cardKey => console.log('cardKey', cardKey, cardKey.startsWith(selectedCard)) || cardKey.startsWith(selectedCard))
-              .map((cardKey) => console.log('mapping', cardKey, cardImages[cardKey]) ||
-                <div key={cardKey} onClick={() => handleSelectCard(cardKey)}>
-                  <img src={cardImages[cardKey]} style={{ width: '55px', height: '75px'}} alt="" />
-                </div>
-              )
-              .value()
-          }
-        </div>
+        showCardImageSelection &&
+        <CardPicker>
+          <Grow
+            in={true}
+            style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
+            timeOut={1000}
+          >
+            <CardCarouselRow>
+              {
+                _(cardImages)
+                  .keys()
+                  .filter(cardKey => !!selectedCard && cardKey.startsWith(selectedCard))
+                  .map((cardKey) =>
+                    <div key={cardKey} onClick={() => handlePickCard(cardKey)}>
+                      {/* TODO: need larger dimensions when screen is > tinyScreen*/}
+                      <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
+                    </div>
+                  )
+                  .value()
+              }
+            </CardCarouselRow>
+          </Grow>
+          <div onClick={() => handleClickValue('')}>
+            <ArrowLeft fontSize="large" />
+            <span>Card Value</span>
+          </div>
+        </CardPicker>
       }
       {
-        !selectedCard &&
-        <ValueInputContainer>
-          {
-            _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
-              <CardsRow key={i}>
-                {
-                  chunk.map((cv) =>
-                    <ValueButton
-                      key={cv}
-                      color="primary"
-                      //onClick={handleClickNext}
-                      variant="outlined"
-                      fullWidth
-                      onClick={() =>
-                        //!isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
-                        handleClickValue(cv)
-                      }
-                      // disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
-                      // isSelected={cardsMap[selectedCardKey].value === cv}
-                    >
-                      { cv }
-                    </ValueButton>
-                  )
-                }
-              </CardsRow>
-            )
-          }
-        </ValueInputContainer>
+        !showCardImageSelection &&
+        <Slide
+          in={true}
+          direction="up"
+          style={{ transformOrigin: '0 0 0' }}
+          timeOut={1000}
+        >
+          <ValueInputContainer>
+            {
+              _.flatMap(_.chunk(cardValues, 4), (chunk, i) =>
+                <CardsRow key={i}>
+                  {
+                    chunk.map((cv) =>
+                      <ValueButton
+                        key={cv}
+                        color="primary"
+                        //onClick={handleClickNext}
+                        variant="outlined"
+                        fullWidth
+                        onClick={() =>
+                          //!isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
+                          handleClickValue(cv)
+                        }
+                        // disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
+                        // isSelected={cardsMap[selectedCardKey].value === cv}
+                      >
+                        { cv }
+                      </ValueButton>
+                    )
+                  }
+                </CardsRow>
+              )
+            }
+          </ValueInputContainer>
+        </Slide>
       }
     </React.Fragment>
   );
@@ -170,7 +208,8 @@ const CardsSurface = styled(Paper)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 5px;
+  padding: 5px 5px 10px 5px;
+  background-color: #fafafa !important; // TODO: use theme if surface and background color sticks around.
 `;
 
 const CardsRow = styled.div`
@@ -193,6 +232,23 @@ const ValueInputContainer = styled.div`
 const ValueButton = styled(Button)`
   height: 100%;
 `;
+
+const CardPicker = styled.div`
+  display: flex;
+  flex-direction: column; 
+  width: 100%;
+  margin: 10px 0;
+  justify-content: space-around;
+  flex: 1;
+  padding-top: 10px;
+`;
+
+const CardCarouselRow = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: space-around;
+`;
+
 // Old....
 
 // ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305
