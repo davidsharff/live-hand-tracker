@@ -94,11 +94,15 @@ export default function ManageCards(props) {
     selectedCard.length === 1
   );
 
+  // TODO: larger card dimensions in picker when screen is > tinyScreen
+  //       shrink header so that the card slot selections can be larger
+  //       use pending deck and disable card picker items and card value keys
+  //       Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
+  //       show value key as selected when returning to card value input
+  //       save and consider if should nav after inputting last card the first time or always use next button.
+  //
   return (
     <React.Fragment>
-      {/*<CardsSurface>*/}
-        {/**/}
-      {/*</CardsSurface>*/}
       <CardsSurface>
         <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
           { header }
@@ -139,7 +143,6 @@ export default function ManageCards(props) {
                   .filter(cardKey => !!selectedCard && cardKey.startsWith(selectedCard))
                   .map((cardKey) =>
                     <div key={cardKey} onClick={() => handlePickCard(cardKey)}>
-                      {/* TODO: need larger dimensions when screen is > tinyScreen*/}
                       <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
                     </div>
                   )
@@ -249,9 +252,6 @@ const CardCarouselRow = styled.div`
   justify-content: space-around;
 `;
 
-// Old....
-
-// ...rest is a workaround to avoid unknown prop warning. See: https://github.com/styled-components/styled-components/issues/305
 const CardSlot = styled(({ isEmpty, isSelected, type, isDisabled, ...rest }) => <div { ...rest }/>)`
   border: ${p => p.isEmpty && 'dotted 1px #333'};
   height: 75px;
