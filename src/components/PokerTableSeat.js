@@ -89,7 +89,8 @@ function SquareSeat(props) {
   return (
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={isSelected ? palette.action.active : palette.primary.dark}
+      borderColor={isSelected ? palette.secondary.light : palette.primary.dark}
+      backgroundColor={palette.grey['100']}
       heavyBorder={isSelected}
     >
       <Avatar
@@ -116,8 +117,8 @@ const SquareSeatContainer = styled(({ borderColor, heavyBorder, ...rest}) => <di
   margin-right: 5px;
   margin-bottom: 5px;
   height: 70px;
-  //background-color: #303f9f;
-  border: ${p => `solid ${p.borderColor} ${p.heavyBorder ? '3px' : '1px'}`};
+  background-color: ${p => p.backgroundColor};
+  border: ${p => `solid ${p.borderColor} 1px`};
   border-radius: 5px;
   font-size: 12px;
 `;

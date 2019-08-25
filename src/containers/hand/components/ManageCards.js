@@ -131,25 +131,27 @@ export default function ManageCards(props) {
       {
         showCardImageSelection &&
         <CardPicker>
-          <Grow
-            in={true}
-            style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
-            timeOut={1000}
-          >
+
             <CardCarouselRow>
               {
                 _(cardImages)
                   .keys()
                   .filter(cardKey => !!selectedCard && cardKey.startsWith(selectedCard))
                   .map((cardKey) =>
-                    <div key={cardKey} onClick={() => handlePickCard(cardKey)}>
-                      <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
-                    </div>
+                    <Grow
+                      key={cardKey}
+                      in={true}
+                      style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
+                      timeOut={1000}
+                    >
+                      <div onClick={() => handlePickCard(cardKey)}>
+                        <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
+                      </div>
+                    </Grow>
                   )
                   .value()
               }
             </CardCarouselRow>
-          </Grow>
           <div onClick={() => handleClickValue('')}>
             <ArrowLeft fontSize="large" />
             <span>Card Value</span>
@@ -229,7 +231,6 @@ const ValueInputContainer = styled.div`
   width: 100%;
   margin-top: 10px;
   padding-bottom: 15px;
-  //justify-content: space-between;
 `;
 
 const ValueButton = styled(Button)`
