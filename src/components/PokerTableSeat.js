@@ -90,8 +90,7 @@ function SquareSeat(props) {
     <SquareSeatContainer
       onClick={onClick}
       borderColor={isSelected ? palette.secondary.light : palette.primary.dark}
-      backgroundColor={palette.grey['100']}
-      heavyBorder={isSelected}
+      backgroundColor={palette.grey['50']}
     >
       <Avatar
         style={{
@@ -108,7 +107,7 @@ function SquareSeat(props) {
   );
 }
 
-const SquareSeatContainer = styled(({ borderColor, heavyBorder, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ borderColor, backgroundColor, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
   justify-content: space-around;

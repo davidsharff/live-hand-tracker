@@ -42,7 +42,7 @@ function Hand(props) {
     return <div>Loading hand...</div>;
   }
 
-  const handleSaveHoleCards = (seatIndex, holeCards) => {
+  const handleSaveHoleCards = (seatIndex, holeCards, isFinishedEditing) => {
     props.dispatch({
       type: actionTypes.SET_HOLE_CARDS,
       payload: {
@@ -54,9 +54,11 @@ function Hand(props) {
     if (isHandComplete) {
       const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
       handleNavToSeatHoleCards(nextSeatIndex);
-    } else {
-      // TODO: this should just go to /hand
-      history.push('/hand/actions');
+    }
+
+    if (isFinishedEditing) {
+      // TODO: this should just go to a '/hand' route.
+      props.history.push('/hand/actions');
     }
   };
 
@@ -89,7 +91,7 @@ function Hand(props) {
     // TODO: lookup url to make sure we aren't inputting hero hole cards.
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
-      history.push(`/hand/cards/seat/${hand.heroSeatIndex}`);
+      history.push(`/hand/cards/seat/${hand.heroSeatIndex + 1}`);
     } else if (isHandComplete) {
       handleNavToSeatHoleCards(seatIndex);
     }

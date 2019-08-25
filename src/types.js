@@ -3,7 +3,9 @@ import PT from 'prop-types';
 
 import { cards, bettingRounds, handActionTypes } from './constants';
 
-export const holeCardsType = PT.arrayOf(PT.oneOf(cards)).isRequired; // TODO: shouldn't force required at top level.
+export const holeCardsType = PT.arrayOf(
+  PT.oneOf(['', ...cards]) // Supports only knowing a single hole card (poker edgecase when only a single villian card is revealed)
+).isRequired; // TODO: shouldn't force required at top level.
 
 export const seatsType = PT.arrayOf(PT.exact({
   isActive: PT.bool.isRequired,

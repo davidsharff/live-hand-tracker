@@ -45,17 +45,17 @@ export default function HandWizard(props) {
         {/*)*/}
       {/*}*/}
 
-      <Route exact path="/hand/cards/seat/:seatIndex" render={(routerProps) => {
+      <Route path="/hand/cards/seat/:seatNum" render={(routerProps) => {
         // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
-        const matchedSeatIndex = parseInt(routerProps.match.params.seatIndex, 10);
+        const matchedSeatIndex = parseInt(routerProps.match.params.seatNum, 10) - 1;
         setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
         return (
           <ManageCards
             cards={hand.seats[matchedSeatIndex].holeCards}
             deck={deck}
             type={cardInputTypes.HOLE_CARDS}
-            onSave={(cards) => {
-              props.onSaveHoleCards(matchedSeatIndex, cards);
+            onSave={(cards, isFinishedEditing) => {
+              props.onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
               setSelectedSeatIndex(null);
             }}
             header={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}

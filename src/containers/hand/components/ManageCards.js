@@ -22,7 +22,9 @@ import cardImages from '../../../assets/cards';
 // TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
 export default function ManageCards(props) {
   //const { deck, onSave, type, header } = props;
-  const { type, header, cards } = props;
+  const { type, header, cards, onSave } = props;
+
+  const [initialCards] = useState(cards);
 
   const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(type));
 
@@ -53,7 +55,7 @@ export default function ManageCards(props) {
 
   const handleClickValue = (value) => handleChangeCardValue(selectedCardIndex, value);
 
-  const handleChangeCardValue = (targetIndex, value) => console.log('changing card value', value, selectedCardIndex) || setPendingCards(
+  const handleChangeCardValue = (targetIndex, value) => setPendingCards(
     pendingCards.map((c, i) =>
       i === targetIndex
         ?  ('' + value)
@@ -62,19 +64,23 @@ export default function ManageCards(props) {
   );
 
   const handlePickCard = (card) => {
-    setPendingCards(
-      pendingCards.map((c, i) =>
-        i === selectedCardIndex
-          ? card
-          : c
-      )
+
+    const updatedPendingCards = pendingCards.map((c, i) =>
+      i === selectedCardIndex
+        ? card
+        : c
     );
 
-    if (selectedCardIndex < pendingCards.length - 1) {
-      setSelectedCardIndex(selectedCardIndex + 1);
-    } else {
-      setSelectedCardIndex(null);
-    }
+    setPendingCards(updatedPendingCards);
+
+    const isFinishedEditing = (
+      selectedCardIndex === pendingCards.length - 1 &&
+      initialCards.length === 0 // Only go to next screen if they selected final card on the initial card entry (not future edits)
+    );
+
+    onSave(updatedPendingCards, isFinishedEditing);
+
+    setSelectedCardIndex(selectedCardIndex + 1);
   };
 
   if (canSubmit) {
@@ -142,7 +148,6 @@ export default function ManageCards(props) {
                       key={cardKey}
                       in={true}
                       style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
-                      timeOut={1000}
                     >
                       <div onClick={() => handlePickCard(cardKey)}>
                         <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
@@ -214,7 +219,6 @@ const CardsSurface = styled(Paper)`
   flex-direction: column;
   align-items: center;
   padding: 5px 5px 10px 5px;
-  background-color: #fafafa !important; // TODO: use theme if surface and background color sticks around.
 `;
 
 const CardsRow = styled.div`
