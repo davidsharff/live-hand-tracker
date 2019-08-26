@@ -81,6 +81,7 @@ export default function PokerTable(props) {
                       }
                       lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
                       currentBettingRound={hand && hand.currentBettingRound}
+                      isLiveHand={hand.buttonSeatIndex !== null}
                     />
                   );
                 })

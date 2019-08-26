@@ -17,8 +17,9 @@ import _ from 'lodash';
 
 export default function PokerTableSeat(props) {
   // TODO: either pass this a collated pokerSeat object or move a lot of logic into prop creation in PokerTable
+  //currentBettingRound
   const {
-    onClick, seatIndex, isActive, isHero, isSelected, positionLabel, lastAction, currentBettingRound
+    onClick, seatIndex, isActive, isHero, isSelected, positionLabel, lastAction, isLiveHand
   } = props;
 
   const theme = useTheme();
@@ -65,11 +66,11 @@ export default function PokerTableSeat(props) {
   //   );
   // };
 
-  const foldedInPriorRound = (
-    !!lastAction &&
-    lastAction.type === handActionTypes.FOLD &&
-    lastAction.bettingRound !== currentBettingRound
-  );
+  // const foldedInPriorRound = (
+  //   !!lastAction &&
+  //   lastAction.type === handActionTypes.FOLD &&
+  //   lastAction.bettingRound !== currentBettingRound
+  // );
 
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
@@ -77,6 +78,7 @@ export default function PokerTableSeat(props) {
       onClick={onClick}
       borderColor={isSelected ? palette.secondary.light : palette.primary.dark}
       backgroundColor={palette.grey['50']}
+      isLiveHand={isLiveHand}
     >
       <SeatAvatar
         style={{
@@ -84,37 +86,39 @@ export default function PokerTableSeat(props) {
           width: '24px',
           fontSize: '14px',
           // TODO: extract. This is ugly and bad.
-          backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined
+          backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined,
         }}
       />
       {
-        lastAction && !foldedInPriorRound
-          // TODO: use Typography
-          ? <div style={{color: palette.text.secondary}}>
-              <div style={{ textAlign: 'center'}}>{ _.capitalize(lastAction.type) }</div>
-              {
-                (lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
-                <div style={{ textAlign: 'center'}}>${lastAction.amount}</div>
-              }
-            </div>
-          : (
-            <div style={{color: palette.text.secondary}}>
-              Seat&nbsp;{seatIndex + 1}
-            </div>
-          )
+        isLiveHand && lastAction &&
+        <div style={{color: palette.text.secondary}}>
+          <div style={{ textAlign: 'center'}}>{ _.capitalize(lastAction.type) }</div>
+          {
+            (lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
+            <div style={{ textAlign: 'center'}}>${lastAction.amount}</div>
+          }
+        </div>
+      }
+      {
+        !isLiveHand &&
+        <div style={{color: palette.text.secondary }}>
+          Seat&nbsp;{seatIndex + 1}
+        </div>
       }
     </SquareSeatContainer>
   );
 }
 
-const SquareSeatContainer = styled(({ borderColor, backgroundColor, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ hasButton, borderColor, backgroundColor, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  //justify-content: space-between;
+  justify-content: ${p => p.isLiveHand ? 'space-between' : 'space-around'}
   align-items: center;
   flex-basis: calc(20% - 5px);
   margin-right: 5px;
   margin-bottom: 5px;
+  padding-top: ${p => p.isLiveHand && '5px'};
   height: 70px;
   background-color: ${p => p.backgroundColor};
   border: ${p => `solid ${p.borderColor} 1px`};
