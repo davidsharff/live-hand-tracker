@@ -127,7 +127,9 @@ export function getHoleCards(hand) {
 }
 
 export function getPositionLabelForSeatIndex(hand, seatIndex) {
-  return _.find(hand.positions, { seatIndex }).label;
+  return hand.seats[seatIndex].isActive
+    ? _.find(hand.positions, { seatIndex }).label
+    : null;
 }
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {

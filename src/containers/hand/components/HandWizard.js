@@ -29,6 +29,7 @@ export default function HandWizard(props) {
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
         selectedSeatIndex={selectedSeatIndex}
+        hand={hand}
       />
       {
         hand.buttonSeatIndex === null
@@ -54,9 +55,9 @@ export default function HandWizard(props) {
               }}/>
               <Route exact path="/hand/actions" render={() =>
                 <ActionBody
-                hand={hand}
-                selectedSeatIndex={selectedSeatIndex}
-                isHandComplete={isHandComplete}
+                  hand={hand}
+                  selectedSeatIndex={selectedSeatIndex}
+                  isHandComplete={isHandComplete}
                 />
               }/>
             </React.Fragment>

@@ -9,12 +9,12 @@ import { useTheme } from '@material-ui/styles';
 
 
 import styled from 'styled-components';
-import { isTinyScreen } from "../utils";
 import PokerTableSeat from "./PokerTableSeat";
+import { getCurrentActionsForSeat, getPositionLabelForSeatIndex } from '../redux/reducers/hand';
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, hand } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -59,18 +59,34 @@ export default function PokerTable(props) {
       }
       <div style={{ width: '100%'}}>
         {
-          true
-            ? <SquareTable
-                onClick={onClickSeat}
-                seats={seats}
-                heroSeatIndex={heroSeatIndex}
-                selectedSeatIndex={selectedSeatIndex}
-              />
-            : <CircularTable
-                onClick={onClickSeat}
-                seats={seats}
-                heroSeatIndex={heroSeatIndex}
-              />
+          _.flatMap(_.chunk(seats, 5), (seatsRow, rowIndex) =>
+            <SquareTableRow key={rowIndex}>
+              {
+                seatsRow.map(({ isActive }, _i) => {
+                  const seatIndex = _i + ( rowIndex === 1 ? 5 : 0);
+                  // TODO: consider wrapper for session/hand poker tables
+                  return (
+                    <PokerTableSeat
+                      key={seatIndex}
+                      type="square"
+                      onClick={() => onClickSeat(seatIndex)}
+                      isActive={_.get(seats[seatIndex], 'isActive')}
+                      isHero={seatIndex === heroSeatIndex}
+                      isSelected={seatIndex === selectedSeatIndex}
+                      seatIndex={seatIndex}
+                      positionLabel={
+                        hand && hand.positions.length
+                          ? getPositionLabelForSeatIndex(hand, seatIndex)
+                          : null
+                      }
+                      lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
+                      currentBettingRound={hand && hand.currentBettingRound}
+                    />
+                  );
+                })
+              }
+            </SquareTableRow>
+          )
         }
       </div>
     </React.Fragment>
@@ -88,130 +104,105 @@ const LegendItem = styled.div`
   padding-right: 20px;
 `;
 
-function SquareTable(props) {
-  const { onClick, seats, heroSeatIndex, selectedSeatIndex } = props;
-
-  return  _.flatMap(_.chunk(seats, 5), (seatsRow, rowIndex) =>
-    <SquareTableRow key={rowIndex}>
-      {
-        seatsRow.map(({ isActive }, seatRowIndex) => {
-          const seatIndex = seatRowIndex + ( rowIndex === 1 ? 5 : 0);
-          return (
-            <PokerTableSeat
-              key={seatIndex}
-              type="square"
-              onClick={() => onClick(seatIndex)}
-              isActive={_.get(seats[seatIndex], 'isActive')}
-              isHero={seatIndex === heroSeatIndex}
-              isSelected={seatIndex === selectedSeatIndex}
-              seatIndex={seatIndex}
-            />
-          );
-        })
-      }
-    </SquareTableRow>
-  );
-}
-
 const SquareTableRow = styled.div`
   display: flex;
   flex-direction: row;
 `;
 
-function CircularTable(props) {
-  const { onClick, seats, heroSeatIndex } = props;
+// function CircularTable(props) {
+//   const { onClick, seats, heroSeatIndex } = props;
+//
+//   // TODO: all of the below need serious refactor once/if general approach is confirmed.
+//   // TODO: can seat 1 position choice be improved?
+//   const topRowSeats = seats.length === 6
+//     ? [2, 3]
+//     : [4, 5, 6];
+//
+//   const midRowsSeats = seats.length === 6
+//     ? [[1, 4]]
+//     : [[3, 7], [2, 8]];
+//
+//   const bottomRowSeats =  seats.length === 6
+//     ? [0, 5]
+//     : [1, 0, 9];
+//
+//   const bottomRowLen = bottomRowSeats.length;
+//
+//   const midRowPadding = '10px';
+//
+//   const outerRowPadding = isTinyScreen() || seats.length > 6
+//     ? '40px'
+//     : '60px';
+//
+//   return (
+//     <React.Fragment>
+//       <CircularTableRow style={{ justifyContent: 'space-around' }}>
+//         {
+//           topRowSeats.map((seatIndex, i) =>
+//             <PokerTableSeat
+//               key={seatIndex}
+//               style={{
+//                 marginLeft: i === 0 ? outerRowPadding : 'unset',
+//                 marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
+//                 marginTop: topRowSeats.length === 3 && (i === 0 || i === 2) && '25px'
+//               }}
+//               type="badge"
+//               onClick={() => onClick(seatIndex)}
+//               isActive={_.get(seats[seatIndex], 'isActive')}
+//               isHero={console.log('seatIndex === heroSeatIndex', seatIndex === heroSeatIndex, seatIndex, heroSeatIndex) || seatIndex === heroSeatIndex}
+//               seatIndex={seatIndex}
+//             />
+//           )
+//         }
+//       </CircularTableRow>
+//       {
+//         _.flatMap(midRowsSeats, (seatIndicies, i) =>
+//           // TODO: screen size change could break this key by index.
+//           <CircularTableRow key={i} style={{
+//             justifyContent: 'space-between',
+//             paddingLeft: midRowsSeats.length === 3 && i !== 1 && midRowPadding,
+//             paddingRight: midRowsSeats.length === 3 && i !== 1 && midRowPadding}
+//           }>
+//             {
+//               seatIndicies.map((seatIndex) =>
+//                 <PokerTableSeat
+//                   key={seatIndex}
+//                   type="badge"
+//                   onClick={() => onClick(seatIndex)}
+//                   isActive={_.get(seats[seatIndex], 'isActive')}
+//                   isHero={seatIndex === heroSeatIndex}
+//                   seatIndex={seatIndex}
+//                 />
+//               )
+//             }
+//           </CircularTableRow>
+//         )
+//       }
+//       <CircularTableRow style={{ justifyContent: 'space-around' }}>
+//         {
+//           bottomRowSeats.map((seatIndex, i) =>
+//             <PokerTableSeat
+//               key={seatIndex}
+//               style={{
+//                 marginLeft: i === 0 && outerRowPadding,
+//                 marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
+//                 marginTop: bottomRowLen === 3 && i === 1 && '25px'
+//               }}
+//               type="badge"
+//               onClick={() => onClick(seatIndex)}
+//               isActive={_.get(seats[seatIndex], 'isActive')}
+//               isHero={seatIndex === heroSeatIndex}
+//               seatIndex={seatIndex}
+//             />
+//           )
+//         }
+//       </CircularTableRow>
+//     </React.Fragment>
+//   );
+// }
 
-  // TODO: all of the below need serious refactor once/if general approach is confirmed.
-  // TODO: can seat 1 position choice be improved?
-  const topRowSeats = seats.length === 6
-    ? [2, 3]
-    : [4, 5, 6];
-
-  const midRowsSeats = seats.length === 6
-    ? [[1, 4]]
-    : [[3, 7], [2, 8]];
-
-  const bottomRowSeats =  seats.length === 6
-    ? [0, 5]
-    : [1, 0, 9];
-
-  const bottomRowLen = bottomRowSeats.length;
-
-  const midRowPadding = '10px';
-
-  const outerRowPadding = isTinyScreen() || seats.length > 6
-    ? '40px'
-    : '60px';
-
-  return (
-    <React.Fragment>
-      <CircularTableRow style={{ justifyContent: 'space-around' }}>
-        {
-          topRowSeats.map((seatIndex, i) =>
-            <PokerTableSeat
-              key={seatIndex}
-              style={{
-                marginLeft: i === 0 ? outerRowPadding : 'unset',
-                marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
-                marginTop: topRowSeats.length === 3 && (i === 0 || i === 2) && '25px'
-              }}
-              type="badge"
-              onClick={() => onClick(seatIndex)}
-              isActive={_.get(seats[seatIndex], 'isActive')}
-              isHero={console.log('seatIndex === heroSeatIndex', seatIndex === heroSeatIndex, seatIndex, heroSeatIndex) || seatIndex === heroSeatIndex}
-              seatIndex={seatIndex}
-            />
-          )
-        }
-      </CircularTableRow>
-      {
-        _.flatMap(midRowsSeats, (seatIndicies, i) =>
-          // TODO: screen size change could break this key by index.
-          <CircularTableRow key={i} style={{
-            justifyContent: 'space-between',
-            paddingLeft: midRowsSeats.length === 3 && i !== 1 && midRowPadding,
-            paddingRight: midRowsSeats.length === 3 && i !== 1 && midRowPadding}
-          }>
-            {
-              seatIndicies.map((seatIndex) =>
-                <PokerTableSeat
-                  key={seatIndex}
-                  type="badge"
-                  onClick={() => onClick(seatIndex)}
-                  isActive={_.get(seats[seatIndex], 'isActive')}
-                  isHero={seatIndex === heroSeatIndex}
-                  seatIndex={seatIndex}
-                />
-              )
-            }
-          </CircularTableRow>
-        )
-      }
-      <CircularTableRow style={{ justifyContent: 'space-around' }}>
-        {
-          bottomRowSeats.map((seatIndex, i) =>
-            <PokerTableSeat
-              key={seatIndex}
-              style={{
-                marginLeft: i === 0 && outerRowPadding,
-                marginRight: ((bottomRowLen === 3 && i === 2) || (bottomRowLen === 2 && i === 1)) && outerRowPadding,
-                marginTop: bottomRowLen === 3 && i === 1 && '25px'
-              }}
-              type="badge"
-              onClick={() => onClick(seatIndex)}
-              isActive={_.get(seats[seatIndex], 'isActive')}
-              isHero={seatIndex === heroSeatIndex}
-              seatIndex={seatIndex}
-            />
-          )
-        }
-      </CircularTableRow>
-    </React.Fragment>
-  );
-}
-
-const CircularTableRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 20px;
-`;
+// const CircularTableRow = styled.div`
+//   display: flex;
+//   flex-direction: row;
+//   margin-bottom: 20px;
+// `;

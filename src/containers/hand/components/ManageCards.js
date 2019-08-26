@@ -19,94 +19,35 @@ import { deckType, holeCardsType } from '../../../types';
 // TODO: if a react web app is used in production, need to be smart about when to load these.
 import cardImages from '../../../assets/cards';
 
-// TODO: after refactoring from just hole cards to all card inputs, I'm confident the state Object could be converted to Collection for easier usage.
+// TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
   //const { deck, onSave, type, header } = props;
-  const { type, header, cards, onSave } = props;
+  const { type, header, cards, onSave, deck } = props;
 
   const [initialCards] = useState(cards);
 
   const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(type));
 
-  const totalCardsLenForType = type === cardInputTypes.HOLE_CARDS ? 2 : 5;
-
-  const [pendingCards, setPendingCards] = useState(
-    _(Array(totalCardsLenForType))
-      .fill('') // Create applicable num of empty slots
-      .map((emptyCardVal, i) => // Override empty slot if props card exists.
-        cards[i] || emptyCardVal
-      )
-      .value()
-  );
+  const [pendingCards, setPendingCards] = useState(createInitialPendingCards(type, cards));
 
   const selectedCard = pendingCards[selectedCardIndex];
 
-  const canSubmit = false;
+  const handleClickCardSlot = (pendingCardIndex) => clickCardSlot(pendingCards, pendingCardIndex, setPendingCards, setSelectedCardIndex);
 
-  const handleClickCardSlot = (cardIndex) => {
-    const targetPendingCard = pendingCards[cardIndex];
+  const handleClickCardValue = (targetIndex, value) => updatePendingCardVal(pendingCards, setPendingCards, targetIndex, value);
 
-    if (!!targetPendingCard) {
-      handleChangeCardValue(cardIndex, targetPendingCard[0]); // They clicked on populated card, remove suit to trigger card image selection display.
-    }
-
-    setSelectedCardIndex(cardIndex);
-  };
-
-  const handleClickValue = (value) => handleChangeCardValue(selectedCardIndex, value);
-
-  const handleChangeCardValue = (targetIndex, value) => setPendingCards(
-    pendingCards.map((c, i) =>
-      i === targetIndex
-        ?  ('' + value)
-        : c
-    )
-  );
-
-  const handlePickCard = (card) => {
-
-    const updatedPendingCards = pendingCards.map((c, i) =>
-      i === selectedCardIndex
-        ? card
-        : c
+  const handlePickCard = (card) =>
+    pickCard(
+      pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, card
     );
 
-    setPendingCards(updatedPendingCards);
-
-    const isFinishedEditing = (
-      selectedCardIndex === pendingCards.length - 1 &&
-      initialCards.length === 0 // Only go to next screen if they selected final card on the initial card entry (not future edits)
-    );
-
-    onSave(updatedPendingCards, isFinishedEditing);
-
-    setSelectedCardIndex(selectedCardIndex + 1);
-  };
-
-  if (canSubmit) {
-    return (
-      <Button
-        color="primary"
-        //onClick={handleClickNext}
-        variant="outlined"
-        fullWidth
-      >
-        Submit
-      </Button>
-    );
-  }
-
-  const showCardImageSelection = !!selectedCard && (
-    selectedCard.length === 1
-  );
+  const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards);
 
   // TODO: larger card dimensions in picker when screen is > tinyScreen
   //       shrink header so that the card slot selections can be larger
-  //       use pending deck and disable card picker items and card value keys
   //       Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
-  //       show value key as selected when returning to card value input
-  //       save and consider if should nav after inputting last card the first time or always use next button.
-  //
+  //       handle next button required when returning to hole cards to edit
+
   return (
     <React.Fragment>
       <CardsSurface>
@@ -134,21 +75,58 @@ export default function ManageCards(props) {
         }
       </div>
       </CardsSurface>
+      {/*{*/}
+        {/*showButtonControls(initialCards, pendingCards) &&*/}
+        {/*<React.Fragment>*/}
+          {/*{*/}
+            {/*<Button*/}
+              {/*color="primary"*/}
+              {/*//onClick={handleClickNext}*/}
+              {/*fullWidth*/}
+              {/*variant="contained"*/}
+            {/*>*/}
+              {/*Edit*/}
+            {/*</Button>*/}
+          {/*}*/}
+          {/*{*/}
+            {/*<Button*/}
+              {/*color="default"*/}
+              {/*//onClick={handleClickNext}*/}
+              {/*fullWidth*/}
+              {/*variant="contained"*/}
+            {/*>*/}
+              {/*{*/}
+                {/*_.difference(cards, pendingCards) > 0*/}
+              {/*}*/}
+              {/*Submit*/}
+            {/*</Button>*/}
+          {/*}*/}
+        {/*</React.Fragment>*/}
+      {/*}*/}
       {
-        showCardImageSelection &&
+        showCardCarousel &&
         <CardPicker>
 
             <CardCarouselRow>
               {
                 _(cardImages)
                   .keys()
-                  .filter(cardKey => !!selectedCard && cardKey.startsWith(selectedCard))
+                  .filter(cardKey =>
+                    !!selectedCard &&
+                    cardKey.startsWith(selectedCard) &&
+                    (
+                      _.includes(deck, cardKey) ||
+                      // Include a dealt card if it is the one they clicked on to edit.
+                      !_.includes(pendingCards, cardKey)
+                    )
+                  )
                   .map((cardKey) =>
                     <Grow
                       key={cardKey}
                       in={true}
                       style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
                     >
+                      {/* TODO: should we somehow include cards no longer in deck and show them disabled and/or with cards location? */}
                       <div onClick={() => handlePickCard(cardKey)}>
                         <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
                       </div>
@@ -157,14 +135,14 @@ export default function ManageCards(props) {
                   .value()
               }
             </CardCarouselRow>
-          <div onClick={() => handleClickValue('')}>
+          <div onClick={() => handleClickCardValue(selectedCardIndex, '')}>
             <ArrowLeft fontSize="large" />
             <span>Card Value</span>
           </div>
         </CardPicker>
       }
       {
-        !showCardImageSelection &&
+        !showCardCarousel && !showButtonControls(initialCards, pendingCards) &&
         <Slide
           in={true}
           direction="up"
@@ -180,16 +158,14 @@ export default function ManageCards(props) {
                       <ValueButton
                         key={cv}
                         color="primary"
-                        //onClick={handleClickNext}
                         variant="outlined"
                         fullWidth
                         onClick={() =>
-                          //!isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv) &&
-                          handleClickValue(cv)
+                          !isCardValueDisabled(deck, cv) &&
+                          handleClickCardValue(selectedCardIndex, cv)
                         }
-                        // disabled={isCardValueDisabled(getPendingDeck(), cardsMap[selectedCardKey].suit, cv)}
-                        // isSelected={cardsMap[selectedCardKey].value === cv}
-                      >
+                        disabled={isCardValueDisabled(deck, cv)}
+                        >
                         { cv }
                       </ValueButton>
                     )
@@ -268,17 +244,12 @@ const CardSlot = styled(({ isEmpty, isSelected, type, isDisabled, ...rest }) => 
   `};                  
 `;
 
-// function isCardValueDisabled(deck, selectedSuit, cardValue) {
-//   // TODO: test first condition when board cards are wired up.
-//   const noCardValueInDeck = !deck.some((c) => c.slice(0, -1) === cardValue);
-//   const noCardInDeck = !!selectedSuit && !_.includes(deck, (cardValue + selectedSuit));
-//
-//   return noCardValueInDeck || noCardInDeck;
-// }
-//
-// function isSuitDisabled(deck, selectedValue, suit) {
-//   return !!selectedValue && !_.includes(deck, (selectedValue + suit));
-// }
+// TODO: Update everywhere else. I like this approach to helper functions. Defining inside function like methods is hold over from class based approach.
+function isCardValueDisabled(deck, cardValue) {
+  // TODO: untested post refactor now that you never no suit before value.
+
+  return !deck.some((c) => c.slice(0, -1) === cardValue);
+}
 
 function getInitialCardIndexForType(type) {
   return type === cardInputTypes.TURN
@@ -293,4 +264,60 @@ function getIsCardIndexDisabled(type, cardIndex) {
     (type === cardInputTypes.FLOP && cardIndex > 2) ||
     (type === cardInputTypes.TURN && cardIndex > 3)
   );
+}
+
+function updatePendingCardVal(pendingCards, setPendingCards, pendingCardIndex, newValue) {
+  setPendingCards(
+    pendingCards.map((c, i) =>
+      i === pendingCardIndex
+        ?  ('' + newValue)
+        : c
+    )
+  );
+};
+
+function pickCard(pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, pickedCard) {
+  const updatedPendingCards = pendingCards.map((c, i) =>
+    i === selectedCardIndex
+      ? pickedCard
+      : c
+  );
+
+  setPendingCards(updatedPendingCards);
+
+  const isFinishedEditing = (
+    selectedCardIndex === pendingCards.length - 1 &&
+    initialCards.length === 0 // Only go to next screen if they selected final card on the initial card entry (not future edits)
+  );
+
+  onSave(updatedPendingCards, isFinishedEditing);
+
+  setSelectedCardIndex(selectedCardIndex + 1);
+}
+
+function clickCardSlot(pendingCards, pendingCardIndex, setPendingCards, setSelectedCardIndex) {
+  const targetPendingCard = pendingCards[pendingCardIndex];
+
+  // They clicked on prev selected card--clear value.
+  if (!!targetPendingCard) {
+    updatePendingCardVal(pendingCards, setPendingCards, pendingCardIndex, '');
+  }
+
+  setSelectedCardIndex(pendingCardIndex);
+}
+
+function createInitialPendingCards(type, existingCards) {
+  const totalCardsLenForType = type === cardInputTypes.HOLE_CARDS ? 2 : 5;
+
+  return _(Array(totalCardsLenForType))
+    .fill('') // Create applicable num of empty slots
+    .map((emptyCardVal, i) => // Override empty slot if props card exists.
+      existingCards[i] || emptyCardVal
+    )
+    .value();
+}
+
+function showButtonControls(initialCards, pendingCards) {
+  return !!initialCards.length &&
+    initialCards.length === _.filter(pendingCards).length;
 }
