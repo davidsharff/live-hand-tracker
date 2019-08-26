@@ -51,5 +51,7 @@ export default store => next => action => {
 
     default:
       next(action);
+      // TODO: de-dup setting hand in local storage
+      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
   }
 };

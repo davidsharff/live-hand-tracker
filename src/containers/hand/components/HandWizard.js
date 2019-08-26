@@ -1,23 +1,36 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import _ from 'lodash';
 import { Route } from 'react-router-dom';
 
 import styled from 'styled-components';
 import Container from '@material-ui/core/Container';
 import Typography from "@material-ui/core/Typography/Typography";
+import Input from "@material-ui/core/Input/Input";
+import Button from "@material-ui/core/Button/Button";
 
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
 import { cardInputTypes, handActionTypes } from "../../../constants";
-import { Button, Input, Row } from 'reactstrap';
-import { getAvailableActionForSeatIndex } from '../../../redux/reducers/hand';
+import {getAvailableActionForSeatIndex, getNextToActSeatIndex} from '../../../redux/reducers/hand';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onAction } = props;
 
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
+
+  const nextToActSeatIndex = hand.buttonSeatIndex !== null
+    ? getNextToActSeatIndex(hand)
+    : null;
+
+  useEffect(() => {
+    if (hand.buttonSeatIndex !== null) {
+      setSelectedSeatIndex(nextToActSeatIndex);
+    }
+  }, [hand.buttonSeatIndex, nextToActSeatIndex]);
+
+  const handleAction = (actionType, amount) => onAction(selectedSeatIndex, actionType, amount);
 
   // TODO: below sections should be their own components
   return (
@@ -46,7 +59,7 @@ export default function HandWizard(props) {
                     deck={deck}
                     type={cardInputTypes.HOLE_CARDS}
                     onSave={(cards, isFinishedEditing) => {
-                      props.onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
+                      onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
                       setSelectedSeatIndex(null);
                     }}
                     header={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}
@@ -58,6 +71,7 @@ export default function HandWizard(props) {
                   hand={hand}
                   selectedSeatIndex={selectedSeatIndex}
                   isHandComplete={isHandComplete}
+                  handleAction={handleAction}
                 />
               }/>
             </React.Fragment>
@@ -101,7 +115,7 @@ function InitialHandBody() {
 }
 
 function ActionBody(props) {
-  const { isHandComplete, hand, selectedSeatIndex } = props;
+  const { isHandComplete, hand, selectedSeatIndex, handleAction } = props;
 
   if (isHandComplete) {
     return (
@@ -112,7 +126,7 @@ function ActionBody(props) {
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
   return (
-    <div>
+    <ActionBodyContainer>
       {
         // TODO: make most common actions sort first.
         _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents)
@@ -122,19 +136,28 @@ function ActionBody(props) {
               type={availableAction.type}
               amount={availableAction.amount}
               isHandComplete={isHandComplete}
+              handleAction={handleAction}
             />
           )
       }
-    </div>
+    </ActionBodyContainer>
   );
 }
 
+const ActionBodyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+`;
+
 function ActionInput(props) {
-  const { type, amount } = props;
+  const { type, amount, handleAction } = props;
 
   switch (type) {
     case handActionTypes.RAISE: {
-      return <RaiseInput minRaise={amount} />;
+      return <RaiseInput minRaise={amount} innerStyle={{ marginTop: '20%' }} handleClick={handleAction} />;
     }
 
     default:
@@ -145,7 +168,7 @@ function ActionInput(props) {
 }
 
 function RaiseInput(props) {
-  const { minRaise } = props;
+  const { minRaise, innerStyle, handleClick } = props;
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
   const handleChange = (e) => {
@@ -155,12 +178,18 @@ function RaiseInput(props) {
     );
   };
 
+  console.log(handleClick, ' test');
   return (
-    <Button outline color="primary">
-      <Row className="d-flex flex-row justify-content-center align-items-center">
-        <span style={{ marginRight: '10px'}}>Raise</span>
-        <Input onClick={(e) => e.stopPropagation()} className="px-0" style={{ maxWidth: '50px', textAlign: 'center', height: '24px'}} color="success" type="number" value={raiseAmount} onChange={handleChange} />
-      </Row>
+    <Button variant="outlined" color="primary" fullWidth style={innerStyle} disableRipple onClick={() => handleClick(handActionTypes.RAISE, raiseAmount)}>
+      <span style={{ marginRight: '5px' }}>Raise</span>
+      <Input
+        onClick={(e) => e.stopPropagation()}
+        inputProps={{ style: { maxWidth: '50px', textAlign: 'center' } }}
+        color="success"
+        type="number"
+        value={raiseAmount}
+        onChange={handleChange}
+      />
     </Button>
   );
 }
