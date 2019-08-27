@@ -74,11 +74,13 @@ export default function PokerTableSeat(props) {
 
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
+    // TODO: example of why it'd be great if theme was always on styled components props.
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={isSelected ? palette.secondary.light : palette.primary.dark}
+      borderColor={isSelected ? palette.primary.dark : palette.primary.light}
+      heavyBorder={isSelected}
       backgroundColor={palette.grey['50']}
-      isLiveHand={isLiveHand}
+      isMultiRow={isLiveHand}
     >
       <SeatAvatar
         style={{
@@ -91,13 +93,22 @@ export default function PokerTableSeat(props) {
       />
       {
         isLiveHand && lastAction &&
-        <div style={{color: palette.text.secondary}}>
-          <div style={{ textAlign: 'center'}}>{ _.capitalize(lastAction.type) }</div>
+        <BodyContainer style={{color: palette.text.secondary}}>
+          <div>
+            {
+              _.capitalize(lastAction.type)
+            }
+          </div>
           {
-            (lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
-            <div style={{ textAlign: 'center'}}>${lastAction.amount}</div>
+            <div>
+              {
+                // TODO: move to const or fn
+                (lastAction && lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
+                '$' + lastAction.amount
+              }
+            </div>
           }
-        </div>
+        </BodyContainer>
       }
       {
         !isLiveHand &&
@@ -109,19 +120,29 @@ export default function PokerTableSeat(props) {
   );
 }
 
-const SquareSeatContainer = styled(({ hasButton, borderColor, backgroundColor, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, isMultiRow, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
-  //justify-content: space-between;
-  justify-content: ${p => p.isLiveHand ? 'space-between' : 'space-around'}
+  justify-content: ${p => p.isMultiRow ? 'space-between' : 'space-around'}
   align-items: center;
   flex-basis: calc(20% - 5px);
   margin-right: 5px;
   margin-bottom: 5px;
-  padding-top: ${p => p.isLiveHand && '5px'};
+  padding-top: ${p => p.isMultiRow && '5px'};
   height: 70px;
   background-color: ${p => p.backgroundColor};
   border: ${p => `solid ${p.borderColor} 1px`};
   border-radius: 5px;
   font-size: 12px;
+  ${p => p.heavyBorder && `
+    border-width: 2px
+  `};
 `;
+
+const BodyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-around;
+  align-items: center;
+ `;
