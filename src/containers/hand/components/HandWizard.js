@@ -131,7 +131,7 @@ function ActionBody(props) {
         // TODO: make most common actions sort first.
         _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents)
           .map(availableAction =>
-            <ActionInput
+            <ActionOption
               key={availableAction.type}
               type={availableAction.type}
               amount={availableAction.amount}
@@ -150,14 +150,21 @@ const ActionBodyContainer = styled.div`
   align-items: center;
   flex: 1;
   width: 100%;
+  padding: 20px 0;
 `;
 
-function ActionInput(props) {
+function ActionOption(props) {
   const { type, amount, handleAction } = props;
 
+  const handleClick = (optionalValue) => handleAction(type, optionalValue || null);
+
   switch (type) {
+    case handActionTypes.CALL: {
+      return <CallButton amount={amount} handleClick={handleClick} />;
+    }
+
     case handActionTypes.RAISE: {
-      return <RaiseInput minRaise={amount} innerStyle={{ marginTop: '20%' }} handleClick={handleAction} />;
+      return <RaiseButton minRaise={amount} handleClick={handleClick} />;
     }
 
     default:
@@ -167,7 +174,7 @@ function ActionInput(props) {
   }
 }
 
-function RaiseInput(props) {
+function RaiseButton(props) {
   const { minRaise, innerStyle, handleClick } = props;
   const [raiseAmount, setRaiseAmount] = useState(minRaise);
 
@@ -178,21 +185,35 @@ function RaiseInput(props) {
     );
   };
 
-  console.log(handleClick, ' test');
   return (
-    <Button variant="outlined" color="primary" fullWidth style={innerStyle} disableRipple onClick={() => handleClick(handActionTypes.RAISE, raiseAmount)}>
-      <span style={{ marginRight: '5px' }}>Raise</span>
+    <ActionButton variant="outlined" color="primary" fullWidth style={innerStyle} disableRipple onClick={() => handleClick(raiseAmount)}>
+      <span style={{ marginRight: '5px' }}>Raise $</span>
       <Input
         onClick={(e) => e.stopPropagation()}
-        inputProps={{ style: { maxWidth: '50px', textAlign: 'center' } }}
+        inputProps={{ style: { maxWidth: '50px', textAlign: 'center', padding: '2px 0' } }}
         color="success"
         type="number"
         value={raiseAmount}
         onChange={handleChange}
       />
-    </Button>
+    </ActionButton>
   );
 }
+
+function CallButton(props) {
+  const { amount, innerStyle, handleClick } = props;
+
+  return (
+    <ActionButton variant="outlined" color="secondary" fullWidth style={innerStyle} disableRipple onClick={handleClick}>
+      Call&nbsp;{ '$' + amount }
+    </ActionButton>
+  );
+}
+
+const ActionButton = styled(Button)`
+  margin-top: 20px !important;
+  height: 44px;
+`;
 
 function sortActionComponents({ type }) {
   return type === handActionTypes.CHECK
