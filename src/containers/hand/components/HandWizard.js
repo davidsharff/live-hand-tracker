@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import _ from 'lodash';
 import { Route } from 'react-router-dom';
 
@@ -11,26 +11,16 @@ import Button from "@material-ui/core/Button/Button";
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
 import { cardInputTypes, handActionTypes } from "../../../constants";
-import {getAvailableActionForSeatIndex, getNextToActSeatIndex} from '../../../redux/reducers/hand';
+import { getAvailableActionForSeatIndex } from '../../../redux/reducers/hand';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onAction } = props;
-
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
+  console.log('rendering', selectedSeatIndex);
 
-  const nextToActSeatIndex = hand.buttonSeatIndex !== null
-    ? getNextToActSeatIndex(hand)
-    : null;
-
-  useEffect(() => {
-    if (hand.buttonSeatIndex !== null) {
-      setSelectedSeatIndex(nextToActSeatIndex);
-    }
-  }, [hand.buttonSeatIndex, nextToActSeatIndex]);
-
-  const handleAction = (actionType, amount) => onAction(selectedSeatIndex, actionType, amount);
+  const handleAction = (seatIndex, actionType, amount) => onAction(seatIndex, actionType, amount);
 
   // TODO: below sections should be their own components
   return (
@@ -66,14 +56,21 @@ export default function HandWizard(props) {
                   />
                 );
               }}/>
-              <Route exact path="/hand/actions" render={() =>
-                <ActionBody
-                  hand={hand}
-                  selectedSeatIndex={selectedSeatIndex}
-                  isHandComplete={isHandComplete}
-                  handleAction={handleAction}
-                />
-              }/>
+              <Route path="/hand/actions/:seatNum" render={(routerProps) => {
+                // TODO: make indv routes per seat.
+                const matchedSeatIndex = parseInt(routerProps.match.params.seatNum, 10) - 1;
+                console.log('setting', matchedSeatIndex);
+                setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
+
+                return (
+                  <ActionBody
+                    hand={hand}
+                    selectedSeatIndex={selectedSeatIndex}
+                    isHandComplete={isHandComplete}
+                    handleAction={handleAction}
+                  />
+                );
+              }}/>
             </React.Fragment>
           )
       }
@@ -117,6 +114,11 @@ function InitialHandBody() {
 function ActionBody(props) {
   const { isHandComplete, hand, selectedSeatIndex, handleAction } = props;
 
+  const handleClick = useCallback((actionType, amount) =>
+    handleAction(selectedSeatIndex, actionType, amount)
+    , [selectedSeatIndex, handleAction]
+  );
+
   if (isHandComplete) {
     return (
       <h4>TODO: Hand Complete</h4>
@@ -136,7 +138,7 @@ function ActionBody(props) {
               type={availableAction.type}
               amount={availableAction.amount}
               isHandComplete={isHandComplete}
-              handleAction={handleAction}
+              onClick={handleClick}
             />
           )
       }
@@ -154,63 +156,58 @@ const ActionBodyContainer = styled.div`
 `;
 
 function ActionOption(props) {
-  const { type, amount, handleAction } = props;
+  const { type, amount, onClick } = props;
 
-  const handleClick = (optionalValue) => handleAction(type, optionalValue || null);
+  const handleClick = (optionalValue) => onClick(type, optionalValue || null);
+  const passiveActions = [handActionTypes.FOLD, handActionTypes.CHECK, handActionTypes.CALL];
+  const typeLabel = _.startCase(type);
 
-  switch (type) {
-    case handActionTypes.CALL: {
-      return <CallButton amount={amount} handleClick={handleClick} />;
-    }
+  if (_.includes(passiveActions, type)) {
+    const amountSuffix = type === handActionTypes.FOLD ? '' : '$' + amount;
+    return (
+      <ActionButton color="primary" onClick={handleClick}>
+        { typeLabel + ' ' + amountSuffix }
+      </ActionButton>
 
-    case handActionTypes.RAISE: {
-      return <RaiseButton minRaise={amount} handleClick={handleClick} />;
-    }
-
-    default:
-      console.log('TODO: handle ' + type + ' turn on throw when completes');
-      return null;
-      //throw new Error(`Unknown hand input type: ${type}`);
+    );
   }
+
+  const actionAmount = type === handActionTypes.RAISE
+    ? amount * 2
+    : amount;
+
+  return (
+    <ActionButtonWithInput buttonColor="secondary" amount={actionAmount} handleClick={handleClick} label={typeLabel} />
+  );
 }
 
-function RaiseButton(props) {
-  const { minRaise, innerStyle, handleClick } = props;
-  const [raiseAmount, setRaiseAmount] = useState(minRaise);
+function ActionButtonWithInput(props) {
+  const { amount, label, handleClick, buttonColor } = props;
+  const [newAmount, setNewAmount] = useState(amount);
 
   const handleChange = (e) => {
     const newValue = parseInt(e.target.value, 10);
-    setRaiseAmount(
+    setNewAmount(
       isNaN(newValue) ? 0 : newValue
     );
   };
 
   return (
-    <ActionButton variant="outlined" color="primary" fullWidth style={innerStyle} disableRipple onClick={() => handleClick(raiseAmount)}>
-      <span style={{ marginRight: '5px' }}>Raise $</span>
+    <ActionButton variant="outlined" color={buttonColor} fullWidth disableRipple onClick={() => handleClick(newAmount)}>
+      <span style={{ marginRight: '5px' }}>{ label }$</span>
       <Input
         onClick={(e) => e.stopPropagation()}
         inputProps={{ style: { maxWidth: '50px', textAlign: 'center', padding: '2px 0' } }}
         color="success"
         type="number"
-        value={raiseAmount}
+        value={newAmount}
         onChange={handleChange}
       />
     </ActionButton>
   );
 }
 
-function CallButton(props) {
-  const { amount, innerStyle, handleClick } = props;
-
-  return (
-    <ActionButton variant="outlined" color="secondary" fullWidth style={innerStyle} disableRipple onClick={handleClick}>
-      Call&nbsp;{ '$' + amount }
-    </ActionButton>
-  );
-}
-
-const ActionButton = styled(Button)`
+const ActionButton = styled(({ ...rest }) => <Button { ...rest } disableRipple fullWidth variant="outlined" />)`
   margin-top: 20px !important;
   height: 44px;
 `;
@@ -218,9 +215,9 @@ const ActionButton = styled(Button)`
 function sortActionComponents({ type }) {
   return type === handActionTypes.CHECK
     ? 0
-    : type === handActionTypes.CALL
+    : type  === handActionTypes.FOLD
       ? 1
-      : type  === handActionTypes.FOLD
+      : type === handActionTypes.CALL
         ? 2
         : type === handActionTypes.BET
           ? 3

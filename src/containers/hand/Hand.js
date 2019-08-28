@@ -9,7 +9,7 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 import { bettingRounds } from "../../constants";
 
-import {getDeck, getNextSeatIndex, getIsHandComplete} from "../../redux/reducers/hand";
+import {getDeck, getNextSeatIndex, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/hand";
 import Overview from "./components/Overview";
 
 function Hand(props) {
@@ -58,7 +58,7 @@ function Hand(props) {
 
     if (isFinishedEditing) {
       // TODO: this should just go to a '/hand' route.
-      props.history.push('/hand/actions');
+      props.history.push(`/hand/actions/${getNextToActSeatIndex(hand) + 1}`);
     }
   };
 
@@ -80,11 +80,10 @@ function Hand(props) {
         seatIndex,
         type,
         amount
-      },
-      aux: {
-        redirectToFn: (path) => history.push(path)
       }
     });
+
+    props.history.push(`/hand/actions/${getNextToActSeatIndex(hand) + 1}`);
   };
 
   const handleClickSeat = (seatIndex) => {
