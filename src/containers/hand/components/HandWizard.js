@@ -11,15 +11,13 @@ import Button from "@material-ui/core/Button/Button";
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
 import { cardInputTypes, handActionTypes } from "../../../constants";
-import { getAvailableActionForSeatIndex } from '../../../redux/reducers/hand';
+import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../../../redux/reducers/hand';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onAction } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
-
-  const handleAction = (seatIndex, actionType, amount) => onAction(seatIndex, actionType, amount);
 
   // TODO: below sections should be their own components
   return (
@@ -51,7 +49,7 @@ export default function HandWizard(props) {
                       onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
                       setSelectedSeatIndex(null);
                     }}
-                    header={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}
+                    headerText={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}
                   />
                 );
               }}/>
@@ -64,9 +62,10 @@ export default function HandWizard(props) {
                     return (
                       <ActionBody
                         hand={hand}
-                        selectedSeatIndex={i}
+                        seatIndex={i}
                         isHandComplete={isHandComplete}
-                        handleAction={handleAction}
+                        onClickAction={onAction}
+                        positionLabel={i === hand.heroSeatIndex ? 'Hero' : getPositionLabelForSeatIndex(hand, i)}
                       />
                     );
                   }}/>
@@ -114,11 +113,11 @@ function InitialHandBody() {
 }
 
 function ActionBody(props) {
-  const { isHandComplete, hand, selectedSeatIndex, handleAction } = props;
+  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel } = props;
 
   const handleClick = useCallback((actionType, amount) =>
-    handleAction(selectedSeatIndex, actionType, amount)
-    , [selectedSeatIndex, handleAction]
+      onClickAction(seatIndex, actionType, amount)
+    , [seatIndex, onClickAction]
   );
 
   if (isHandComplete) {
@@ -131,12 +130,15 @@ function ActionBody(props) {
     // Update: this todo was pre-ui overhaul
   return (
     <ActionBodyContainer>
+      <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
+        { positionLabel }&nbsp;(Seat { seatIndex + 1 })
+      </Typography>
       {
         // TODO: make most common actions sort first.
-        _.sortBy(getAvailableActionForSeatIndex(hand, selectedSeatIndex), sortActionComponents)
+        _.sortBy(getAvailableActionForSeatIndex(hand, seatIndex), sortActionComponents)
           .map(availableAction =>
             <ActionOption
-              key={availableAction.type}
+              key={seatIndex + availableAction.type}
               type={availableAction.type}
               amount={availableAction.amount}
               isHandComplete={isHandComplete}
@@ -160,7 +162,9 @@ const ActionBodyContainer = styled.div`
 function ActionOption(props) {
   const { type, amount, onClick } = props;
 
+  // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
+
   const passiveActions = [handActionTypes.FOLD, handActionTypes.CHECK, handActionTypes.CALL];
   const typeLabel = _.startCase(type);
 
@@ -173,13 +177,8 @@ function ActionOption(props) {
     );
   }
 
-  // TODO: bug causing value to be quadrupling
-  const actionAmount = type === handActionTypes.RAISE
-    ? amount * 2
-    : amount;
-
   return (
-    <ActionButtonWithInput buttonColor="secondary" amount={actionAmount} handleClick={handleClick} label={typeLabel} />
+    <ActionButtonWithInput buttonColor="secondary" amount={amount} handleClick={handleClick} label={typeLabel} />
   );
 }
 
@@ -196,9 +195,9 @@ function ActionButtonWithInput(props) {
 
   return (
     <ActionButton variant="outlined" color={buttonColor} fullWidth disableRipple onClick={() => handleClick(newAmount)}>
-      <span style={{ marginRight: '5px' }}>{ label }$</span>
+      <span style={{ marginRight: '5px' }}>{ label }&nbsp;$</span>
       <Input
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation() }
         inputProps={{ style: { maxWidth: '50px', textAlign: 'center', padding: '2px 0' } }}
         color="success"
         type="number"

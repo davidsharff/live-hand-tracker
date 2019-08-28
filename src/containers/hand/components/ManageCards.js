@@ -22,7 +22,7 @@ import cardImages from '../../../assets/cards';
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
   //const { deck, onSave, type, header } = props;
-  const { type, header, cards, onSave, deck } = props;
+  const { type, headerText, cards, onSave, deck } = props;
 
   const [initialCards] = useState(cards);
 
@@ -52,7 +52,7 @@ export default function ManageCards(props) {
     <React.Fragment>
       <CardsSurface>
         <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
-          { header }
+          { headerText }
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>
         {
