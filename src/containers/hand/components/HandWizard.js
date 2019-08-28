@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import _ from 'lodash';
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 
 import styled from 'styled-components';
 import Container from '@material-ui/core/Container';
@@ -10,13 +10,13 @@ import Button from "@material-ui/core/Button/Button";
 
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
-import { cardInputTypes, handActionTypes } from "../../../constants";
+import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
 import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../../../redux/reducers/hand';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onAction } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   // TODO: below sections should be their own components
@@ -56,8 +56,11 @@ export default function HandWizard(props) {
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
-                    // TODO: make indv routes per seat.
-                    setSelectedSeatIndex(i); // TODO: re-route if invalid seat index (somehow?).
+                    if (hand.buttonSeatIndex === null) {
+                      return <Redirect to="/hand/actions" />;
+                    }
+
+                    setSelectedSeatIndex(i);
 
                     return (
                       <ActionBody
@@ -76,18 +79,26 @@ export default function HandWizard(props) {
           )
       }
 
-      {/*{*/}
-        {/*_.values(bettingRounds).map((bettingRound) =>*/}
-          {/*// TOO: bug. Handle if they manually return to prior board input url.*/}
-          {/*<Route exact key={bettingRound} path={`/hand/board/${bettingRound}`} render={() => {*/}
-            {/*if (hand.buttonSeatIndex === null) {*/}
-              {/*return <Redirect to="/hand/actions" />;*/}
-            {/*}*/}
+      {
+        _.values(bettingRounds).map((bettingRound) =>
+          // TOO: bug. Handle if they manually return to prior board input url.
+          <Route exact key={bettingRound} path={`/hand/board/${bettingRound}`} render={() => {
+            if (hand.buttonSeatIndex === null) {
+              return <Redirect to="/hand/actions" />;
+            }
 
-            {/*return <ManageCards cards={hand.board} deck={deck} onSave={onSaveBoardCards} type={bettingRound} />*/}
-          {/*}}/>*/}
-        {/*)*/}
-      {/*}*/}
+            return (
+              <ManageCards
+                cards={hand.board}
+                deck={deck}
+                type={bettingRound}
+                onSave={(cards, isFinishedEditing) => onSaveBoardCards(cards, isFinishedEditing)}
+                headerText={_.capitalize(bettingRound)}
+              />
+            );
+          }}/>
+        )
+      }
     </StyledContainer>
   );
 }

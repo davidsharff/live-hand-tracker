@@ -49,6 +49,11 @@ export default store => next => action => {
     // TODO: we should handle always saving to local storage on any hand action type.
     case actionTypes.SET_BOARD_CARDS: {
       next(action);
+
+      if (action.aux.isFinishedEditing) {
+        action.aux.navToNextSeatIndex(store.getState().hand);
+      }
+
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }

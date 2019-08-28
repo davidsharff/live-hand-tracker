@@ -61,15 +61,17 @@ function Hand(props) {
     }
   };
 
-  const handleSaveBoardCards = (cards) => {
+  const handleSaveBoardCards = (cards, isFinishedEditing) => {
     props.dispatch({
       type: actionTypes.SET_BOARD_CARDS,
       payload: {
         cards
+      },
+      aux: {
+        isFinishedEditing,
+        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand))
       }
     });
-
-    history.push('/hand/actions');
   };
 
   const handleAddAction = (seatIndex, type, amount) => {
