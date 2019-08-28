@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, { useState, useCallback } from 'react';
 import _ from 'lodash';
 import { Route } from 'react-router-dom';
 
@@ -18,7 +18,6 @@ export default function HandWizard(props) {
 
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onAction } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
-  console.log('rendering', selectedSeatIndex);
 
   const handleAction = (seatIndex, actionType, amount) => onAction(seatIndex, actionType, amount);
 
@@ -56,21 +55,24 @@ export default function HandWizard(props) {
                   />
                 );
               }}/>
-              <Route path="/hand/actions/:seatNum" render={(routerProps) => {
-                // TODO: make indv routes per seat.
-                const matchedSeatIndex = parseInt(routerProps.match.params.seatNum, 10) - 1;
-                console.log('setting', matchedSeatIndex);
-                setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
+              {
+                hand.seats.map(({ isActive }, i) => isActive &&
+                  <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
+                    // TODO: make indv routes per seat.
+                    setSelectedSeatIndex(i); // TODO: re-route if invalid seat index (somehow?).
 
-                return (
-                  <ActionBody
-                    hand={hand}
-                    selectedSeatIndex={selectedSeatIndex}
-                    isHandComplete={isHandComplete}
-                    handleAction={handleAction}
-                  />
-                );
-              }}/>
+                    return (
+                      <ActionBody
+                        hand={hand}
+                        selectedSeatIndex={i}
+                        isHandComplete={isHandComplete}
+                        handleAction={handleAction}
+                      />
+                    );
+                  }}/>
+
+                )
+              }
             </React.Fragment>
           )
       }
@@ -163,15 +165,15 @@ function ActionOption(props) {
   const typeLabel = _.startCase(type);
 
   if (_.includes(passiveActions, type)) {
-    const amountSuffix = type === handActionTypes.FOLD ? '' : '$' + amount;
     return (
       <ActionButton color="primary" onClick={handleClick}>
-        { typeLabel + ' ' + amountSuffix }
+        { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
       </ActionButton>
 
     );
   }
 
+  // TODO: bug causing value to be quadrupling
   const actionAmount = type === handActionTypes.RAISE
     ? amount * 2
     : amount;

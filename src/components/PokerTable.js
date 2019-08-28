@@ -69,7 +69,7 @@ export default function PokerTable(props) {
                     <PokerTableSeat
                       key={seatIndex}
                       type="square"
-                      onClick={() => onClickSeat(seatIndex)}
+                      onClick={() => isActive && onClickSeat(seatIndex)}
                       isActive={_.get(seats[seatIndex], 'isActive')}
                       isHero={seatIndex === heroSeatIndex}
                       isSelected={seatIndex === selectedSeatIndex}

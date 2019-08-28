@@ -3,6 +3,7 @@ import {isCurrentRoundComplete, getIsHandComplete} from "../reducers/hand";
 
 // TODO: add validateAction middleware.
 // TODO: add pre and postActionValidation middleware. Post should be absolute last in chain before reducer and block _EVENT suffix actions from getting through.
+// TODO: it'd be cleaner to have seperate hand and session middleware.
 export default store => next => action => {
   const { type } = action;
 
@@ -31,14 +32,17 @@ export default store => next => action => {
 
     case actionTypes.SET_NEW_ACTION: {
       next(action);
-      const { hand } = store.getState();
+      {
+        const { hand } = store.getState();
 
-      if (isCurrentRoundComplete(hand) && !getIsHandComplete(hand)) {
-        next({
-          type: actionTypes.ADVANCE_BETTING_ROUND
-        });
+        if (isCurrentRoundComplete(hand) && !getIsHandComplete(hand)) {
+          next({
+            type: actionTypes.ADVANCE_BETTING_ROUND
+          });
+        }
       }
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
+      action.aux.navToNextSeatIndex(store.getState().hand);
       return;
     }
 
@@ -46,6 +50,16 @@ export default store => next => action => {
     case actionTypes.SET_BOARD_CARDS: {
       next(action);
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
+      return;
+    }
+
+    case actionTypes.SET_HOLE_CARDS: {
+      next(action);
+      // TODO: improvement on this approach is to use breaks instead of returns and then check generic bool for existance
+      //       of aux nav cb and always call. Additionally, that's where hand would be saved to localStorage.
+      if (action.aux.isFinishedEditing) {
+        action.aux.navToNextSeatIndex(store.getState().hand);
+      }
       return;
     }
 

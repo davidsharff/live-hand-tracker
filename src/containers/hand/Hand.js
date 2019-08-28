@@ -48,17 +48,16 @@ function Hand(props) {
       payload: {
         seatIndex,
         holeCards
+      },
+      aux: {
+        isFinishedEditing,
+        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand))
       }
     });
 
     if (isHandComplete) {
       const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
       handleNavToSeatHoleCards(nextSeatIndex);
-    }
-
-    if (isFinishedEditing) {
-      // TODO: this should just go to a '/hand' route.
-      props.history.push(`/hand/actions/${getNextToActSeatIndex(hand) + 1}`);
     }
   };
 
@@ -80,10 +79,13 @@ function Hand(props) {
         seatIndex,
         type,
         amount
+      },
+      aux: {
+        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand))
       }
     });
 
-    props.history.push(`/hand/actions/${getNextToActSeatIndex(hand) + 1}`);
+
   };
 
   const handleClickSeat = (seatIndex) => {
@@ -96,6 +98,11 @@ function Hand(props) {
     }
   };
 
+  function handleNavToSeatIndexActions(seatIndex) {
+    history.push(`/hand/actions/seat/${seatIndex + 1}`);
+  };
+
+  // TODO: change to use seatNum not seatIndex.
   function handleNavToSeatHoleCards(seatIndex) {
     history.push(`/hand/cards/seat/${seatIndex}`);
   }
