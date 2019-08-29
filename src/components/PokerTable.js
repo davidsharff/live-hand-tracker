@@ -18,7 +18,7 @@ import {
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, hand } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, hand, shrink } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -87,6 +87,7 @@ export default function PokerTable(props) {
                       currentBettingRound={hand && hand.currentBettingRound}
                       isLiveHand={hand && hand.buttonSeatIndex !== null}
                       amountInvested={hand && getCurrentAmountInvestedForSeat(hand, seatIndex)}
+                      shrink={shrink}
                     />
                   );
                 })

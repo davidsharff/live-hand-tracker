@@ -49,6 +49,7 @@ export default function ManageCards(props) {
   //       Selected cards are too skinny on tiny screen
   //       shrink header so that the card slot selections can be larger
   //         If header is shrunk, it would be great since it'd leave room for always showing betting round above table.
+  //         Show pot total next to label
   //       Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
   //       handle next button required when returning to hole cards to edit
   //       showButtonControls break on future rounds if there was a refresh.
@@ -56,7 +57,7 @@ export default function ManageCards(props) {
   return (
     <React.Fragment>
       <CardsSurface>
-        <Typography variant="h6">
+        <Typography variant="h6" style={{ marginBottom: '5px'}}>
           { headerText }
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>

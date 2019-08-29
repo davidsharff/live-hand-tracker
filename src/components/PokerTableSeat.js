@@ -24,7 +24,8 @@ export default function PokerTableSeat(props) {
     lastAction,
     isLiveHand,
     currentBettingRound,
-    amountInvested
+    amountInvested,
+    shrink
   } = props;
 
   const theme = useTheme();
@@ -63,6 +64,7 @@ export default function PokerTableSeat(props) {
       heavyBorder={isSelected}
       backgroundColor={useDisabledUI ? palette.action.disabledBackground : palette.grey['50']}
       isMultiRow={isLiveHand}
+      shrink={shrink}
     >
       <SeatAvatar
         style={{
@@ -83,6 +85,7 @@ export default function PokerTableSeat(props) {
             }
           </div>
           {
+            !shrink &&
             <div>
               {
                 // TODO: move to const or fn
@@ -103,7 +106,7 @@ export default function PokerTableSeat(props) {
   );
 }
 
-const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, isMultiRow, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, isMultiRow, shrink, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
   justify-content: ${p => p.isMultiRow ? 'space-between' : 'space-around'}
@@ -112,7 +115,7 @@ const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor,
   margin-right: 5px;
   margin-bottom: 5px;
   padding-top: ${p => p.isMultiRow && '5px'};
-  height: 70px;
+  height: ${p => p.shrink ? '55px' : '70px'};
   background-color: ${p => p.backgroundColor};
   border: ${p => `solid ${p.borderColor} 1px`};
   border-radius: 5px;

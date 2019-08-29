@@ -16,7 +16,7 @@ import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../.
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   // TODO:
@@ -24,10 +24,8 @@ export default function HandWizard(props) {
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
   //   - Use consistent typography, particularly missing text color
   //   - Don't nav to board cards onMount if they are already populated. Consider hook useEffectNoMount useEffectOnMount
-  //   - Show pot totals
   //   - Consider showing total amount invested on seats after hand is completed and consider that and other relevant details in action body
   //   - Change action urls to include betting round to setup support for future editing
-
   // TODO: below sections should be their own components
   return (
     <StyledContainer>
@@ -39,6 +37,7 @@ export default function HandWizard(props) {
         showLegend={false}
         selectedSeatIndex={selectedSeatIndex}
         hand={hand}
+        shrink={matchParams.inputStepType === 'cards'}
       />
       {
         hand.buttonSeatIndex === null
@@ -58,7 +57,7 @@ export default function HandWizard(props) {
                       onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
                       setSelectedSeatIndex(null);
                     }}
-                    headerText={(matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`) + ' Hole Cards'}
+                    headerText={'Hole Cards: ' + (matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`)}
                   />
                 );
               }}/>
@@ -152,10 +151,10 @@ function ActionBody(props) {
     // Update: this todo was pre-ui overhaul
   return (
     <ActionBodyContainer>
-      <Typography variant="h6">
+      <Typography variant="h4">
         { _.startCase(bettingRound) }
       </Typography>
-      <Typography variant="h8">
+      <Typography variant="h6">
         { positionLabel }&nbsp;(Seat { seatIndex + 1 })
       </Typography>
       {
