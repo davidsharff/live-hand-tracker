@@ -7,19 +7,15 @@ import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import { useTheme } from '@material-ui/styles';
 
 import styled from 'styled-components';
-
-//import { formatSeatIndexLabel } from "../utils";
 import {handActionTypes} from '../constants';
 import _ from 'lodash';
-//import {getCurrentAmountInvestedForSeat} from '../redux/reducers/hand';
 
 
 
 export default function PokerTableSeat(props) {
   // TODO: either pass this a collated pokerSeat object or move a lot of logic into prop creation in PokerTable
-  //currentBettingRound
   const {
-    onClick, seatIndex, isActive, isHero, isSelected, positionLabel, lastAction, isLiveHand
+    onClick, seatIndex, isActive, isHero, isSelected, positionLabel, lastAction, isLiveHand, currentBettingRound
   } = props;
 
   const theme = useTheme();
@@ -47,39 +43,21 @@ export default function PokerTableSeat(props) {
     );
   };
 
-  // const getColor = (seatIndex) => {
-  //
-  //   return (
-  //     isHero
-  //       ? 'secondary' // TODO: I don't really like red as a secondary color.
-  //       : isActive
-  //       ? 'primary'
-  //       : 'default'
-  //   );
-  // };
-  //
-  // const getLabel = (seatIndex) => {
-  //   return (
-  //     isActive
-  //       ? formatSeatIndexLabel(seatIndex) // TODO: consider having this handle Empty label
-  //       : <span style={{width: '49px'}}>Empty</span>
-  //   );
-  // };
+  const foldedInPriorRound = (
+    !!lastAction &&
+    lastAction.type === handActionTypes.FOLD &&
+    lastAction.bettingRound !== currentBettingRound
+  );
 
-  // const foldedInPriorRound = (
-  //   !!lastAction &&
-  //   lastAction.type === handActionTypes.FOLD &&
-  //   lastAction.bettingRound !== currentBettingRound
-  // );
-
+  const useDisabledUI = foldedInPriorRound || !isActive;
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
     // TODO: example of why it'd be great if theme was always on styled components props.
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={isSelected ? palette.primary.dark : palette.primary.light}
+      borderColor={useDisabledUI ? palette.action.disabled : isSelected ? palette.primary.dark : palette.primary.light}
       heavyBorder={isSelected}
-      backgroundColor={palette.grey['50']}
+      backgroundColor={useDisabledUI ? palette.action.disabledBackground : palette.grey['50']}
       isMultiRow={isLiveHand}
     >
       <SeatAvatar
@@ -89,6 +67,7 @@ export default function PokerTableSeat(props) {
           fontSize: '14px',
           // TODO: extract. This is ugly and bad.
           backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined,
+          opacity: foldedInPriorRound && .5
         }}
       />
       {

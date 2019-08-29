@@ -19,6 +19,16 @@ export default function HandWizard(props) {
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
+  // TODO:
+  //   - Pass pokertableseat their getCurrentAmountInvestedForSeat value;
+  //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
+  //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
+  //   - Use consistent typography, particularly missing text color
+  //   - Don't nav to board cards onMount if they are already populated. Consider hook useEffectNoMount useEffectOnMount
+  //   - Show pot totals
+  //   - Consider showing total amount invested on seats after hand is completed and consider that and other relevant details in action body
+  //   - Change action urls to include betting round to setup support for future editing
+
   // TODO: below sections should be their own components
   return (
     <StyledContainer>
@@ -70,6 +80,7 @@ export default function HandWizard(props) {
                         isHandComplete={isHandComplete}
                         onClickAction={onAction}
                         positionLabel={i === hand.heroSeatIndex ? 'Hero' : getPositionLabelForSeatIndex(hand, i)}
+                        bettingRound={hand.currentBettingRound}
                       />
                     );
                   }}/>
@@ -125,7 +136,7 @@ function InitialHandBody() {
 }
 
 function ActionBody(props) {
-  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel } = props;
+  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel, bettingRound } = props;
 
   const handleClick = useCallback((actionType, amount) =>
       onClickAction(seatIndex, actionType, amount)
@@ -142,7 +153,10 @@ function ActionBody(props) {
     // Update: this todo was pre-ui overhaul
   return (
     <ActionBodyContainer>
-      <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
+      <Typography variant="h6">
+        { _.startCase(bettingRound) }
+      </Typography>
+      <Typography variant="h8">
         { positionLabel }&nbsp;(Seat { seatIndex + 1 })
       </Typography>
       {
@@ -168,7 +182,7 @@ const ActionBodyContainer = styled.div`
   align-items: center;
   flex: 1;
   width: 100%;
-  padding: 20px 0;
+  padding: 10px 0;
 `;
 
 function ActionOption(props) {

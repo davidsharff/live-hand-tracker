@@ -46,14 +46,17 @@ export default function ManageCards(props) {
   const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards, type);
 
   // TODO: larger card dimensions in picker when screen is > tinyScreen
+  //       Selected cards are too skinny on tiny screen
   //       shrink header so that the card slot selections can be larger
+  //         If header is shrunk, it would be great since it'd leave room for always showing betting round above table.
   //       Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
   //       handle next button required when returning to hole cards to edit
+  //       showButtonControls break on future rounds if there was a refresh.
 
   return (
     <React.Fragment>
       <CardsSurface>
-        <Typography variant="h6" style={{ alignSelf: 'center', marginTop: '5px 0', lineHeight: '24px', paddingBottom: '5px' }}>
+        <Typography variant="h6">
           { headerText }
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>
@@ -119,7 +122,7 @@ export default function ManageCards(props) {
                     >
                       {/* TODO: should we somehow include cards no longer in deck and show them disabled and/or with cards location? */}
                       <div onClick={() => handlePickCard(cardKey)}>
-                        <img src={cardImages[cardKey]} style={{ width: '60px', height: '100px'}} alt="" />
+                        <img src={cardImages[cardKey]} style={{ width: '60px', height: '90px'}} alt="" />
                       </div>
                     </Grow>
                   )
