@@ -15,7 +15,16 @@ import _ from 'lodash';
 export default function PokerTableSeat(props) {
   // TODO: either pass this a collated pokerSeat object or move a lot of logic into prop creation in PokerTable
   const {
-    onClick, seatIndex, isActive, isHero, isSelected, positionLabel, lastAction, isLiveHand, currentBettingRound
+    onClick,
+    seatIndex,
+    isActive,
+    isHero,
+    isSelected,
+    positionLabel,
+    lastAction,
+    isLiveHand,
+    currentBettingRound,
+    amountInvested
   } = props;
 
   const theme = useTheme();
@@ -34,11 +43,6 @@ export default function PokerTableSeat(props) {
                 : <PersonOutlineIcon/>
 
         }
-        {/*<span style={{ fontSize: '13px' }}>*/}
-        {/*{*/}
-        {/*positionLabelsMap['10'][seatIndex]*/}
-        {/*}*/}
-        {/*</span>*/}
       </Avatar>
     );
   };
@@ -83,7 +87,7 @@ export default function PokerTableSeat(props) {
               {
                 // TODO: move to const or fn
                 (lastAction && lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
-                '$' + lastAction.amount
+                '$' + amountInvested
               }
             </div>
           }

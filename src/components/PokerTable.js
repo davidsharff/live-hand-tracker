@@ -10,7 +10,11 @@ import { useTheme } from '@material-ui/styles';
 
 import styled from 'styled-components';
 import PokerTableSeat from "./PokerTableSeat";
-import { getCurrentActionsForSeat, getPositionLabelForSeatIndex } from '../redux/reducers/hand';
+import {
+  getCurrentActionsForSeat,
+  getCurrentAmountInvestedForSeat,
+  getPositionLabelForSeatIndex
+} from '../redux/reducers/hand';
 
 
 export default function PokerTable(props) {
@@ -82,6 +86,7 @@ export default function PokerTable(props) {
                       lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
                       currentBettingRound={hand && hand.currentBettingRound}
                       isLiveHand={hand && hand.buttonSeatIndex !== null}
+                      amountInvested={hand && getCurrentAmountInvestedForSeat(hand, seatIndex)}
                     />
                   );
                 })

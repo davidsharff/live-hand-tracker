@@ -20,7 +20,6 @@ export default function HandWizard(props) {
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   // TODO:
-  //   - Pass pokertableseat their getCurrentAmountInvestedForSeat value;
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
   //   - Use consistent typography, particularly missing text color
