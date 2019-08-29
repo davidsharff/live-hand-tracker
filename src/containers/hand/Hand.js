@@ -24,7 +24,7 @@ function Hand(props) {
       currentBettingRound &&
       currentBettingRound !== bettingRounds.PRE_FLOP
     ) {
-      history.push(`/hand/board/${currentBettingRound}`);
+      history.push(`/hand/cards/board/${currentBettingRound}`);
     }
   }, [currentBettingRound, history]);
 

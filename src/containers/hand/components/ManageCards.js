@@ -9,11 +9,11 @@ import Paper from "@material-ui/core/Paper";
 import Grow from '@material-ui/core/Grow';
 //import Collapse from '@material-ui/core/Collapse';
 import Slide from '@material-ui/core/Slide';
-
 import ArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import { useTheme } from '@material-ui/styles';
 
 
-import { cardInputTypes, cardValues } from '../../../constants';
+import { bettingRounds, cardInputTypes, cardValues } from '../../../constants';
 import { deckType, holeCardsType } from '../../../types';
 
 // TODO: if a react web app is used in production, need to be smart about when to load these.
@@ -21,11 +21,13 @@ import cardImages from '../../../assets/cards';
 
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
-  //const { deck, onSave, type, header } = props;
   const { type, headerText, cards, onSave, deck } = props;
+
+  const { palette } = useTheme();
 
   const [initialCards] = useState(cards);
 
+  // TODO: consider changing to single useReducer instead of multiple useState.
   const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(type));
 
   const [pendingCards, setPendingCards] = useState(createInitialPendingCards(type, cards));
@@ -38,10 +40,10 @@ export default function ManageCards(props) {
 
   const handlePickCard = (card) =>
     pickCard(
-      pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, card
+      type, pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, card
     );
 
-  const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards);
+  const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards, type);
 
   // TODO: larger card dimensions in picker when screen is > tinyScreen
   //       shrink header so that the card slot selections can be larger
@@ -64,6 +66,7 @@ export default function ManageCards(props) {
           isSelected={i === selectedCardIndex}
           type={type}
           isDisabled={getIsCardIndexDisabled(type, i)}
+          disabledBackgroundColor={palette.action.disabledBackground}
           style={{ margin: '0 5px'}}
         >
           {
@@ -75,34 +78,22 @@ export default function ManageCards(props) {
         }
       </div>
       </CardsSurface>
-      {/*{*/}
-        {/*showButtonControls(initialCards, pendingCards) &&*/}
-        {/*<React.Fragment>*/}
-          {/*{*/}
-            {/*<Button*/}
-              {/*color="primary"*/}
-              {/*//onClick={handleClickNext}*/}
-              {/*fullWidth*/}
-              {/*variant="contained"*/}
-            {/*>*/}
-              {/*Edit*/}
-            {/*</Button>*/}
-          {/*}*/}
-          {/*{*/}
-            {/*<Button*/}
-              {/*color="default"*/}
-              {/*//onClick={handleClickNext}*/}
-              {/*fullWidth*/}
-              {/*variant="contained"*/}
-            {/*>*/}
-              {/*{*/}
-                {/*_.difference(cards, pendingCards) > 0*/}
-              {/*}*/}
-              {/*Submit*/}
-            {/*</Button>*/}
-          {/*}*/}
-        {/*</React.Fragment>*/}
-      {/*}*/}
+      {
+        showButtonControls(initialCards, pendingCards, type) &&
+        <EditContainer>
+          {
+            <Button
+              color="primary"
+              onClick={() => onSave(pendingCards, true) /* TODO: unecessary save action. */}
+              fullWidth
+              variant="contained"
+              disabled={!isBoardFilledForRound(pendingCards, type)}
+            >
+              Next
+            </Button>
+          }
+        </EditContainer>
+      }
       {
         showCardCarousel &&
         <CardPicker>
@@ -142,7 +133,7 @@ export default function ManageCards(props) {
         </CardPicker>
       }
       {
-        !showCardCarousel && !showButtonControls(initialCards, pendingCards) &&
+        !showCardCarousel && !showButtonControls(initialCards, pendingCards, type) &&
         <Slide
           in={true}
           direction="up"
@@ -197,6 +188,15 @@ const CardsSurface = styled(Paper)`
   padding: 5px 5px 10px 5px;
 `;
 
+const EditContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1; 
+  width: 100%;
+  padding-bottom: 10px;
+`;
+
 const CardsRow = styled.div`
   width: 100%;
   display: flex;
@@ -233,15 +233,16 @@ const CardCarouselRow = styled.div`
   justify-content: space-around;
 `;
 
-const CardSlot = styled(({ isEmpty, isSelected, type, isDisabled, ...rest }) => <div { ...rest }/>)`
+const CardSlot = styled(({ isEmpty, isSelected, isDisabled, disabledBackgroundColor, ...rest }) => <div { ...rest }/>)`
   border: ${p => p.isEmpty && 'dotted 1px #333'};
   height: 75px;
   width: 55px;
   margin: 10px 10px;
+  background-color: ${p => p.isDisabled && p.disabledBackgroundColor}
   ${p => p.isSelected && `
     border-color: #118844;
     border-width: 2px;
-  `};                  
+  `};               
 `;
 
 // TODO: Update everywhere else. I like this approach to helper functions. Defining inside function like methods is hold over from class based approach.
@@ -276,7 +277,7 @@ function updatePendingCardVal(pendingCards, setPendingCards, pendingCardIndex, n
   );
 };
 
-function pickCard(pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, pickedCard) {
+function pickCard(type, pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, pickedCard) {
   const updatedPendingCards = pendingCards.map((c, i) =>
     i === selectedCardIndex
       ? pickedCard
@@ -285,14 +286,29 @@ function pickCard(pendingCards, selectedCardIndex, setPendingCards, setSelectedC
 
   setPendingCards(updatedPendingCards);
 
+  const nextCardIndex = selectedCardIndex + 1;
+  const isNextCardDisabled = getIsCardIndexDisabled(type, nextCardIndex);
+
   const isFinishedEditing = (
-    selectedCardIndex === pendingCards.length - 1 &&
-    initialCards.length === 0 // Only go to next screen if they selected final card on the initial card entry (not future edits)
+    (isNextCardDisabled || selectedCardIndex === pendingCards.length - 1) &&
+    (
+      (
+        (type === cardInputTypes.HOLE_CARDS || type === cardInputTypes.FLOP) && initialCards.length === 0
+      ) ||
+      (
+        type === cardInputTypes.TURN && initialCards.length === 3
+      ) ||
+      (
+        type === cardInputTypes.RIVER && initialCards.length === 4
+      )
+    )
   );
 
-  onSave(updatedPendingCards, isFinishedEditing);
+  onSave(_.filter(updatedPendingCards), isFinishedEditing);
 
-  setSelectedCardIndex(selectedCardIndex + 1);
+  if (!isNextCardDisabled) {
+    setSelectedCardIndex(nextCardIndex);
+  }
 }
 
 function clickCardSlot(pendingCards, pendingCardIndex, setPendingCards, setSelectedCardIndex) {
@@ -317,7 +333,17 @@ function createInitialPendingCards(type, existingCards) {
     .value();
 }
 
-function showButtonControls(initialCards, pendingCards) {
+function showButtonControls(initialCards, pendingCards, bettingRound) {
+  const filledPendingCards = pendingCards.filter((c) => c.length === 2);
   return !!initialCards.length &&
-    initialCards.length === _.filter(pendingCards).length;
+    isBoardFilledForRound(filledPendingCards, bettingRound);
+}
+
+function isBoardFilledForRound(board, bettingRound) {
+  const boardLength = board.length;
+  return (
+    (bettingRound === bettingRounds.FLOP  && boardLength >= 3) ||
+    (bettingRound === bettingRounds.TURN  && boardLength >= 4) ||
+    (bettingRound === bettingRounds.RIVER && boardLength >= 5)
+  );
 }

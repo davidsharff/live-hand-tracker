@@ -62,6 +62,7 @@ export default function HandWizard(props) {
 
                     setSelectedSeatIndex(i);
 
+                    // TODO: include betting round in header.
                     return (
                       <ActionBody
                         hand={hand}
@@ -82,7 +83,7 @@ export default function HandWizard(props) {
       {
         _.values(bettingRounds).map((bettingRound) =>
           // TOO: bug. Handle if they manually return to prior board input url.
-          <Route exact key={bettingRound} path={`/hand/board/${bettingRound}`} render={() => {
+          <Route exact key={bettingRound} path={`/hand/cards/board/${bettingRound}`} render={() => {
             if (hand.buttonSeatIndex === null) {
               return <Redirect to="/hand/actions" />;
             }
