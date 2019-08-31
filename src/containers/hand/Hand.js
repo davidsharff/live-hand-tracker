@@ -3,7 +3,6 @@ import React, { useEffect }  from 'react';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
 import HandWizard from './components/HandWizard';
-import Header from '../../components/Header';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
@@ -123,11 +122,6 @@ function Hand(props) {
   // TODO: all routes below should use handId param
   return (
     <React.Fragment>
-      <Header
-        mainLabel="Hand #1"
-        subLabel={session.location}
-        onGoBack={() => history.push('/session/')}
-      />
       <Switch>
         <Route exact path="/hand/overview" render={() =>
           <Overview hand={hand} />

@@ -11,7 +11,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import styled from 'styled-components';
 
-import Header from '../../components/Header';
 import PokerTable from '../../components/PokerTable';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
@@ -110,10 +109,7 @@ function Session(props) {
 
   // TODO: consider breaking into discreet steps
   return(
-    <div>
-      <Header
-        mainLabel="Session"
-      />
+    <React.Fragment>
       <Container>
         <SessionField>
           <TextField
@@ -179,7 +175,7 @@ function Session(props) {
             </Button>
           </SessionField>
       </Container>
-    </div>
+    </React.Fragment>
   );
 }
 
