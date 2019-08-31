@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 
-import session from './session';
-import hand from './hand';
+import session from './sessionReducer';
+import hand from './handReducer';
 
 export default combineReducers({
   session,

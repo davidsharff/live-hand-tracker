@@ -6,7 +6,7 @@ import { Col, Row } from "reactstrap";
 
 import { handType } from '../../../types';
 import { bettingRounds, sortedBettingRounds } from "../../../constants";
-import { getBoardForRound } from "../../../redux/reducers/hand";
+import { getBoardForRound } from "../../../redux/reducers/handReducer";
 
 function Overview(props) {
   const { hand } = props;

@@ -11,7 +11,7 @@ import Button from "@material-ui/core/Button/Button";
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
 import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
-import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../../../redux/reducers/hand';
+import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../../../redux/reducers/handReducer';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;

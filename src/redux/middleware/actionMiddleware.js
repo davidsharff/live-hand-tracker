@@ -1,5 +1,5 @@
 import actionTypes from '../actionTypes';
-import {isCurrentRoundComplete, getIsHandComplete} from "../reducers/hand";
+import {isCurrentRoundComplete, getIsHandComplete} from "../reducers/handReducer";
 
 // TODO: add validateAction middleware.
 // TODO: add pre and postActionValidation middleware. Post should be absolute last in chain before reducer and block _EVENT suffix actions from getting through.

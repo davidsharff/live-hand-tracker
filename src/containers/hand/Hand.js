@@ -9,7 +9,7 @@ import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 import { bettingRounds } from "../../constants";
 
-import {getDeck, getNextSeatIndex, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/hand";
+import {getDeck, getNextSeatIndex, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/handReducer";
 import Overview from "./components/Overview";
 
 function Hand(props) {

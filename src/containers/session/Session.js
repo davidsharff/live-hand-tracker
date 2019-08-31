@@ -16,7 +16,7 @@ import PokerTable from '../../components/PokerTable';
 import { sessionType } from '../../types';
 import actionTypes from '../../redux/actionTypes';
 
-import { isValidSession } from "../../redux/reducers/session";
+import { isValidSession } from "../../redux/reducers/sessionReducer";
 
 // TODO: seat selection defaults to two rows with two column radio buttons: empty | hero and third option on last item X remove.
 // TODO: after initial setup, show num seats/players with potentially collapsed edit table, blinds, hero seat, and other details that have to be confirmed at start of each hand.

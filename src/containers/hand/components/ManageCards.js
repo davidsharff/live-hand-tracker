@@ -46,14 +46,11 @@ export default function ManageCards(props) {
 
   const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards, type);
 
-  // TODO: larger card dimensions in picker when screen is > tinyScreen
-  //       Selected cards are too skinny on tiny screen
-  //       shrink header so that the card slot selections can be larger
-  //         If header is shrunk, it would be great since it'd leave room for always showing betting round above table.
-  //         Show pot total next to label
-  //       Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
-  //       handle next button required when returning to hole cards to edit
-  //       showButtonControls break on future rounds if there was a refresh.
+  // TODO:
+  //    Show pot total next to label
+  //    Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
+  //    handle next button required when returning to hole cards to edit
+  //    showButtonControls break on future rounds if there was a refresh.
 
   const isHoleCards = type === cardInputTypes.HOLE_CARDS;
   return (

@@ -5,7 +5,7 @@ import {
   getCurrentActionsForSeat,
   getCurrentAmountInvestedForSeat,
   getPositionLabelForSeatIndex
-} from "../../../redux/reducers/hand";
+} from "../../../redux/reducers/handReducer";
 import { handActionTypes } from "../../../constants";
 import styled from "styled-components";
 

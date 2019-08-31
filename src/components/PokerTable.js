@@ -14,7 +14,7 @@ import {
   getCurrentActionsForSeat,
   getCurrentAmountInvestedForSeat,
   getPositionLabelForSeatIndex
-} from '../redux/reducers/hand';
+} from '../redux/reducers/handReducer';
 
 
 export default function PokerTable(props) {
