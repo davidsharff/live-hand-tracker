@@ -22,7 +22,7 @@ import { isTinyScreen } from '../../../utils';
 
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
-  const { type, headerText, cards, onSave, deck } = props;
+  const { type, headerText, cards, onSave, deck, potSize } = props;
 
   const { palette } = useTheme();
 
@@ -47,9 +47,7 @@ export default function ManageCards(props) {
   const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards, type);
 
   // TODO:
-  //    Show pot total next to label
   //    Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
-  //    handle next button required when returning to hole cards to edit
   //    showButtonControls break on future rounds if there was a refresh.
 
   const isHoleCards = type === cardInputTypes.HOLE_CARDS;
@@ -57,7 +55,7 @@ export default function ManageCards(props) {
     <React.Fragment>
       <CardsSurface>
         <Typography variant="h6" style={{ marginBottom: '5px'}}>
-          { headerText }
+          { headerText }&nbsp;<span style={{ fontSize: '18px'}}>(${potSize})</span>
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
         {

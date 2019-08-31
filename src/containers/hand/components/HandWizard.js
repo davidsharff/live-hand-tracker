@@ -109,6 +109,7 @@ export default function HandWizard(props) {
                 type={bettingRound}
                 onSave={(cards, isFinishedEditing) => onSaveBoardCards(cards, isFinishedEditing)}
                 headerText={_.capitalize(bettingRound)}
+                potSize={getTotalPotSizeDuringRound(hand, bettingRound)}
               />
             );
           }}/>

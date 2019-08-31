@@ -110,7 +110,7 @@ function Session(props) {
 
   // TODO: consider breaking into discreet steps
   return(
-    <React.Fragment>
+    <div>
       <Header
         mainLabel="Session"
       />
@@ -156,30 +156,30 @@ function Session(props) {
             hideOtherInput
           />
         </SessionField>
-        <SessionField>
-          <InputLabel>Configure Seats</InputLabel>
-          <PokerTable
-            seats={session.defaultSeats}
-            onToggleActiveSeat={handleToggleActiveSeat}
-            onSetHeroSeatIndex={handleSetHeroSeatIndex}
-            heroSeatIndex={session.defaultHeroSeatIndex}
-            onClickSeat={handleClickSeat}
-            showLegend
-          />
-        </SessionField>
-        <SessionField>
-          <Button
-            disabled={!isValidSession(session)}
-            color="primary"
-            onClick={handleClickNext}
-            variant="outlined"
-            fullWidth
-          >
-            Next
-          </Button>
-        </SessionField>
+          <SessionField>
+            <InputLabel>Configure Seats</InputLabel>
+            <PokerTable
+              seats={session.defaultSeats}
+              onToggleActiveSeat={handleToggleActiveSeat}
+              onSetHeroSeatIndex={handleSetHeroSeatIndex}
+              heroSeatIndex={session.defaultHeroSeatIndex}
+              onClickSeat={handleClickSeat}
+              showLegend
+            />
+          </SessionField>
+          <SessionField>
+            <Button
+              disabled={!isValidSession(session)}
+              color="primary"
+              onClick={handleClickNext}
+              variant="outlined"
+              fullWidth
+            >
+              Next
+            </Button>
+          </SessionField>
       </Container>
-    </React.Fragment>
+    </div>
   );
 }
 

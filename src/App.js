@@ -1,9 +1,10 @@
 import React from 'react';
 import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import store from './redux/store';
-import ContainerRoutes from './containers/ContainerRoutes';
+import Main from './containers/Main';
 
 const theme = createMuiTheme({});
 
@@ -11,7 +12,9 @@ function App() {
   return (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <ContainerRoutes />
+        <BrowserRouter>
+          <Main />
+        </BrowserRouter>
       </ThemeProvider>
     </Provider>
   );
