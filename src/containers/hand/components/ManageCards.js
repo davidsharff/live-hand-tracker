@@ -18,6 +18,7 @@ import { deckType, holeCardsType } from '../../../types';
 
 // TODO: if a react web app is used in production, need to be smart about when to load these.
 import cardImages from '../../../assets/cards';
+import { isTinyScreen } from '../../../utils';
 
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
@@ -54,13 +55,14 @@ export default function ManageCards(props) {
   //       handle next button required when returning to hole cards to edit
   //       showButtonControls break on future rounds if there was a refresh.
 
+  const isHoleCards = type === cardInputTypes.HOLE_CARDS;
   return (
     <React.Fragment>
       <CardsSurface>
         <Typography variant="h6" style={{ marginBottom: '5px'}}>
           { headerText }
         </Typography>
-      <div style={{display: 'flex', width: '100%', justifyContent: 'center'}}>
+      <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
         {
         pendingCards.map((card, i) =>
         <CardSlot
@@ -71,7 +73,8 @@ export default function ManageCards(props) {
           type={type}
           isDisabled={getIsCardIndexDisabled(type, i)}
           disabledBackgroundColor={palette.action.disabledBackground}
-          style={{ margin: '0 5px'}}
+          leftMargin={getCardSlotLeftMargin(isTinyScreen(), isHoleCards, i)}
+          rightMargin={getCardSlotRightMargin(isTinyScreen(), isHoleCards, i)}
         >
           {
             card.length === 2 &&
@@ -237,11 +240,12 @@ const CardCarouselRow = styled.div`
   justify-content: space-around;
 `;
 
-const CardSlot = styled(({ isEmpty, isSelected, isDisabled, disabledBackgroundColor, ...rest }) => <div { ...rest }/>)`
+const CardSlot = styled(({ isEmpty, isSelected, isDisabled, disabledBackgroundColor, leftMargin, rightMargin, ...rest }) => <div { ...rest }/>)`
   border: ${p => p.isEmpty && 'dotted 1px #333'};
-  height: 75px;
-  width: 55px;
-  margin: 10px 10px;
+  height: ${isTinyScreen() ? '75px' : '90px'};
+  width: ${isTinyScreen() ? '50px' : '60px'};
+  margin-left: ${p => p.leftMargin};
+  margin-right: ${p => p.rightMargin};
   background-color: ${p => p.isDisabled && p.disabledBackgroundColor}
   ${p => p.isSelected && `
     border-color: #118844;
@@ -350,4 +354,24 @@ function isBoardFilledForRound(board, bettingRound) {
     (bettingRound === bettingRounds.TURN  && boardLength >= 4) ||
     (bettingRound === bettingRounds.RIVER && boardLength >= 5)
   );
+}
+
+function getCardSlotLeftMargin(isTinyScreen, isHoleCards, index) {
+  if (isHoleCards) {
+    return '10px';
+  }
+
+  return isTinyScreen && index !== 0
+    ? '3px'
+    : 'unset';
+}
+
+function getCardSlotRightMargin(isTinyScreen, isHoleCards, index) {
+  if (isHoleCards) {
+    return '10px';
+  }
+
+  return isTinyScreen && index < 4
+    ? '3px'
+    : 'unset';
 }
