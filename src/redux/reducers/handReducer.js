@@ -358,3 +358,9 @@ export function getNextSeatIndex(hand, startingSeatIndex) {
 
   return naiveNextSeatIndex;
 }
+
+export function getTotalPotSizeDuringRound(hand, targetRound) {
+  return _(hand.actions)
+    .filter(({ bettingRound }) => sortedBettingRounds.indexOf(bettingRound) <= sortedBettingRounds.indexOf(targetRound))
+    .sumBy('amount');
+}

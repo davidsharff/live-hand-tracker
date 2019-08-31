@@ -11,7 +11,11 @@ import Button from "@material-ui/core/Button/Button";
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
 import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
-import {getAvailableActionForSeatIndex, getPositionLabelForSeatIndex} from '../../../redux/reducers/handReducer';
+import {
+  getAvailableActionForSeatIndex,
+  getPositionLabelForSeatIndex,
+  getTotalPotSizeDuringRound
+} from '../../../redux/reducers/handReducer';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
@@ -79,6 +83,7 @@ export default function HandWizard(props) {
                         onClickAction={onAction}
                         positionLabel={i === hand.heroSeatIndex ? 'Hero' : getPositionLabelForSeatIndex(hand, i)}
                         bettingRound={hand.currentBettingRound}
+                        potSize={getTotalPotSizeDuringRound(hand, hand.currentBettingRound)}
                       />
                     );
                   }}/>
@@ -134,7 +139,7 @@ function InitialHandBody() {
 }
 
 function ActionBody(props) {
-  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel, bettingRound } = props;
+  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel, bettingRound, potSize } = props;
 
   const handleClick = useCallback((actionType, amount) =>
       onClickAction(seatIndex, actionType, amount)
@@ -155,7 +160,7 @@ function ActionBody(props) {
         { _.startCase(bettingRound) }
       </Typography>
       <Typography variant="h6">
-        { positionLabel }&nbsp;(Seat { seatIndex + 1 })
+        {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
       </Typography>
       {
         // TODO: make most common actions sort first.
