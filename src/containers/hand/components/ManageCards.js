@@ -54,8 +54,8 @@ export default function ManageCards(props) {
   return (
     <React.Fragment>
       <CardsSurface>
-        <Typography variant="h6" style={{ marginBottom: '5px'}}>
-          { headerText }&nbsp;<span style={{ fontSize: '18px'}}>(${potSize})</span>
+        <Typography variant="h5" style={{ marginBottom: '5px'}}>
+          { headerText }&nbsp;<span style={{ fontSize: '18px' }}>(${potSize})</span>
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
         {

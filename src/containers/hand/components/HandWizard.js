@@ -121,9 +121,9 @@ export default function HandWizard(props) {
 
 const StyledContainer = styled(Container)`
   display: flex;
-  flex: 1;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 `;
 
 function InitialHandBody() {
@@ -157,7 +157,7 @@ function ActionBody(props) {
     // Update: this todo was pre-ui overhaul
   return (
     <ActionBodyContainer>
-      <Typography variant="h4">
+      <Typography variant="h5">
         { _.startCase(bettingRound) }
       </Typography>
       <Typography variant="h6">
