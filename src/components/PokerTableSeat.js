@@ -57,7 +57,6 @@ export default function PokerTableSeat(props) {
   const useDisabledUI = foldedInPriorRound || !isActive;
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
-    // TODO: example of why it'd be great if theme was always on styled components props.
     <SquareSeatContainer
       onClick={onClick}
       borderColor={useDisabledUI ? palette.action.disabled : isSelected ? palette.primary.dark : palette.primary.light}
@@ -120,6 +119,7 @@ const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor,
   border: ${p => `solid ${p.borderColor} 1px`};
   border-radius: 5px;
   font-size: 12px;
+  transition: height 500ms;
   ${p => p.heavyBorder && `
     border-width: 2px
   `};
