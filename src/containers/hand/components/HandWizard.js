@@ -10,12 +10,13 @@ import Button from "@material-ui/core/Button/Button";
 
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
-import {bettingRounds, cardInputTypes, handActionTypes} from "../../../constants";
+import { bettingRounds, cardInputTypes, handActionTypes } from "../../../constants";
 import {
   getAvailableActionForSeatIndex,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound
 } from '../../../redux/reducers/handReducer';
+import { isTinyScreen } from '../../../utils';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
@@ -41,7 +42,7 @@ export default function HandWizard(props) {
         showLegend={false}
         selectedSeatIndex={selectedSeatIndex}
         hand={hand}
-        shrink={matchParams.inputStepType === 'cards'}
+        shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
       />
       {
         hand.buttonSeatIndex === null
