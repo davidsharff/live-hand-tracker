@@ -45,14 +45,16 @@ export default function HandWizard(props) {
         shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
       />
       {
-        hand.buttonSeatIndex === null
-          ? <InitialHandBody/>
+        hand.buttonSeatIndex === null || isHandComplete
+          ? <InfoBody header={hand.buttonSeatIndex === null ? 'New Hand' : 'Hand Complete'} subtitle={hand.buttonSeatIndex === null ? 'Tap button seat location to begin.' : 'Tap seat location to input revealed hole cards.'}/>
           : (
             <React.Fragment>
               <Route path="/hand/cards/seat/:seatNum" render={(routerProps) => {
+
                 // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
                 const matchedSeatIndex = parseInt(routerProps.match.params.seatNum, 10) - 1;
                 setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
+
                 return (
                   <ManageCards
                     cards={hand.seats[matchedSeatIndex].holeCards}
@@ -69,7 +71,7 @@ export default function HandWizard(props) {
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
-                    if (hand.buttonSeatIndex === null) {
+                    if (hand.buttonSeatIndex === null || isHandComplete) {
                       return <Redirect to="/hand/actions" />;
                     }
 
@@ -80,15 +82,10 @@ export default function HandWizard(props) {
                       <ActionBody
                         hand={hand}
                         seatIndex={i}
-                        isHandComplete={isHandComplete}
                         onClickAction={onAction}
-                        positionLabel={i === hand.heroSeatIndex ? 'Hero' : getPositionLabelForSeatIndex(hand, i)}
-                        bettingRound={hand.currentBettingRound}
-                        potSize={getTotalPotSizeDuringRound(hand, hand.currentBettingRound)}
                       />
                     );
                   }}/>
-
                 )
               }
             </React.Fragment>
@@ -103,14 +100,15 @@ export default function HandWizard(props) {
               return <Redirect to="/hand/actions" />;
             }
 
+            const potSize = getTotalPotSizeDuringRound(hand, hand.currentBettingRound);
+
             return (
               <ManageCards
                 cards={hand.board}
                 deck={deck}
                 type={bettingRound}
                 onSave={(cards, isFinishedEditing) => onSaveBoardCards(cards, isFinishedEditing)}
-                headerText={_.capitalize(bettingRound)}
-                potSize={getTotalPotSizeDuringRound(hand, bettingRound)}
+                headerText={_.capitalize(bettingRound) + (potSize ? ' $' + potSize : '' )}
               />
             );
           }}/>
@@ -127,39 +125,39 @@ const StyledContainer = styled(Container)`
   height: 100%;
 `;
 
-function InitialHandBody() {
+function InfoBody({ header, subtitle }) {
   return (
     <React.Fragment>
       <Typography variant="h6">
-        New Hand
+        { header }
       </Typography>
-      <Typography variant="subtitle1" style={{ marginBottom: '10px'}}>
-        Tap button seat location to begin.
+      <Typography variant="subtitle1" style={{ marginBottom: '10px', textAlign: 'center'}}>
+        { subtitle }
       </Typography>
     </React.Fragment>
   );
 }
 
 function ActionBody(props) {
-  const { isHandComplete, hand, seatIndex, onClickAction, positionLabel, bettingRound, potSize } = props;
+  const { hand, seatIndex, onClickAction } = props;
+
+  const positionLabel = seatIndex === hand.heroSeatIndex
+    ? 'Hero'
+    : getPositionLabelForSeatIndex(hand, seatIndex);
+
+  const potSize = getTotalPotSizeDuringRound(hand, hand.currentBettingRound);
 
   const handleClick = useCallback((actionType, amount) =>
       onClickAction(seatIndex, actionType, amount)
     , [seatIndex, onClickAction]
   );
 
-  if (isHandComplete) {
-    return (
-      <h4>TODO: Hand Complete</h4>
-    );
-  }
-
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
   return (
     <ActionBodyContainer>
       <Typography variant="h5">
-        { _.startCase(bettingRound) }
+        { _.startCase(hand.currentBettingRound) }
       </Typography>
       <Typography variant="h6">
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
@@ -172,7 +170,6 @@ function ActionBody(props) {
               key={seatIndex + availableAction.type}
               type={availableAction.type}
               amount={availableAction.amount}
-              isHandComplete={isHandComplete}
               onClick={handleClick}
             />
           )

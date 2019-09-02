@@ -6,26 +6,14 @@ import HandWizard from './components/HandWizard';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
-import { bettingRounds } from "../../constants";
 
 import {getDeck, getNextSeatIndex, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/handReducer";
 import Overview from "./components/Overview";
 
 function Hand(props) {
-  const { session, hand, deck, currentBettingRound, isHandComplete, history } = props;
+  const { session, hand, deck, isHandComplete, history } = props;
 
   useEffect(() => window.scrollTo(0, 0), []);
-
-  useEffect(() => {
-
-    // TODO: this prevents returning to any step prior to latest data.
-    if (
-      currentBettingRound &&
-      currentBettingRound !== bettingRounds.PRE_FLOP
-    ) {
-      history.push(`/hand/cards/board/${currentBettingRound}`);
-    }
-  }, [currentBettingRound, history]);
 
   if (session === null) {
     return <Redirect to="/session" />;
@@ -82,7 +70,8 @@ function Hand(props) {
         amount
       },
       aux: {
-        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand))
+        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand)),
+        navToBoardInput: (bettingRound) => history.push(`/hand/cards/board/${bettingRound}`)
       }
     });
 

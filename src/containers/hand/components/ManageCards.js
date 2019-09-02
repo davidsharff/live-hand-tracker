@@ -22,7 +22,7 @@ import { isTinyScreen } from '../../../utils';
 
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
-  const { type, headerText, cards, onSave, deck, potSize } = props;
+  const { type, headerText, cards, onSave, deck } = props;
 
   const { palette } = useTheme();
 
@@ -55,7 +55,7 @@ export default function ManageCards(props) {
     <React.Fragment>
       <CardsSurface>
         <Typography variant="h5" style={{ marginBottom: '5px'}}>
-          { headerText }&nbsp;<span style={{ fontSize: '18px' }}>(${potSize})</span>
+          { headerText }
         </Typography>
       <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
         {

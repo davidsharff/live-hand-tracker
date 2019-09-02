@@ -7,10 +7,8 @@ import PersonOutlineIcon from '@material-ui/icons/PersonOutline';
 import { useTheme } from '@material-ui/styles';
 
 import styled from 'styled-components';
-import {handActionTypes} from '../constants';
+import { handActionTypes}  from '../constants';
 import _ from 'lodash';
-
-
 
 export default function PokerTableSeat(props) {
   // TODO: either pass this a collated pokerSeat object or move a lot of logic into prop creation in PokerTable

@@ -39,6 +39,9 @@ export default store => next => action => {
           next({
             type: actionTypes.ADVANCE_BETTING_ROUND
           });
+
+          action.aux.navToBoardInput(store.getState().hand.currentBettingRound);
+          return;
         }
       }
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
