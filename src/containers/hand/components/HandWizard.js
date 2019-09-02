@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import _ from 'lodash';
 import { Route, Redirect } from 'react-router-dom';
 
@@ -24,6 +24,12 @@ export default function HandWizard(props) {
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
+  useEffect(() => {
+    if (isHandComplete) {
+      setSelectedSeatIndex(null);
+    }
+  }, [isHandComplete]);
+
   // TODO:
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
@@ -45,29 +51,14 @@ export default function HandWizard(props) {
         shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
       />
       {
-        hand.buttonSeatIndex === null || isHandComplete
-          ? <InfoBody header={hand.buttonSeatIndex === null ? 'New Hand' : 'Hand Complete'} subtitle={hand.buttonSeatIndex === null ? 'Tap button seat location to begin.' : 'Tap seat location to input revealed hole cards.'}/>
+        // TODO: this will be unecessary once card management routes are moved into parent Hand component
+        matchParams.inputStepType === 'actions' && (hand.buttonSeatIndex === null || isHandComplete)
+          ? <InfoBody
+            header={hand.buttonSeatIndex === null   ? 'New Hand' : 'Hand Complete'}
+            subtitle={hand.buttonSeatIndex === null ? 'Tap button seat location to begin.' : 'Tap seat to input hole cards.'}
+          />
           : (
             <React.Fragment>
-              <Route path="/hand/cards/seat/:seatNum" render={(routerProps) => {
-
-                // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
-                const matchedSeatIndex = parseInt(routerProps.match.params.seatNum, 10) - 1;
-                setSelectedSeatIndex(matchedSeatIndex); // TODO: re-route if invalid seat index (somehow?).
-
-                return (
-                  <ManageCards
-                    cards={hand.seats[matchedSeatIndex].holeCards}
-                    deck={deck}
-                    type={cardInputTypes.HOLE_CARDS}
-                    onSave={(cards, isFinishedEditing) => {
-                      onSaveHoleCards(matchedSeatIndex, cards, isFinishedEditing);
-                      setSelectedSeatIndex(null);
-                    }}
-                    headerText={'Hole Cards: ' + (matchedSeatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${matchedSeatIndex + 1}`)}
-                  />
-                );
-              }}/>
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
@@ -91,7 +82,31 @@ export default function HandWizard(props) {
             </React.Fragment>
           )
       }
+      {/* TODO: move all card input routes to Hand.js and rename HandWizard to ActionWizard */}
+      {
+        hand.seats.map((s, i) =>
+          <Route key={i} path={`/hand/cards/seat/${i + 1}`} render={(routerProps) => {
 
+            // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
+            setSelectedSeatIndex(i); // TODO: re-route if invalid seat index (somehow?).
+
+            return (
+              <ManageCards
+                cards={hand.seats[i].holeCards}
+                deck={deck}
+                type={cardInputTypes.HOLE_CARDS}
+                onSave={(cards, isFinishedEditing) => {
+                  onSaveHoleCards(i, cards, isFinishedEditing);
+                  if (isHandComplete && isFinishedEditing) {
+                    setSelectedSeatIndex(null);
+                  }
+                }}
+                headerText={'Hole Cards: ' + (i === hand.heroSeatIndex ? 'Hero' : `Seat ${i + 1}`)}
+              />
+            );
+          }}/>
+        )
+      }
       {
         _.values(bettingRounds).map((bettingRound) =>
           // TOO: bug. Handle if they manually return to prior board input url.

@@ -13,7 +13,8 @@ import PokerTableSeat from "./PokerTableSeat";
 import {
   getCurrentActionsForSeat,
   getCurrentAmountInvestedForSeat,
-  getPositionLabelForSeatIndex
+  getPositionLabelForSeatIndex,
+  getIsHandComplete
 } from '../redux/reducers/handReducer';
 
 
@@ -74,7 +75,7 @@ export default function PokerTable(props) {
                       key={seatIndex}
                       type="square"
                       onClick={() => isActive && onClickSeat(seatIndex)}
-                      isActive={_.get(seats[seatIndex], 'isActive')}
+                      seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
                       isSelected={seatIndex === selectedSeatIndex}
                       seatIndex={seatIndex}
@@ -86,6 +87,7 @@ export default function PokerTable(props) {
                       lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
                       currentBettingRound={hand && hand.currentBettingRound}
                       isLiveHand={hand && hand.buttonSeatIndex !== null}
+                      isHandComplete={!!hand && getIsHandComplete(hand)}
                       amountInvested={hand && getCurrentAmountInvestedForSeat(hand, seatIndex)}
                       shrink={shrink}
                     />

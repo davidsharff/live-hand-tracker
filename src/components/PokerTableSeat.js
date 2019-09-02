@@ -15,19 +15,22 @@ export default function PokerTableSeat(props) {
   const {
     onClick,
     seatIndex,
-    isActive,
     isHero,
     isSelected,
+    seat,
     positionLabel,
     lastAction,
     isLiveHand,
     currentBettingRound,
     amountInvested,
+    isHandComplete,
     shrink
   } = props;
 
   const theme = useTheme();
   const { palette } = theme;
+
+  const isActive = !!seat && seat.isActive;
 
   const SeatAvatar = (props) => {
     return (
@@ -74,22 +77,38 @@ export default function PokerTableSeat(props) {
         }}
       />
       {
-        isLiveHand && lastAction &&
+        isLiveHand && isActive &&
         <BodyContainer style={{color: palette.text.secondary}}>
-          <div>
-            {
-              _.capitalize(lastAction.type)
-            }
-          </div>
           {
-            !shrink &&
-            <div>
-              {
-                // TODO: move to const or fn
-                (lastAction && lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
-                '$' + amountInvested
-              }
-            </div>
+            isHandComplete
+              ? (
+                <div>
+                  {
+                    seat.holeCards.length
+                      ? seat.holeCards.join(' ')
+                      : '??'
+                  }
+                </div>
+              )
+              : lastAction && (
+                <React.Fragment>
+                  <div>
+                    {
+                      _.capitalize(lastAction.type)
+                    }
+                  </div>
+                  {
+                    !shrink &&
+                    <div>
+                      {
+                        // TODO: move to const or fn
+                        (lastAction && lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
+                        '$' + amountInvested
+                      }
+                    </div>
+                  }
+                </React.Fragment>
+              )
           }
         </BodyContainer>
       }

@@ -13,7 +13,7 @@ import ArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import { useTheme } from '@material-ui/styles';
 
 
-import { bettingRounds, cardInputTypes, cardValues } from '../../../constants';
+import { cardInputTypes, cardValues } from '../../../constants';
 import { deckType, holeCardsType } from '../../../types';
 
 // TODO: if a react web app is used in production, need to be smart about when to load these.
@@ -29,11 +29,13 @@ export default function ManageCards(props) {
   const [initialCards] = useState(cards);
 
   // TODO: consider changing to single useReducer instead of multiple useState.
-  const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(type));
+  const [selectedCardIndex, setSelectedCardIndex] = useState(getInitialCardIndexForType(cards, type));
 
   const [pendingCards, setPendingCards] = useState(createInitialPendingCards(type, cards));
 
-  const selectedCard = pendingCards[selectedCardIndex];
+  const selectedCard = selectedCardIndex === null
+    ? null
+    : pendingCards[selectedCardIndex];
 
   const handleClickCardSlot = (pendingCardIndex) => clickCardSlot(pendingCards, pendingCardIndex, setPendingCards, setSelectedCardIndex);
 
@@ -44,13 +46,17 @@ export default function ManageCards(props) {
       type, pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, card
     );
 
-  const showCardCarousel = !!selectedCard && !showButtonControls(initialCards, pendingCards, type);
+  const showCardCarousel = selectedCard && selectedCard.length === 1;
+
+  const showValueKeyboard = !showCardCarousel && selectedCardIndex !== null;
 
   // TODO:
+  //    Capture if they mucked?
   //    Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
   //    showButtonControls break on future rounds if there was a refresh.
 
   const isHoleCards = type === cardInputTypes.HOLE_CARDS;
+
   return (
     <React.Fragment>
       <CardsSurface>
@@ -81,7 +87,7 @@ export default function ManageCards(props) {
       </div>
       </CardsSurface>
       {
-        showButtonControls(initialCards, pendingCards, type) &&
+        !showCardCarousel && !showValueKeyboard && isBoardFilledForRound(cards, type) &&
         <EditContainer>
           {
             <Button
@@ -110,7 +116,7 @@ export default function ManageCards(props) {
                     (
                       _.includes(deck, cardKey) ||
                       // Include a dealt card if it is the one they clicked on to edit.
-                      !_.includes(pendingCards, cardKey)
+                      ( !_.includes(deck, cardKey) && cards[selectedCardIndex] === cardKey )
                     )
                   )
                   .map((cardKey) =>
@@ -135,7 +141,7 @@ export default function ManageCards(props) {
         </CardPicker>
       }
       {
-        !showCardCarousel && !showButtonControls(initialCards, pendingCards, type) &&
+        showValueKeyboard &&
         <Slide
           in={true}
           direction="up"
@@ -255,16 +261,24 @@ function isCardValueDisabled(deck, cardValue) {
   return !deck.some((c) => c.slice(0, -1) === cardValue);
 }
 
-function getInitialCardIndexForType(type) {
-  return type === cardInputTypes.TURN
+function getInitialCardIndexForType(cards, type) {
+  const initialCardIndex = type === cardInputTypes.TURN
     ? 3
     : type === cardInputTypes.RIVER
       ? 4
       : 0;
+
+  if ((cards.length - 1) > initialCardIndex) {
+    return null;
+  }
+  return cards[initialCardIndex]
+    ? Math.min(cards.length, initialCardIndex) // Initial card index is already populated, set it to the last card
+    : initialCardIndex;
 }
 
 function getIsCardIndexDisabled(type, cardIndex) {
-  return type !== cardInputTypes.HOLE_CARDS && (
+  return (
+    (type === cardInputTypes.HOLE_CARDS && cardIndex > 1) ||
     (type === cardInputTypes.FLOP && cardIndex > 2) ||
     (type === cardInputTypes.TURN && cardIndex > 3)
   );
@@ -309,7 +323,9 @@ function pickCard(type, pendingCards, selectedCardIndex, setPendingCards, setSel
 
   onSave(_.filter(updatedPendingCards), isFinishedEditing);
 
-  if (!isNextCardDisabled) {
+  if (isNextCardDisabled || pendingCards[nextCardIndex].length) {
+    setSelectedCardIndex(null);
+  } else {
     setSelectedCardIndex(nextCardIndex);
   }
 }
@@ -336,18 +352,13 @@ function createInitialPendingCards(type, existingCards) {
     .value();
 }
 
-function showButtonControls(initialCards, pendingCards, bettingRound) {
-  const filledPendingCards = pendingCards.filter((c) => c.length === 2);
-  return !!initialCards.length &&
-    isBoardFilledForRound(filledPendingCards, bettingRound);
-}
-
-function isBoardFilledForRound(board, bettingRound) {
+function isBoardFilledForRound(board, cardsType) {
   const boardLength = board.length;
   return (
-    (bettingRound === bettingRounds.FLOP  && boardLength >= 3) ||
-    (bettingRound === bettingRounds.TURN  && boardLength >= 4) ||
-    (bettingRound === bettingRounds.RIVER && boardLength >= 5)
+    (cardsType === cardInputTypes.HOLE_CARDS && boardLength === 2 ) ||
+    (cardsType === cardInputTypes.FLOP  && boardLength >= 3) ||
+    (cardsType === cardInputTypes.TURN  && boardLength >= 4) ||
+    (cardsType === cardInputTypes.RIVER && boardLength >= 5)
   );
 }
 

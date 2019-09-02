@@ -7,7 +7,7 @@ import HandWizard from './components/HandWizard';
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 
-import {getDeck, getNextSeatIndex, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/handReducer";
+import {getDeck, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/handReducer";
 import Overview from "./components/Overview";
 
 function Hand(props) {
@@ -41,11 +41,6 @@ function Hand(props) {
         navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand))
       }
     });
-
-    if (isHandComplete) {
-      const nextSeatIndex = getNextSeatIndex(hand, seatIndex);
-      handleNavToSeatHoleCards(nextSeatIndex);
-    }
   };
 
   const handleSaveBoardCards = (cards, isFinishedEditing) => {
@@ -94,7 +89,7 @@ function Hand(props) {
 
   // TODO: change to use seatNum not seatIndex.
   function handleNavToSeatHoleCards(seatIndex) {
-    history.push(`/hand/cards/seat/${seatIndex}`);
+    history.push(`/hand/cards/seat/${seatIndex + 1}`);
   }
 
   // TODO: explore / decide between const and named functions.
