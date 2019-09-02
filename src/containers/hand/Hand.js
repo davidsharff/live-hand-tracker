@@ -43,6 +43,20 @@ function Hand(props) {
     });
   };
 
+  const handleMuckHoleCards = (seatIndex, holeCards, isFinishedEditing) => {
+    props.dispatch({
+      type: actionTypes.SET_DID_MUCK,
+      payload: {
+        seatIndex
+      },
+      aux: {
+        // TODO: it'd be great to get rid of all of these and either give routing ability to middleware or handle all routing changes in this component.
+        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand)),
+        navToBoardInput: (bettingRound) => history.push(`/hand/cards/board/${bettingRound}`)
+      }
+    });
+  };
+
   const handleSaveBoardCards = (cards, isFinishedEditing) => {
     props.dispatch({
       type: actionTypes.SET_BOARD_CARDS,
@@ -69,8 +83,6 @@ function Hand(props) {
         navToBoardInput: (bettingRound) => history.push(`/hand/cards/board/${bettingRound}`)
       }
     });
-
-
   };
 
   const handleClickSeat = (seatIndex) => {
@@ -108,20 +120,23 @@ function Hand(props) {
         <Route exact path="/hand/overview" render={() =>
           <Overview hand={hand} />
         }/>
-        <Route path="/hand/:inputStepType" render={({ match }) =>
-          <HandWizard
-            matchParams={match.params}
-            hand={hand}
-            onAction={handleAddAction}
-            blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
-            deck={deck}
-            onSaveBoardCards={handleSaveBoardCards}
-            onSaveHoleCards={handleSaveHoleCards}
-            board={hand.board}
-            isHandComplete={isHandComplete}
-            onClickSeat={handleClickSeat}
-          />
-        }/>
+        <Route path="/hand/:inputStepType" render={({ match }) => {
+          return (
+            <HandWizard
+              matchParams={match.params}
+              hand={hand}
+              onAction={handleAddAction}
+              blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
+              deck={deck}
+              onSaveBoardCards={handleSaveBoardCards}
+              onSaveHoleCards={handleSaveHoleCards}
+              onMuckHoleCards={handleMuckHoleCards}
+              board={hand.board}
+              isHandComplete={isHandComplete}
+              onClickSeat={handleClickSeat}
+            />
+          );
+        }}/>
       </Switch>
     </React.Fragment>
   );

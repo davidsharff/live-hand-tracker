@@ -23,7 +23,7 @@ import { isTinyScreen } from '../../../utils';
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, onMuckHoleCards, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   const winningSeatIndices = getWinningSeatIndices(hand);
@@ -36,7 +36,9 @@ export default function HandWizard(props) {
 
   // TODO:
   //   - HAND SPLIT POT
-  //   - TODO: write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
+  //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
+  //   - get rid of all exact '/hand/actions' navigation
+  //   - handle forward/back nav and possibly also clicking seats to edit past action selection during betting round and ultimately in any betting round.
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
   //   - Use consistent typography, particularly missing text color
@@ -72,6 +74,7 @@ export default function HandWizard(props) {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
                     if (hand.buttonSeatIndex === null || winningSeatIndices.length > 0) {
+                      // TODO: make this a different route
                       return <Redirect to="/hand/actions" />;
                     }
 
@@ -83,6 +86,7 @@ export default function HandWizard(props) {
                         hand={hand}
                         seatIndex={i}
                         onClickAction={onAction}
+                        onMuckHoleCards={onMuckHoleCards}
                       />
                     );
                   }}/>
@@ -185,7 +189,7 @@ function HandCompleteBody(props) {
 }
 
 function ActionBody(props) {
-  const { hand, seatIndex, onClickAction, handleMuck, handleGoToHoleCards } = props;
+  const { hand, seatIndex, onClickAction, onMuckHoleCards, handleGoToHoleCards } = props;
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -198,14 +202,17 @@ function ActionBody(props) {
     , [seatIndex, onClickAction]
   );
 
+  const handleMuckHoleCards = () => onMuckHoleCards(seatIndex);
+
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
 
   const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
+  const isHandComplete = getIsHandComplete(hand);
   return (
     <BodyContainer>
       <Typography variant="h5">
-        { _.startCase(hand.currentBettingRound) }
+        { isHandComplete ? 'Showdown' : _.startCase(hand.currentBettingRound) }
       </Typography>
       <Typography variant="h6">
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
@@ -223,14 +230,14 @@ function ActionBody(props) {
           )
       }
       {
-        getIsHandComplete(hand) &&
+        isHandComplete &&
         <ActionButton color="primary" onClick={handleGoToHoleCards}>
           Add Hole Cards
         </ActionButton>
       }
       {
        !_.find(availableActions, { type: handActionTypes.FOLD}) &&
-       <ActionButton onClick={handleMuck}>
+       <ActionButton color={isHandComplete && 'secondary'} onClick={handleMuckHoleCards}>
          Muck
        </ActionButton>
       }

@@ -30,6 +30,7 @@ export default store => next => action => {
       return;
     }
 
+    case actionTypes.SET_DID_MUCK:
     case actionTypes.SET_NEW_ACTION: {
       next(action);
       {

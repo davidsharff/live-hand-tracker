@@ -28,9 +28,32 @@ export default function handReducer(hand = initialState, action) {
       return _.assign({}, hand, {
         seats: hand.seats.map((s, i) =>
           i === seatIndex
-            ? _.assign({}, s, { holeCards })
+            ? _.assign({}, s, { holeCards, didMuck: false })
             : s
         )
+      });
+    }
+
+    case actionTypes.SET_DID_MUCK: {
+      const { seatIndex } = payload;
+
+      return _.assign({}, hand, {
+        seats: hand.seats.map((s, i) =>
+          i === seatIndex
+            ? _.assign({}, s, { didMuck: true, holeCards: [] })
+            : s
+        ),
+        actions: getIsHandComplete(hand)
+          ? hand.actions
+          : [
+            ...hand.actions, {
+            type: handActionTypes.FOLD,
+            bettingRound: hand.currentBettingRound,
+            seatIndex,
+            // TODO: this should record the new amount invested, and not the total price of call, and will require UI to use calc for total invested during round.
+            amount: 0
+          }
+         ]
       });
     }
 
@@ -153,25 +176,16 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
   // TODO: below is untested
   // TODO: I guess we'll have to support someone folding instead of checking. Code below assumes that is impossible.
   if (!lastLiveAction) {
-    if (actionsThisRound.length === 0) {
-      return [
-        {
-          type: handActionTypes.CHECK,
-          amount: null
-        },
-        {
-          type: handActionTypes.BET,
-          amount: hand.bigBlind
-        }
-      ];
-    } else {
-      // TODO: I think this can handle checking if anyone is left to act. If so, someone must have folded unecessarily.
-      return [
-        {
-          type: 'win'
-        }
-      ];
-    }
+    return [
+      {
+        type: handActionTypes.CHECK,
+        amount: null
+      },
+      {
+        type: handActionTypes.BET,
+        amount: hand.bigBlind
+      }
+    ];
   }
 
   // TODO: reconsider names
