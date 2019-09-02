@@ -13,6 +13,7 @@ import ManageCards from "./ManageCards";
 import { bettingRounds, cardInputTypes, handActionTypes } from "../../../constants";
 import {
   getAvailableActionForSeatIndex,
+  getCurrentActivePositions,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound
 } from '../../../redux/reducers/handReducer';
@@ -52,12 +53,14 @@ export default function HandWizard(props) {
       />
       {
         // TODO: this will be unecessary once card management routes are moved into parent Hand component
-        matchParams.inputStepType === 'actions' && (hand.buttonSeatIndex === null || isHandComplete)
-          ? <InfoBody
-            header={hand.buttonSeatIndex === null   ? 'New Hand' : 'Hand Complete'}
-            subtitle={hand.buttonSeatIndex === null ? 'Tap button seat location to begin.' : 'Tap seat to input hole cards.'}
-          />
-          : (
+        hand.buttonSeatIndex === null
+          ? <NewHandBody />
+          : matchParams.inputStepType === 'actions' && isHandComplete
+            ? <HandCompleteBody
+                winningSeatIndex={getCurrentActivePositions(hand)[0].seatIndex}
+                potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
+              />
+            : (
             <React.Fragment>
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
@@ -140,16 +143,36 @@ const StyledContainer = styled(Container)`
   height: 100%;
 `;
 
-function InfoBody({ header, subtitle }) {
+function NewHandBody({ header, subtitle }) {
   return (
-    <React.Fragment>
-      <Typography variant="h6">
-        { header }
+    <BodyContainer>
+      <Typography variant="h5">
+       New Hand
       </Typography>
       <Typography variant="subtitle1" style={{ marginBottom: '10px', textAlign: 'center'}}>
-        { subtitle }
+        Tap button seat location to begin.
       </Typography>
-    </React.Fragment>
+    </BodyContainer>
+  );
+}
+
+function HandCompleteBody(props) {
+  const { winningSeatIndex, potSize } = props;
+  return (
+    <BodyContainer>
+      <Typography variant="h5">
+        Winner: Seat { winningSeatIndex + 1} (${potSize})
+      </Typography>
+      <Typography variant="subtitle1" style={{ fontStyle: 'italic'}}>
+        Tap seat to input hole cards.
+      </Typography>
+      <Button variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
+        Create New Hand
+      </Button>
+      <Button variant="contained" color="secondary" fullWidth>
+        Home
+      </Button>
+    </BodyContainer>
   );
 }
 
@@ -170,7 +193,7 @@ function ActionBody(props) {
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
   return (
-    <ActionBodyContainer>
+    <BodyContainer>
       <Typography variant="h5">
         { _.startCase(hand.currentBettingRound) }
       </Typography>
@@ -189,17 +212,18 @@ function ActionBody(props) {
             />
           )
       }
-    </ActionBodyContainer>
+    </BodyContainer>
   );
 }
 
-const ActionBodyContainer = styled.div`
+const BodyContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
   width: 100%;
-  padding: 10px 0;
+  padding: 10px 0 20px 0;
+  text-align: center;
 `;
 
 function ActionOption(props) {

@@ -2,6 +2,8 @@ import _ from 'lodash';
 
 import actionTypes from '../actionTypes';
 
+// TODO: Support rake settings
+
 const baseSession =  {
   location: '',
   defaultHeroSeatIndex: null,
