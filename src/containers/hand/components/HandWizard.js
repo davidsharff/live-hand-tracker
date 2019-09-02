@@ -40,6 +40,7 @@ export default function HandWizard(props) {
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
   //   - Support all-in flag
+  //   - Breakout hand and session middleware and make sure apiMiddleware saves session and hand seperately
   //   - handle forward/back nav and possibly also clicking seats to edit past action selection during betting round and ultimately in any betting round.
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.

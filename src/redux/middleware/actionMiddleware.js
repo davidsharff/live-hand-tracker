@@ -6,7 +6,6 @@ import { isCurrentRoundComplete, getIsHandComplete } from "../reducers/handReduc
 // TODO: it'd be cleaner to have seperate hand and session middleware.
 export default store => next => action => {
   const { type } = action;
-
   switch(type) {
 
     case actionTypes.CREATE_SESSION: {
