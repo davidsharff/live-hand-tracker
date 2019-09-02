@@ -19,7 +19,7 @@ import {
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, hand, shrink } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, winningSeatIndices, hand, shrink } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -77,7 +77,7 @@ export default function PokerTable(props) {
                       onClick={() => isActive && onClickSeat(seatIndex)}
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
-                      isSelected={seatIndex === selectedSeatIndex}
+                      isSelected={seatIndex === selectedSeatIndex || _.includes(winningSeatIndices, seatIndex)}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length

@@ -35,7 +35,8 @@ export default function HandWizard(props) {
   }, [winningSeatIndices]);
 
   // TODO:
-  //   - HAND SPLIT POT
+  //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
+  //      -- Lookup how to handle odd number when splitting pot
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
   //   - Support all-in flag
@@ -72,6 +73,7 @@ export default function HandWizard(props) {
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
         selectedSeatIndex={selectedSeatIndex}
+        winningSeatIndices={winningSeatIndices}
         hand={hand}
         shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
       />
@@ -183,7 +185,6 @@ function NewHandBody({ header, subtitle }) {
 function HandCompleteBody(props) {
   const { winningSeatIndices, potSize } = props;
 
-  // TODO: handle split pot and replace winningSeatIndices with winningSeats once it has new data.
   return (
     <BodyContainer>
       <Typography variant="h5">
