@@ -1,5 +1,5 @@
 import _ from 'lodash';
-
+import { Hand as pokersolver } from 'pokersolver';
 import actionTypes from '../actionTypes';
 
 import {
@@ -133,6 +133,9 @@ export function getPositionLabelForSeatIndex(hand, seatIndex) {
 }
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {
+  if (getIsHandComplete(hand)) {
+    return [];
+  }
   const lastLiveAction = getLastLiveAction(hand);
 
   // TODO: better noun?
@@ -341,7 +344,9 @@ export function getIsHandComplete(hand) {
 
 export function getCurrentActivePositions(hand) {
   return hand.positions.filter(({ seatIndex }) =>
-    hand.seats[seatIndex].isActive && !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD })
+    hand.seats[seatIndex].isActive &&
+    !hand.seats[seatIndex].didMuck && // TODO: add and wire up a didMuck field
+    !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD })
   );
 }
 
@@ -363,4 +368,37 @@ export function getTotalPotSizeDuringRound(hand, targetRound) {
   return _(hand.actions)
     .filter(({ bettingRound }) => sortedBettingRounds.indexOf(bettingRound) <= sortedBettingRounds.indexOf(targetRound))
     .sumBy('amount');
+}
+
+export function getWinningSeatIndices(hand) {
+  const activePositions = getCurrentActivePositions(hand);
+
+  const awaitingHoleCards = activePositions.some(({ seatIndex }) => hand.seats[seatIndex].holeCards.length < 2);
+
+  if (awaitingHoleCards) {
+    return [];
+  }
+
+  const boardCards = hand.board;
+
+  const decoratedPositions = activePositions.map((p) => {
+    const solvedHand = pokersolver.solve([...hand.seats[p.seatIndex].holeCards, ...boardCards]);
+
+    return _.assign({}, p, {
+      solvedHand,
+      handCards: solvedHand.cards,
+      handDescription: solvedHand.descr
+    });
+  });
+
+  const solvedWinners = pokersolver.winners(_.map(decoratedPositions, 'solvedHand'));
+
+  // TODO: in add HOLE_CARDS middleware, check if valid state to determine winner, and spawn actions to stamp these calc values on seat records.
+  return decoratedPositions
+    .filter(({ handDescription }) =>
+      solvedWinners[0].descr === handDescription
+    )
+    .map((p) =>
+      p.seatIndex
+    );
 }

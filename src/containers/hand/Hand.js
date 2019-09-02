@@ -78,8 +78,6 @@ function Hand(props) {
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
       history.push(`/hand/cards/seat/${hand.heroSeatIndex + 1}`);
-    } else if (isHandComplete) {
-      handleNavToSeatHoleCards(seatIndex);
     }
   };
 

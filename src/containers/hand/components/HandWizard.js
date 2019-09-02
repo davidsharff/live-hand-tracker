@@ -13,9 +13,10 @@ import ManageCards from "./ManageCards";
 import { bettingRounds, cardInputTypes, handActionTypes } from "../../../constants";
 import {
   getAvailableActionForSeatIndex,
-  getCurrentActivePositions,
+  getIsHandComplete,
   getPositionLabelForSeatIndex,
-  getTotalPotSizeDuringRound
+  getTotalPotSizeDuringRound,
+  getWinningSeatIndices
 } from '../../../redux/reducers/handReducer';
 import { isTinyScreen } from '../../../utils';
 
@@ -25,13 +26,17 @@ export default function HandWizard(props) {
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
+  const winningSeatIndices = getWinningSeatIndices(hand);
+
   useEffect(() => {
-    if (isHandComplete) {
+    if (winningSeatIndices.length) {
       setSelectedSeatIndex(null);
     }
-  }, [isHandComplete]);
+  }, [winningSeatIndices]);
 
   // TODO:
+  //   - HAND SPLIT POT
+  //   - TODO: write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
   //   - Use consistent typography, particularly missing text color
@@ -39,6 +44,7 @@ export default function HandWizard(props) {
   //   - Consider showing total amount invested on seats after hand is completed and consider that and other relevant details in action body
   //   - Change action urls to include betting round to setup support for future editing
   // TODO: below sections should be their own components
+
   return (
     <StyledContainer>
       {/* TODO: convert to onClick*/}
@@ -55,9 +61,9 @@ export default function HandWizard(props) {
         // TODO: this will be unecessary once card management routes are moved into parent Hand component
         hand.buttonSeatIndex === null
           ? <NewHandBody />
-          : matchParams.inputStepType === 'actions' && isHandComplete
+          : matchParams.inputStepType === 'actions' && winningSeatIndices.length
             ? <HandCompleteBody
-                winningSeatIndex={getCurrentActivePositions(hand)[0].seatIndex}
+                winningSeatIndices={winningSeatIndices}
                 potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
               />
             : (
@@ -65,7 +71,7 @@ export default function HandWizard(props) {
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
-                    if (hand.buttonSeatIndex === null || isHandComplete) {
+                    if (hand.buttonSeatIndex === null || winningSeatIndices.length > 0) {
                       return <Redirect to="/hand/actions" />;
                     }
 
@@ -157,14 +163,16 @@ function NewHandBody({ header, subtitle }) {
 }
 
 function HandCompleteBody(props) {
-  const { winningSeatIndex, potSize } = props;
+  const { winningSeatIndices, potSize } = props;
+
+  // TODO: handle split pot and replace winningSeatIndices with winningSeats once it has new data.
   return (
     <BodyContainer>
       <Typography variant="h5">
-        Winner: Seat { winningSeatIndex + 1} (${potSize})
+        Winner: Seat { winningSeatIndices[0] + 1} (${potSize})
       </Typography>
       <Typography variant="subtitle1" style={{ fontStyle: 'italic'}}>
-        Tap seat to input hole cards.
+        TODO: add all known hand types and results
       </Typography>
       <Button variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
         Create New Hand
@@ -177,7 +185,7 @@ function HandCompleteBody(props) {
 }
 
 function ActionBody(props) {
-  const { hand, seatIndex, onClickAction } = props;
+  const { hand, seatIndex, onClickAction, handleMuck, handleGoToHoleCards } = props;
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -192,6 +200,8 @@ function ActionBody(props) {
 
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
+
+  const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
   return (
     <BodyContainer>
       <Typography variant="h5">
@@ -202,7 +212,7 @@ function ActionBody(props) {
       </Typography>
       {
         // TODO: make most common actions sort first.
-        _.sortBy(getAvailableActionForSeatIndex(hand, seatIndex), sortActionComponents)
+        _.sortBy(availableActions, sortActionComponents)
           .map(availableAction =>
             <ActionOption
               key={seatIndex + availableAction.type}
@@ -211,6 +221,18 @@ function ActionBody(props) {
               onClick={handleClick}
             />
           )
+      }
+      {
+        getIsHandComplete(hand) &&
+        <ActionButton color="primary" onClick={handleGoToHoleCards}>
+          Add Hole Cards
+        </ActionButton>
+      }
+      {
+       !_.find(availableActions, { type: handActionTypes.FOLD}) &&
+       <ActionButton onClick={handleMuck}>
+         Muck
+       </ActionButton>
       }
     </BodyContainer>
   );

@@ -323,7 +323,7 @@ function pickCard(type, pendingCards, selectedCardIndex, setPendingCards, setSel
 
   onSave(_.filter(updatedPendingCards), isFinishedEditing);
 
-  if (isNextCardDisabled || pendingCards[nextCardIndex].length) {
+  if (isNextCardDisabled || (pendingCards[nextCardIndex] && pendingCards[nextCardIndex].length)) {
     setSelectedCardIndex(null);
   } else {
     setSelectedCardIndex(nextCardIndex);

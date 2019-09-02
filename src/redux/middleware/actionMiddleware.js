@@ -44,6 +44,7 @@ export default store => next => action => {
           return;
         }
       }
+
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       action.aux.navToNextSeatIndex(store.getState().hand);
       return;
@@ -68,6 +69,8 @@ export default store => next => action => {
       if (action.aux.isFinishedEditing) {
         action.aux.navToNextSeatIndex(store.getState().hand);
       }
+
+      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }
 
