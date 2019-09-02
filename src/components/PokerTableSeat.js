@@ -60,7 +60,6 @@ export default function PokerTableSeat(props) {
 
   const useDisabledUI = foldedInPriorRound || !isActive;
 
-  console.log('lastAction', lastAction);
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
     <SquareSeatContainer
@@ -89,11 +88,13 @@ export default function PokerTableSeat(props) {
               ? (
                 <div>
                   {
-                    seat.holeCards.length
-                      ? seat.holeCards.join(' ')
-                      : lastAction.type === handActionTypes.MUCK
-                        ? _.capitalize(handActionTypes.MUCK)
-                        : '??'
+                    lastAction.type === handActionTypes.MUCK
+                      ? _.capitalize(handActionTypes.MUCK)
+                      : seat.holeCards.length
+                        ? seat.holeCards.join(' ')
+                        : lastAction.type === handActionTypes.REVEAL
+                          ? 'Reveal'
+                          : '??'
                   }
                 </div>
               )

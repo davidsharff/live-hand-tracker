@@ -238,13 +238,14 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
 export function getNextToActSeatIndex(hand) {
   const roundActions = getCurrentActions(hand);
   if (roundActions.length === 0) {
-    return _(hand.positions) // TODO: duplication with activePositions logic below.
+    const nextToActPosition = _(hand.positions) // TODO: duplication with activePositions logic below.
       .reject(({ seatIndex }) =>
         getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.FOLD ||
         getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.MUCK
       )
-      .first()
-      .seatIndex;
+      .first();
+
+    return nextToActPosition ? nextToActPosition.seatIndex : null;
   }
 
   const lastActionSeatIndex = _.last(roundActions).seatIndex;
@@ -360,7 +361,7 @@ export function isCurrentRoundComplete(hand) {
 export function getIsHandComplete(hand) {
   return isCurrentRoundComplete(hand) && (
     hand.currentBettingRound === bettingRounds.RIVER ||
-    getCurrentActivePositions(hand).length === 1
+    getCurrentActivePositions(hand).length <= 1
   );
 }
 
@@ -368,7 +369,7 @@ export function getCurrentActivePositions(hand) {
   return hand.positions.filter(({ seatIndex }) =>
     hand.seats[seatIndex].isActive &&
     (
-      !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD }) ||
+      !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD }) &&
       !_.some(hand.actions, { seatIndex, type: handActionTypes.MUCK })
     )
   );
@@ -395,13 +396,45 @@ export function getTotalPotSizeDuringRound(hand, targetRound) {
 }
 
 export function getWinningSeatIndices(hand) {
+  if (!getIsHandComplete(hand)) {
+    return [];
+  }
+
   const activePositions = getCurrentActivePositions(hand);
 
-  const awaitingHoleCards = activePositions.some(({ seatIndex }) => hand.seats[seatIndex].holeCards.length < 2);
+  // All positions have folded or mucked
+  if (activePositions.length === 0) {
+    const lastAction = _.last(hand.actions);
 
+    if (lastAction.type !== handActionTypes.MUCK) {
+      throw new Error(`Cannot determine winner, unexpected last action type. Action type: ${lastAction.type}. Seat Index: ${lastAction.seatIndex}`);
+    }
+
+    return [_.last(hand.actions).seatIndex];
+  }
+
+  const awaitingHoleCards = activePositions.some(({ seatIndex }) =>
+    (
+      seatIndex === hand.heroSeatIndex &&
+      !_.find(hand.actions, { seatIndex, type: handActionTypes.REVEAL })
+    ) ||
+    (
+      seatIndex !== hand.heroSeatIndex &&
+      hand.seats[seatIndex].holeCards.length < 2
+    )
+  );
+
+  // At least 1 active position that hasn't revealed hole cards.
   if (awaitingHoleCards) {
     return [];
   }
+
+
+  if (activePositions.length === 1) {
+    return [activePositions[0].seatIndex];
+  }
+
+  // More than one active position with hole cards. Evaluate hand strengths to determine winner.
 
   const boardCards = hand.board;
 
@@ -415,6 +448,7 @@ export function getWinningSeatIndices(hand) {
     });
   });
 
+  // TODO: I think the solver returns if the hand is possible. Consider using for validation.
   const solvedWinners = pokersolver.winners(_.map(decoratedPositions, 'solvedHand'));
 
   // TODO: in add HOLE_CARDS middleware, check if valid state to determine winner, and spawn actions to stamp these calc values on seat records.

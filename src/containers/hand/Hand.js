@@ -83,11 +83,6 @@ function Hand(props) {
     history.push(`/hand/actions/seat/${seatIndex + 1}`);
   };
 
-  // TODO: change to use seatNum not seatIndex.
-  function handleNavToSeatHoleCards(seatIndex) {
-    history.push(`/hand/cards/seat/${seatIndex + 1}`);
-  }
-
   // TODO: explore / decide between const and named functions.
   function handleSetButtonIndex(buttonSeatIndex) {
     props.dispatch({
@@ -107,6 +102,12 @@ function Hand(props) {
           <Overview hand={hand} />
         }/>
         <Route path="/hand/:inputStepType" render={({ match }) => {
+
+          if (match.isExact && hand.buttonSeatIndex !== null) {
+            handleNavToSeatIndexActions(getNextToActSeatIndex(hand));
+            return null;
+          }
+
           return (
             <HandWizard
               matchParams={match.params}

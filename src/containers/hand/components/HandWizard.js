@@ -48,6 +48,21 @@ export default function HandWizard(props) {
   //   - Change action urls to include betting round to setup support for future editing
   // TODO: below sections should be their own components
 
+  // TODO: move to Hand.js route definition redirect handling.
+  if (matchParams.inputStepType === 'actions') {
+
+    const positionsMissingRevealedCards = hand.actions
+      .filter(({ type, seatIndex }) =>
+        type === handActionTypes.REVEAL &&
+        hand.seats[seatIndex].holeCards.length < 2
+      );
+
+    if (positionsMissingRevealedCards.length) {
+      const seatIndex = positionsMissingRevealedCards[0].seatIndex;
+      return <Redirect to={`/hand/cards/seat/${seatIndex + 1}`} />;
+    }
+  }
+
   return (
     <StyledContainer>
       {/* TODO: convert to onClick*/}
@@ -99,7 +114,6 @@ export default function HandWizard(props) {
       {
         hand.seats.map((s, i) =>
           <Route key={i} path={`/hand/cards/seat/${i + 1}`} render={(routerProps) => {
-
             // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
             setSelectedSeatIndex(i); // TODO: re-route if invalid seat index (somehow?).
 
