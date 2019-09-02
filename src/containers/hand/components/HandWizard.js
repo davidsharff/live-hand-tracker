@@ -23,7 +23,7 @@ import { isTinyScreen } from '../../../utils';
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, onMuckHoleCards, matchParams } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   const winningSeatIndices = getWinningSeatIndices(hand);
@@ -38,6 +38,7 @@ export default function HandWizard(props) {
   //   - HAND SPLIT POT
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
+  //   - Support all-in flag
   //   - handle forward/back nav and possibly also clicking seats to edit past action selection during betting round and ultimately in any betting round.
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
@@ -86,7 +87,6 @@ export default function HandWizard(props) {
                         hand={hand}
                         seatIndex={i}
                         onClickAction={onAction}
-                        onMuckHoleCards={onMuckHoleCards}
                       />
                     );
                   }}/>
@@ -189,7 +189,7 @@ function HandCompleteBody(props) {
 }
 
 function ActionBody(props) {
-  const { hand, seatIndex, onClickAction, onMuckHoleCards, handleGoToHoleCards } = props;
+  const { hand, seatIndex, onClickAction } = props;
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -201,8 +201,6 @@ function ActionBody(props) {
       onClickAction(seatIndex, actionType, amount)
     , [seatIndex, onClickAction]
   );
-
-  const handleMuckHoleCards = () => onMuckHoleCards(seatIndex);
 
   // TODO: flashing some intervening state showing a Bet button on mobile.
     // Update: this todo was pre-ui overhaul
@@ -229,18 +227,6 @@ function ActionBody(props) {
             />
           )
       }
-      {
-        isHandComplete &&
-        <ActionButton color="primary" onClick={handleGoToHoleCards}>
-          Add Hole Cards
-        </ActionButton>
-      }
-      {
-       !_.find(availableActions, { type: handActionTypes.FOLD}) &&
-       <ActionButton color={isHandComplete && 'secondary'} onClick={handleMuckHoleCards}>
-         Muck
-       </ActionButton>
-      }
     </BodyContainer>
   );
 }
@@ -261,7 +247,10 @@ function ActionOption(props) {
   // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
 
-  const passiveActions = [handActionTypes.FOLD, handActionTypes.CHECK, handActionTypes.CALL];
+  const passiveActions = _.reject(_.values(handActionTypes), t =>
+    t === handActionTypes.BET || t === handActionTypes.RAISE
+  );
+
   const typeLabel = _.startCase(type);
 
   if (_.includes(passiveActions, type)) {

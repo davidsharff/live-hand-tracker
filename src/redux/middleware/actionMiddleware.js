@@ -1,5 +1,5 @@
 import actionTypes from '../actionTypes';
-import {isCurrentRoundComplete, getIsHandComplete} from "../reducers/handReducer";
+import { isCurrentRoundComplete, getIsHandComplete } from "../reducers/handReducer";
 
 // TODO: add validateAction middleware.
 // TODO: add pre and postActionValidation middleware. Post should be absolute last in chain before reducer and block _EVENT suffix actions from getting through.
@@ -30,7 +30,7 @@ export default store => next => action => {
       return;
     }
 
-    case actionTypes.SET_DID_MUCK:
+    // TODO: get rid of muck redux action type and replace with handActionType
     case actionTypes.SET_NEW_ACTION: {
       next(action);
       {
@@ -47,6 +47,7 @@ export default store => next => action => {
       }
 
       localStorage.setItem('hand', JSON.stringify(store.getState().hand));
+
       action.aux.navToNextSeatIndex(store.getState().hand);
       return;
     }

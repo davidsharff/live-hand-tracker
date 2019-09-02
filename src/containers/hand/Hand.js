@@ -43,20 +43,6 @@ function Hand(props) {
     });
   };
 
-  const handleMuckHoleCards = (seatIndex, holeCards, isFinishedEditing) => {
-    props.dispatch({
-      type: actionTypes.SET_DID_MUCK,
-      payload: {
-        seatIndex
-      },
-      aux: {
-        // TODO: it'd be great to get rid of all of these and either give routing ability to middleware or handle all routing changes in this component.
-        navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand)),
-        navToBoardInput: (bettingRound) => history.push(`/hand/cards/board/${bettingRound}`)
-      }
-    });
-  };
-
   const handleSaveBoardCards = (cards, isFinishedEditing) => {
     props.dispatch({
       type: actionTypes.SET_BOARD_CARDS,
@@ -130,7 +116,6 @@ function Hand(props) {
               deck={deck}
               onSaveBoardCards={handleSaveBoardCards}
               onSaveHoleCards={handleSaveHoleCards}
-              onMuckHoleCards={handleMuckHoleCards}
               board={hand.board}
               isHandComplete={isHandComplete}
               onClickSeat={handleClickSeat}

@@ -28,32 +28,9 @@ export default function handReducer(hand = initialState, action) {
       return _.assign({}, hand, {
         seats: hand.seats.map((s, i) =>
           i === seatIndex
-            ? _.assign({}, s, { holeCards, didMuck: false })
+            ? _.assign({}, s, { holeCards })
             : s
         )
-      });
-    }
-
-    case actionTypes.SET_DID_MUCK: {
-      const { seatIndex } = payload;
-
-      return _.assign({}, hand, {
-        seats: hand.seats.map((s, i) =>
-          i === seatIndex
-            ? _.assign({}, s, { didMuck: true, holeCards: [] })
-            : s
-        ),
-        actions: getIsHandComplete(hand)
-          ? hand.actions
-          : [
-            ...hand.actions, {
-            type: handActionTypes.FOLD,
-            bettingRound: hand.currentBettingRound,
-            seatIndex,
-            // TODO: this should record the new amount invested, and not the total price of call, and will require UI to use calc for total invested during round.
-            amount: 0
-          }
-         ]
       });
     }
 
@@ -157,7 +134,16 @@ export function getPositionLabelForSeatIndex(hand, seatIndex) {
 
 export function getAvailableActionForSeatIndex(hand, seatIndex) {
   if (getIsHandComplete(hand)) {
-    return [];
+    return [
+      {
+        type: handActionTypes.MUCK,
+        amount: null
+      },
+      {
+        type: handActionTypes.REVEAL,
+        amount: null
+      }
+    ];
   }
   const lastLiveAction = getLastLiveAction(hand);
 
@@ -184,6 +170,10 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
       {
         type: handActionTypes.BET,
         amount: hand.bigBlind
+      },
+      {
+        type: handActionTypes.MUCK,
+        amount: null
       }
     ];
   }
@@ -219,6 +209,10 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           {
             type: handActionTypes.RAISE,
             amount: lastAmount * 2
+          },
+          {
+            type: handActionTypes.MUCK,
+            amount: null
           }
         ];
       } else {
@@ -230,6 +224,10 @@ export function getAvailableActionForSeatIndex(hand, seatIndex) {
           {
             type: handActionTypes.BET,
             amount: hand.bigBlind
+          },
+          {
+            type: handActionTypes.MUCK,
+            amount: null
           }
         ];
       }
@@ -242,7 +240,8 @@ export function getNextToActSeatIndex(hand) {
   if (roundActions.length === 0) {
     return _(hand.positions) // TODO: duplication with activePositions logic below.
       .reject(({ seatIndex }) =>
-        getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.FOLD
+        getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.FOLD ||
+        getLastActionTypeForSeat(hand, seatIndex) === handActionTypes.MUCK
       )
       .first()
       .seatIndex;
@@ -255,7 +254,11 @@ export function getNextToActSeatIndex(hand) {
     return (
       seatIndex === lastActionSeatIndex || // Always include the position that just acted
       !lastActionForPosition ||  // Always include positions yet to act
-      lastActionForPosition.type !== handActionTypes.FOLD // Only include positions that haven't folded.
+      (
+        // Only include positions that haven't folded.
+        lastActionForPosition.type !== handActionTypes.FOLD &&
+        lastActionForPosition.type !== handActionTypes.MUCK
+      )
     );
   });
 
@@ -278,7 +281,11 @@ export function getLastActionTypeForSeat(hand, seatIndex) {
 
 function getLastLiveAction(hand) {
   return _(hand.actions)
-    .filter(({ type, bettingRound}) => bettingRound === hand.currentBettingRound && type !== handActionTypes.FOLD)
+    .filter(({ type, bettingRound}) =>
+      bettingRound === hand.currentBettingRound &&
+      type !== handActionTypes.FOLD &&
+      type !== handActionTypes.MUCK
+    )
     .last();
 }
 
@@ -296,7 +303,8 @@ export function getCurrentActionsForSeat(hand, seatIndex) {
     a.seatIndex === seatIndex &&
     (
       a.bettingRound === hand.currentBettingRound ||
-      a.type === handActionTypes.FOLD
+      a.type === handActionTypes.FOLD ||
+      a.type === handActionTypes.MUCK
     )
   );
 }
@@ -359,8 +367,10 @@ export function getIsHandComplete(hand) {
 export function getCurrentActivePositions(hand) {
   return hand.positions.filter(({ seatIndex }) =>
     hand.seats[seatIndex].isActive &&
-    !hand.seats[seatIndex].didMuck && // TODO: add and wire up a didMuck field
-    !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD })
+    (
+      !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD }) ||
+      !_.some(hand.actions, { seatIndex, type: handActionTypes.MUCK })
+    )
   );
 }
 

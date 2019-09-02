@@ -51,11 +51,16 @@ export default function PokerTableSeat(props) {
 
   const foldedInPriorRound = (
     !!lastAction &&
-    lastAction.type === handActionTypes.FOLD &&
+    (
+      lastAction.type === handActionTypes.FOLD ||
+      lastAction.type === handActionTypes.MUCK
+    ) &&
     lastAction.bettingRound !== currentBettingRound
   );
 
   const useDisabledUI = foldedInPriorRound || !isActive;
+
+  console.log('lastAction', lastAction);
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
     <SquareSeatContainer
@@ -86,7 +91,9 @@ export default function PokerTableSeat(props) {
                   {
                     seat.holeCards.length
                       ? seat.holeCards.join(' ')
-                      : '??'
+                      : lastAction.type === handActionTypes.MUCK
+                        ? _.capitalize(handActionTypes.MUCK)
+                        : '??'
                   }
                 </div>
               )
@@ -101,8 +108,7 @@ export default function PokerTableSeat(props) {
                     !shrink &&
                     <div>
                       {
-                        // TODO: move to const or fn
-                        (lastAction && lastAction.type !== handActionTypes.FOLD && lastAction.type !== handActionTypes.CHECK) &&
+                        lastAction && lastAction.amount > 0 &&
                         '$' + amountInvested
                       }
                     </div>

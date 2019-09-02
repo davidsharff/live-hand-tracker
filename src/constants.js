@@ -28,7 +28,9 @@ export const handActionTypes = {
   BET: 'bet',
   RAISE: 'raise',
   FOLD: 'fold',
-  CHECK: 'check'
+  CHECK: 'check',
+  MUCK: 'muck',
+  REVEAL: 'reveal'
 };
 
 export const positionLabels = {
