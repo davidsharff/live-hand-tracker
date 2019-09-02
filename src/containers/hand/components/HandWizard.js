@@ -169,7 +169,7 @@ function HandCompleteBody(props) {
       <Button variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
         Create New Hand
       </Button>
-      <Button variant="contained" color="secondary" fullWidth>
+      <Button variant="contained" color="secondary" fullWidth disabled>
         Home
       </Button>
     </BodyContainer>
