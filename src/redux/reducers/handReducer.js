@@ -16,6 +16,7 @@ export default function handReducer(hand = initialState, action) {
 
     case actionTypes.CREATE_HAND:
       return _.assign({}, payload.handSessionDefaults, {
+        id: payload.handId, // TODO: also make sure we save a sessionId
         buttonSeatIndex: null,
         actions: [],
         positions: [],

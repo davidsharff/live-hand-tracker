@@ -23,7 +23,9 @@ export default store => next => action => {
             seats: session.defaultSeats,
             smallBlind: session.smallBlind,
             bigBlind: session.bigBlind
-          }
+          },
+          // TODO: use real uId generator
+          handId: Math.round(Math.random() * 10000000)
         }
       });
       return;

@@ -13,6 +13,7 @@ export const seatsType = PT.arrayOf(PT.exact({
 })).isRequired;
 
 export const handType = PT.exact({
+  id: PT.number.isRequired,
   currentBettingRound: PT.oneOf(_.values(bettingRounds)).isRequired,
   // TODO: get hardcoded max for seats from constants?
   buttonSeatIndex: PT.oneOf(_.range(0, 10)),
