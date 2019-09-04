@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path');
 const app = express();
 const cors = require('cors');
+const fs = require('fs');
 
 const buildPath = path.join(__dirname,'../build');
 
@@ -21,10 +22,45 @@ app.use(express.static(buildPath));
 const PORT = process.env.PORT || 8080;
 app.listen(console.log('Listening on ' + PORT) || PORT);
 
-app.route('/save/session-and-hand')
-  .post(saveHand)
 
-function saveHand(req, res) {
-  const data = req.body;
-  console.log('data', JSON.stringify(data.actions.length));
+const handsPath = path.join(__dirname, 'db/hands.json');
+if (!fs.existsSync(handsPath)) {
+  fs.writeFileSync(handsPath, JSON.stringify([]))
+}
+
+app.route('/hand/add')
+  .post(createHand)
+
+app.route('/hand/update')
+  .post(updateHand)
+
+
+function createHand(req, res) {
+  const { authToken, data: hand } = req.body;
+
+  const updatedHands = [
+    ...(JSON.parse(fs.readFileSync(handsPath))),
+    {
+      authToken,
+      hand
+    }
+  ];
+
+  fs.writeFileSync(handsPath, JSON.stringify(updatedHands));
+
+  res.send('Success');
+}
+
+function updateHand(req, res) {
+  const { authToken, data: hand } = req.body;
+
+  const updatedHands = (JSON.parse(fs.readFileSync(handsPath))).map((record) =>
+    record.authToken === authToken && record.hand.id === hand.id
+      ? { authToken, hand }
+      : record
+  );
+
+  fs.writeFileSync(handsPath, JSON.stringify(updatedHands));
+
+  res.send('Success');
 }
