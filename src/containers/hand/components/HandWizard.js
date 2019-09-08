@@ -16,7 +16,7 @@ import {
   getIsHandComplete,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound,
-  getWinningSeatIndices
+  getResultDecoratedPositions
 } from '../../../redux/reducers/handReducer';
 import { isTinyScreen } from '../../../utils';
 
@@ -26,17 +26,18 @@ export default function HandWizard(props) {
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
-  const winningSeatIndices = getWinningSeatIndices(hand);
+  const resultDecoratedPositions = getResultDecoratedPositions(hand);
 
   useEffect(() => {
-    if (winningSeatIndices.length) {
+    if (resultDecoratedPositions.length) {
       setSelectedSeatIndex(null);
     }
-  }, [winningSeatIndices]);
+  }, [resultDecoratedPositions]);
 
   // TODO:
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
   //      -- Lookup how to handle odd number when splitting pot
+  //   - Remove all setting hand in localStorage for single time setting currentHandId. Add api stub to getHand(currentHandId)
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
   //   - Support all-in flag
@@ -74,7 +75,7 @@ export default function HandWizard(props) {
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
         selectedSeatIndex={selectedSeatIndex}
-        winningSeatIndices={winningSeatIndices}
+        resultDecoratedPositions={resultDecoratedPositions}
         hand={hand}
         shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
       />
@@ -82,17 +83,18 @@ export default function HandWizard(props) {
         // TODO: this will be unecessary once card management routes are moved into parent Hand component
         hand.buttonSeatIndex === null
           ? <NewHandBody />
-          : matchParams.inputStepType === 'actions' && winningSeatIndices.length
+          : matchParams.inputStepType === 'actions' && resultDecoratedPositions.length
             ? <HandCompleteBody
-                winningSeatIndices={winningSeatIndices}
+                resultDecoratedPositions={resultDecoratedPositions}
                 potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
+                board={hand.board}
               />
             : (
             <React.Fragment>
               {
                 hand.seats.map(({ isActive }, i) => isActive &&
                   <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={(routerProps) => {
-                    if (hand.buttonSeatIndex === null || winningSeatIndices.length > 0) {
+                    if (hand.buttonSeatIndex === null || resultDecoratedPositions.length > 0) {
                       // TODO: make this a different route
                       return <Redirect to="/hand/actions" />;
                     }
@@ -184,16 +186,56 @@ function NewHandBody({ header, subtitle }) {
 }
 
 function HandCompleteBody(props) {
-  const { winningSeatIndices, potSize } = props;
+  const { resultDecoratedPositions, board } = props;
 
+  // const cardImgStyle = isTinyScreen()
+  //   ? { width: '46.2px', height: '70px'}
+  //   : { width: '60px',   height: '90px'};
+
+  // TODO: handle split pot
   return (
-    <BodyContainer>
-      <Typography variant="h5">
-        Winner: Seat { winningSeatIndices[0] + 1} (${potSize})
+    <BodyContainer style={{ alignItems: 'unset' }}>
+      <Typography variant="h5" style={{ textAlign: 'center'}}>
+        Results
       </Typography>
-      <Typography variant="subtitle1" style={{ fontStyle: 'italic'}}>
-        TODO: add all known hand types and results
+      <Typography variant="subtitle2">
+        Board: { board.join(' ')}
       </Typography>
+      {/*<div style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0'}}>*/}
+        {/*{*/}
+          {/*board.map(card =>*/}
+            {/*<img key={card} src={cardImages[card]} style={cardImgStyle} alt="" />*/}
+          {/*)*/}
+        {/*}*/}
+      {/*</div>*/}
+      {
+        // TODO: show board first then each position either has hole cards or mucked.
+        _.sortBy(resultDecoratedPositions, ({ amountWon }) => amountWon > 0 ? -1 : 1).map(p =>
+          <React.Fragment key={p.seatIndex}>
+            <Typography variant="subtitle2" style={{ margin: '2px 0'}}>
+              <span>Seat { p.seatIndex + 1}</span> { p.holeCards.length ? 'showed ' + p.holeCards.join(' ') : 'Mucked'}
+            </Typography>
+            {
+              p.handDescription !== 'Mucked' &&
+              <React.Fragment>
+                <Typography variant="subtitle2">
+                  Seat { p.seatIndex + 1} hand { p.handCards.join(' ') }
+                </Typography>
+                <Typography variant="subtitle2">
+                  Seat { p.seatIndex + 1} has { p.handDescription}
+                </Typography>
+              </React.Fragment>
+            }
+            {
+              p.amountWon > 0 &&
+              <Typography variant="subtitle2">
+                Seat { p.seatIndex + 1} wins ${ p.amountWon}
+              </Typography>
+            }
+          </React.Fragment>
+
+        )
+      }
       <Button variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
         Create New Hand
       </Button>
@@ -254,7 +296,6 @@ const BodyContainer = styled.div`
   flex: 1;
   width: 100%;
   padding: 10px 0 20px 0;
-  text-align: center;
 `;
 
 function ActionOption(props) {

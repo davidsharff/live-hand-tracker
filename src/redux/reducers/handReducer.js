@@ -396,14 +396,18 @@ export function getTotalPotSizeDuringRound(hand, targetRound) {
     .sumBy('amount');
 }
 
-export function getWinningSeatIndices(hand) {
+// TODO: this fn was built out should be refactored to always return records for all positions active during the river
+//       where folds/mucks of losing players are captured in the decorated position.
+export function getResultDecoratedPositions(hand) {
   if (!getIsHandComplete(hand)) {
     return [];
   }
 
   const activePositions = getCurrentActivePositions(hand);
 
-  // All positions have folded or mucked
+  const potSize = getTotalPotSizeDuringRound(hand, bettingRounds.RIVER);
+
+  // All but one position folded and remaining winner mucked.
   if (activePositions.length === 0) {
     const lastAction = _.last(hand.actions);
 
@@ -411,7 +415,15 @@ export function getWinningSeatIndices(hand) {
       throw new Error(`Cannot determine winner, unexpected last action type. Action type: ${lastAction.type}. Seat Index: ${lastAction.seatIndex}`);
     }
 
-    return [_.last(hand.actions).seatIndex];
+    const muckedWinningPosition = _.find(hand.positions, { seatIndex: _.last(hand.actions).seatIndex });
+    return [
+      _.assign({}, muckedWinningPosition, {
+        holeCards: [],
+        handCards: [],
+        handDescription: 'Mucked', // TODO: move to constant if this continues to be relied on post-refactor.
+        amountWon: potSize
+      })
+    ];
   }
 
   const awaitingHoleCards = activePositions.some(({ seatIndex }) =>
@@ -430,20 +442,32 @@ export function getWinningSeatIndices(hand) {
     return [];
   }
 
+  const boardCards = hand.board;
 
+  // One player remaining who chose to reveal cards.
   if (activePositions.length === 1) {
-    return [activePositions[0].seatIndex];
+    const position = activePositions[0];
+
+    const solvedHand = pokersolver.solve([...hand.seats[position.seatIndex].holeCards, ...boardCards]);
+
+    const revealedWinningPosition = _.assign({}, position, {
+      holeCards: hand.seats[position.seatIndex].holeCards,
+      handCards: solvedHand.cards,
+      handDescription: solvedHand.descr,
+      amountWon: potSize
+    });
+
+    return [revealedWinningPosition];
   }
 
   // More than one active position with hole cards. Evaluate hand strengths to determine winner.
-
-  const boardCards = hand.board;
 
   const decoratedPositions = activePositions.map((p) => {
     const solvedHand = pokersolver.solve([...hand.seats[p.seatIndex].holeCards, ...boardCards]);
 
     return _.assign({}, p, {
       solvedHand,
+      holeCards: hand.seats[p.seatIndex].holeCards,
       handCards: solvedHand.cards,
       handDescription: solvedHand.descr
     });
@@ -453,11 +477,14 @@ export function getWinningSeatIndices(hand) {
   const solvedWinners = pokersolver.winners(_.map(decoratedPositions, 'solvedHand'));
 
   // TODO: in add HOLE_CARDS middleware, check if valid state to determine winner, and spawn actions to stamp these calc values on seat records.
+  // TODO: fix handling of remainder in split pots
   return decoratedPositions
-    .filter(({ handDescription }) =>
-      solvedWinners[0].descr === handDescription
-    )
-    .map((p) =>
-      p.seatIndex
+    .map((p, i) => _.omit(
+      _.assign({}, p, {
+        amountWon: p.handDescription === solvedWinners[0].descr ? potSize / solvedWinners.length : 0
+      }),
+      'solvedHand'
+      )
     );
 }
+

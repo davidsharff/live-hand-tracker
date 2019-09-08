@@ -19,7 +19,7 @@ import {
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, winningSeatIndices, hand, shrink } = props;
+  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, resultDecoratedPositions, hand, shrink } = props;
   const theme = useTheme();
   const { palette } = theme;
 
@@ -69,6 +69,7 @@ export default function PokerTable(props) {
               {
                 seatsRow.map(({ isActive }, _i) => {
                   const seatIndex = _i + ( rowIndex === 1 ? 5 : 0);
+                  const resultDecoratedPosition = _.find(resultDecoratedPositions, { seatIndex });
                   // TODO: consider wrapper for session/hand poker tables
                   return (
                     <PokerTableSeat
@@ -77,7 +78,7 @@ export default function PokerTable(props) {
                       onClick={() => isActive && onClickSeat(seatIndex)}
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
-                      isSelected={seatIndex === selectedSeatIndex || _.includes(winningSeatIndices, seatIndex)}
+                      isSelected={seatIndex === selectedSeatIndex || (resultDecoratedPosition && resultDecoratedPosition.amountWon > 0)}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length
