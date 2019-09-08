@@ -23,7 +23,7 @@ import { isTinyScreen } from '../../../utils';
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
 
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, matchParams } = props;
+  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, onCreateNewHand, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
   const resultDecoratedPositions = getResultDecoratedPositions(hand);
@@ -88,6 +88,7 @@ export default function HandWizard(props) {
                 resultDecoratedPositions={resultDecoratedPositions}
                 potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
                 board={hand.board}
+                onCreateNewHand={onCreateNewHand}
               />
             : (
             <React.Fragment>
@@ -186,7 +187,7 @@ function NewHandBody({ header, subtitle }) {
 }
 
 function HandCompleteBody(props) {
-  const { resultDecoratedPositions, board } = props;
+  const { resultDecoratedPositions, board, onCreateNewHand } = props;
 
   // const cardImgStyle = isTinyScreen()
   //   ? { width: '46.2px', height: '70px'}
@@ -236,7 +237,7 @@ function HandCompleteBody(props) {
 
         )
       }
-      <Button variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
+      <Button onClick={onCreateNewHand} variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
         Create New Hand
       </Button>
       <Button variant="contained" color="secondary" fullWidth disabled>

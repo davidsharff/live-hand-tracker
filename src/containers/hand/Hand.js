@@ -79,6 +79,16 @@ function Hand(props) {
     }
   };
 
+  const handleCreateNewHand = (seatIndex) => {
+    localStorage.removeItem('hand');
+
+    props.dispatch({
+      type: actionTypes.CREATE_HAND
+    });
+
+    history.push('/hand/actions');
+  };
+
   function handleNavToSeatIndexActions(seatIndex) {
     history.push(`/hand/actions/seat/${seatIndex + 1}`);
   };
@@ -120,6 +130,7 @@ function Hand(props) {
               board={hand.board}
               isHandComplete={isHandComplete}
               onClickSeat={handleClickSeat}
+              onCreateNewHand={handleCreateNewHand}
             />
           );
         }}/>
