@@ -17,6 +17,7 @@ export default function PokerTableSeat(props) {
     seatIndex,
     isHero,
     isSelected,
+    isMultiSelected,
     seat,
     positionLabel,
     lastAction,
@@ -60,15 +61,30 @@ export default function PokerTableSeat(props) {
 
   const useDisabledUI = foldedInPriorRound || !isActive;
 
+  const selectedBorderColor = palette.primary.dark;
+
+  const borderColor = useDisabledUI
+    ? palette.action.disabled
+      : isMultiSelected
+        ? selectedBorderColor + '8c'
+        : isSelected
+          ? selectedBorderColor
+          : palette.primary.light;
   // TODO: when < 10 seats, consider leaving all 10 slots buy completing greying out non-applicable seats.
   return (
     <SquareSeatContainer
       onClick={onClick}
-      borderColor={useDisabledUI ? palette.action.disabled : isSelected ? palette.primary.dark : palette.primary.light}
+      borderColor={borderColor}
       heavyBorder={isSelected}
-      backgroundColor={useDisabledUI ? palette.action.disabledBackground : palette.grey['50']}
       isMultiRow={isLiveHand}
       shrink={shrink}
+      backgroundColor={
+        useDisabledUI
+          ? palette.action.disabledBackground
+          : isMultiSelected
+            ? selectedBorderColor + '29'
+            : palette.grey['50']
+      }
     >
       <SeatAvatar
         style={{

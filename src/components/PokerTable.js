@@ -81,6 +81,7 @@ export default function PokerTable(props) {
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
                       isSelected={selectedSeatIndices.indexOf(seatIndex) > -1}
+                      isMultiSelected={selectedSeatIndices.indexOf(seatIndex) > -1 && _.last(selectedSeatIndices) !== seatIndex}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length

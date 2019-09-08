@@ -11,6 +11,9 @@ import Button from "@material-ui/core/Button/Button";
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
+
 
 
 import PokerTable from "../../../components/PokerTable";
@@ -21,7 +24,9 @@ import {
   getIsHandComplete,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound,
-  getResultDecoratedPositions, getCurrentActivePositions
+  getResultDecoratedPositions,
+  getCurrentActivePositions,
+  getNextToActSeatIndex
 } from '../../../redux/reducers/handReducer';
 import { isTinyScreen } from '../../../utils';
 
@@ -168,6 +173,7 @@ export default function HandWizard(props) {
                         seatIndex={i}
                         onClickAction={onAction}
                         areMultipleSeatsSelected={selectedSeatIndices.length > 1}
+                        nextToActSeatIndex={getNextToActSeatIndex(hand)}
                       />
                     );
                   }}/>
@@ -310,7 +316,7 @@ function HandCompleteBody(props) {
 }
 
 function ActionBody(props) {
-  const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
+  const { hand, seatIndex, onClickAction, areMultipleSeatsSelected, nextToActSeatIndex } = props;
 
   const [cascadeActionType, setCascadeActionType] = useState(null);
 
@@ -337,12 +343,19 @@ function ActionBody(props) {
     .value();
 
   const CascadeActionSelect = () => {
+    const activePositions = getCurrentActivePositions(hand);
+
+    const firstSkippedPosIndex = _.findIndex(activePositions, { seatIndex: nextToActSeatIndex});
+    const lastSkippedPosIndex = _.findIndex(activePositions, { seatIndex }) - 1;
 
     return (
-      <FormControl>
+      <FormControl style={{ width: '100%', marginTop: '5px' }}>
+        <InputLabel>
+          Prior Seat(s) Action
+        </InputLabel>
         <Select
           value={
-            cascadeActionType === null
+            cascadeActionType === null && availableCascadeActionTypes.length === 1
               ? availableCascadeActionTypes[0]
               : cascadeActionType
           }
@@ -350,10 +363,20 @@ function ActionBody(props) {
         >
           {
             availableCascadeActionTypes.map((type) =>
-              <MenuItem key={type} value={type} style={{ paddingBottom: '2px'}}>{ type }</MenuItem>
+              <MenuItem key={type} value={type} style={{ paddingBottom: '2px'}}>
+                { _.capitalize(type) }
+              </MenuItem>
             )
           }
         </Select>
+        <FormHelperText>
+          Apply this action to skipped positions:&nbsp;
+          { activePositions[firstSkippedPosIndex].label }
+          {
+            lastSkippedPosIndex > firstSkippedPosIndex &&
+            (' - ' + activePositions[lastSkippedPosIndex].label)
+          }
+        </FormHelperText>
       </FormControl>
     );
   };
@@ -367,10 +390,7 @@ function ActionBody(props) {
       </Typography>
       {
         areMultipleSeatsSelected &&
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-          <div style={{ marginRight: '5px'}}>All prior seats will:</div>
-          <CascadeActionSelect />
-        </div>
+        <CascadeActionSelect />
       }
       {
         // TODO: make most common actions sort first.
