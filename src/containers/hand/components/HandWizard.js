@@ -45,9 +45,7 @@ export default function HandWizard(props) {
   }, [resultDecoratedPositions]);
 
   // TODO:
-  //   - Add onMount handling to route to next to act action when applicable
-  //   - Fix bug that doesn't show winning seat
-  //   - Select multiple seats
+  //   - Support skipping to future seat for cascading actions if nextToAct and future seat last action was the same.
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
@@ -327,8 +325,8 @@ function ActionBody(props) {
   const potSize = getTotalPotSizeDuringRound(hand, hand.currentBettingRound);
 
   const handleClick = useCallback((actionType, amount) =>
-      onClickAction(seatIndex, actionType, amount)
-    , [seatIndex, onClickAction]
+      onClickAction(seatIndex, actionType, amount, cascadeActionType)
+    , [seatIndex, onClickAction, cascadeActionType]
   );
 
   // TODO: flashing some intervening state showing a Bet button on mobile.
@@ -348,8 +346,14 @@ function ActionBody(props) {
     const firstSkippedPosIndex = _.findIndex(activePositions, { seatIndex: nextToActSeatIndex});
     const lastSkippedPosIndex = _.findIndex(activePositions, { seatIndex }) - 1;
 
+    useEffect(() => {
+      if (cascadeActionType === null && availableCascadeActionTypes.length === 1) {
+        setCascadeActionType(availableCascadeActionTypes[0]);
+      }
+    }, []);
+
     return (
-      <FormControl style={{ width: '100%', marginTop: '5px' }}>
+      <FormControl style={{ width: '100%' }}>
         <InputLabel>
           Prior Seat(s) Action
         </InputLabel>
@@ -357,7 +361,7 @@ function ActionBody(props) {
           value={
             cascadeActionType === null && availableCascadeActionTypes.length === 1
               ? availableCascadeActionTypes[0]
-              : cascadeActionType
+              : cascadeActionType || ''
           }
           onChange={(e) => setCascadeActionType(e.target.value)}
         >
@@ -380,6 +384,7 @@ function ActionBody(props) {
       </FormControl>
     );
   };
+
   return (
     <BodyContainer>
       <Typography variant="h5">
@@ -401,6 +406,7 @@ function ActionBody(props) {
               type={availableAction.type}
               amount={availableAction.amount}
               onClick={handleClick}
+              isDisabled={areMultipleSeatsSelected && !cascadeActionType}
             />
           )
       }
@@ -418,7 +424,7 @@ const BodyContainer = styled.div`
 `;
 
 function ActionOption(props) {
-  const { type, amount, onClick } = props;
+  const { type, amount, onClick, isDisabled } = props;
 
   // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
@@ -431,7 +437,7 @@ function ActionOption(props) {
 
   if (_.includes(passiveActions, type)) {
     return (
-      <ActionButton color="primary" onClick={handleClick}>
+      <ActionButton color="primary" onClick={handleClick} disabled={isDisabled}>
         { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
       </ActionButton>
 
@@ -439,12 +445,18 @@ function ActionOption(props) {
   }
 
   return (
-    <ActionButtonWithInput buttonColor="secondary" amount={amount} handleClick={handleClick} label={typeLabel} />
+    <ActionButtonWithInput
+      buttonColor="secondary"
+      amount={amount}
+      handleClick={handleClick}
+      label={typeLabel}
+      isDisabled={isDisabled}
+    />
   );
 }
 
 function ActionButtonWithInput(props) {
-  const { amount, label, handleClick, buttonColor } = props;
+  const { amount, label, handleClick, buttonColor, isDisabled } = props;
   const [newAmount, setNewAmount] = useState(amount);
 
   const handleChange = (e) => {
@@ -455,7 +467,14 @@ function ActionButtonWithInput(props) {
   };
 
   return (
-    <ActionButton variant="outlined" color={buttonColor} fullWidth disableRipple onClick={() => handleClick(newAmount)}>
+    <ActionButton
+      variant="outlined"
+      color={buttonColor}
+      fullWidth
+      disableRipple
+      onClick={() => handleClick(newAmount)}
+      disabled={isDisabled}
+    >
       <span style={{ marginRight: '5px' }}>{ label }&nbsp;$</span>
       <Input
         onClick={(e) => e.stopPropagation() }
@@ -464,6 +483,7 @@ function ActionButtonWithInput(props) {
         type="number"
         value={newAmount}
         onChange={handleChange}
+        disabled={isDisabled}
       />
     </ActionButton>
   );

@@ -72,7 +72,8 @@ export default function handReducer(hand = initialState, action) {
       });
     }
 
-    case actionTypes.SET_NEW_ACTION: {
+    case actionTypes.CASCADE_ADD_ACTION:
+    case actionTypes.ADD_ACTION: {
       const { type, amount, seatIndex } = payload;
       return _.assign({}, hand, {
         actions: [

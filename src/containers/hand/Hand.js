@@ -63,13 +63,14 @@ function Hand(props) {
     });
   };
 
-  const handleAddAction = (seatIndex, type, amount) => {
+  const handleAddAction = (seatIndex, type, amount, cascadeActionType) => {
     props.dispatch({
-      type: actionTypes.SET_NEW_ACTION,
+      type: actionTypes.ADD_ACTION,
       payload: {
         seatIndex,
         type,
-        amount
+        amount,
+        cascadeActionType: cascadeActionType || null
       },
       aux: {
         navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand)),
