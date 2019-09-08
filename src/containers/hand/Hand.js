@@ -2,12 +2,19 @@
 import React, { useEffect }  from 'react';
 import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
+import _ from 'lodash';
+
 import HandWizard from './components/HandWizard';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
 
-import {getDeck, getIsHandComplete, getNextToActSeatIndex} from "../../redux/reducers/handReducer";
+import {
+  getCurrentActivePositions,
+  getDeck,
+  getIsHandComplete,
+  getNextToActSeatIndex
+} from "../../redux/reducers/handReducer";
 import Overview from "./components/Overview";
 
 function Hand(props) {
@@ -76,6 +83,16 @@ function Hand(props) {
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
       history.push(`/hand/cards/seat/${hand.heroSeatIndex + 1}`);
+
+      // Allow clicking ahead to input action if seat is live and hasn't acted this round.
+    } else if (_.includes(props.location.pathname, 'actions') && !isHandComplete) {
+      const activePositions = getCurrentActivePositions(hand);
+
+      const lastSeatAction = _.findLast(hand.actions, { seatIndex });
+
+      if (_.some(activePositions, { seatIndex }) && (!lastSeatAction || lastSeatAction.bettingRound !== hand.currentBettingRound)) {
+        handleNavToSeatIndexActions(seatIndex);
+      }
     }
   };
 

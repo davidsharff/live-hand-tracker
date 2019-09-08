@@ -23,7 +23,7 @@ export default function PokerTableSeat(props) {
     isLiveHand,
     currentBettingRound,
     amountInvested,
-    isHandComplete,
+    showHoleCards,
     shrink
   } = props;
 
@@ -84,7 +84,7 @@ export default function PokerTableSeat(props) {
         isLiveHand && isActive &&
         <BodyContainer style={{color: palette.text.secondary}}>
           {
-            isHandComplete
+            showHoleCards
               ? (
                 <div>
                   {

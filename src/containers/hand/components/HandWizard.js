@@ -8,15 +8,20 @@ import Typography from "@material-ui/core/Typography/Typography";
 import Input from "@material-ui/core/Input/Input";
 import Button from "@material-ui/core/Button/Button";
 
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+
+
 import PokerTable from "../../../components/PokerTable";
 import ManageCards from "./ManageCards";
-import { bettingRounds, cardInputTypes, handActionTypes } from "../../../constants";
+import { bettingRounds, cardInputTypes, cascadeActionTypes, handActionTypes } from "../../../constants";
 import {
   getAvailableActionForSeatIndex,
   getIsHandComplete,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound,
-  getResultDecoratedPositions
+  getResultDecoratedPositions, getCurrentActivePositions
 } from '../../../redux/reducers/handReducer';
 import { isTinyScreen } from '../../../utils';
 
@@ -35,9 +40,15 @@ export default function HandWizard(props) {
   }, [resultDecoratedPositions]);
 
   // TODO:
+  //   - Add onMount handling to route to next to act action when applicable
+  //   - Fix bug that doesn't show winning seat
+  //   - Select multiple seats
+  //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
+  //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
   //      -- Lookup how to handle odd number when splitting pot
   //   - Remove all setting hand in localStorage for single time setting currentHandId. Add api stub to getHand(currentHandId)
+  //   - Handle changing past actions
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
   //   - Support all-in flag
@@ -66,6 +77,51 @@ export default function HandWizard(props) {
     }
   }
 
+  const getIncludeInSeatSelection = (seatIndex) => {
+    // Short-circuit. Evaluations below assume that either routeSeatIndex is null or there are multiple selected seats.
+    if (seatIndex === selectedSeatIndex) {
+      return true;
+    }
+
+    const activePositions = getCurrentActivePositions(hand);
+
+    // TODO: test this before committing.
+    // In results phase, all winners are selected.
+    if (isHandComplete) {
+      const resultDecoratedPosition = _.find(resultDecoratedPositions, { seatIndex });
+      return (
+        (resultDecoratedPosition && resultDecoratedPosition.amountWon > 0) ||
+        (
+          activePositions.length === 0 &&
+          _.last(hand.actions).seatIndex === seatIndex
+        )
+
+      );
+    }
+
+    if (hand.buttonSeatIndex !== null && matchParams.inputStepType === 'actions' && selectedSeatIndex !== null) {
+      // Note: this only includes seats that haven't acted this round. A clearer but too long variable name would be
+      // orderedSeatIndicesWaitingForInitialActionThisRound
+      const leftToActSeatIndices = _(activePositions)
+        .map('seatIndex')
+        .reject((sIndex) => _.some(hand.actions, { seatIndex: sIndex, bettingRound: hand.currentBettingRound }))
+        .value();
+
+      const targetSeatLeftToActIndex = leftToActSeatIndices.indexOf(seatIndex);
+      const selectedSeatLeftToActIndex = leftToActSeatIndices.indexOf(selectedSeatIndex);
+
+      // Handle multiple seats selected
+      return targetSeatLeftToActIndex !== -1 && targetSeatLeftToActIndex <= selectedSeatLeftToActIndex;
+    }
+  };
+
+  const selectedSeatIndices = _(hand.positions)
+    .filter(({ seatIndex }) =>
+      getIncludeInSeatSelection(seatIndex)
+    )
+    .map('seatIndex')
+    .value();
+
   return (
     <StyledContainer>
       {/* TODO: convert to onClick*/}
@@ -74,16 +130,19 @@ export default function HandWizard(props) {
         onClickSeat={onClickSeat}
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
-        selectedSeatIndex={selectedSeatIndex}
+        routeSeatIndex={selectedSeatIndex}
         resultDecoratedPositions={resultDecoratedPositions}
         hand={hand}
         shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
+        isHandComplete={isHandComplete}
+        selectedSeatIndices={selectedSeatIndices}
       />
       {
         // TODO: this will be unecessary once card management routes are moved into parent Hand component
         hand.buttonSeatIndex === null
-          ? <NewHandBody />
+          ? <NewHandBody /> // TODO: needs its own route.
           : matchParams.inputStepType === 'actions' && resultDecoratedPositions.length
+            // TODO: needs its own route.
             ? <HandCompleteBody
                 resultDecoratedPositions={resultDecoratedPositions}
                 potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
@@ -108,6 +167,7 @@ export default function HandWizard(props) {
                         hand={hand}
                         seatIndex={i}
                         onClickAction={onAction}
+                        areMultipleSeatsSelected={selectedSeatIndices.length > 1}
                       />
                     );
                   }}/>
@@ -149,6 +209,8 @@ export default function HandWizard(props) {
             }
 
             const potSize = getTotalPotSizeDuringRound(hand, hand.currentBettingRound);
+
+            setSelectedSeatIndex(null);
 
             return (
               <ManageCards
@@ -248,7 +310,9 @@ function HandCompleteBody(props) {
 }
 
 function ActionBody(props) {
-  const { hand, seatIndex, onClickAction } = props;
+  const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
+
+  const [cascadeActionType, setCascadeActionType] = useState(null);
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -262,10 +326,37 @@ function ActionBody(props) {
   );
 
   // TODO: flashing some intervening state showing a Bet button on mobile.
-    // Update: this todo was pre-ui overhaul
+  // Update: this todo was pre-ui overhaul
 
   const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
   const isHandComplete = getIsHandComplete(hand);
+
+  const availableCascadeActionTypes = _(availableActions)
+    .filter(({ type }) => areMultipleSeatsSelected && _.includes(cascadeActionTypes, type))
+    .map('type')
+    .value();
+
+  const CascadeActionSelect = () => {
+
+    return (
+      <FormControl>
+        <Select
+          value={
+            cascadeActionType === null
+              ? availableCascadeActionTypes[0]
+              : cascadeActionType
+          }
+          onChange={(e) => setCascadeActionType(e.target.value)}
+        >
+          {
+            availableCascadeActionTypes.map((type) =>
+              <MenuItem key={type} value={type} style={{ paddingBottom: '2px'}}>{ type }</MenuItem>
+            )
+          }
+        </Select>
+      </FormControl>
+    );
+  };
   return (
     <BodyContainer>
       <Typography variant="h5">
@@ -274,6 +365,13 @@ function ActionBody(props) {
       <Typography variant="h6">
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
       </Typography>
+      {
+        areMultipleSeatsSelected &&
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+          <div style={{ marginRight: '5px'}}>All prior seats will:</div>
+          <CascadeActionSelect />
+        </div>
+      }
       {
         // TODO: make most common actions sort first.
         _.sortBy(availableActions, sortActionComponents)
@@ -359,9 +457,9 @@ const ActionButton = styled(({ ...rest }) => <Button { ...rest } disableRipple f
 function sortActionComponents({ type }) {
   return type === handActionTypes.CHECK
     ? 0
-    : type  === handActionTypes.FOLD
+    : type === handActionTypes.CALL
       ? 1
-      : type === handActionTypes.CALL
+      : type  === handActionTypes.FOLD
         ? 2
         : type === handActionTypes.BET
           ? 3

@@ -19,9 +19,12 @@ import {
 
 
 export default function PokerTable(props) {
-  const { seats, heroSeatIndex, showLegend, onClickSeat, selectedSeatIndex, resultDecoratedPositions, hand, shrink } = props;
+  // TODO: either keep hand prop and drop other props in favor of applicable selectors, or drop hand and use props for everything.
+  const { seats, heroSeatIndex, showLegend, onClickSeat, hand, shrink, selectedSeatIndices } = props;
   const theme = useTheme();
   const { palette } = theme;
+
+  const isHandComplete = !!hand && getIsHandComplete(hand);
 
   if (!seats.length) {
    return null;
@@ -69,7 +72,6 @@ export default function PokerTable(props) {
               {
                 seatsRow.map(({ isActive }, _i) => {
                   const seatIndex = _i + ( rowIndex === 1 ? 5 : 0);
-                  const resultDecoratedPosition = _.find(resultDecoratedPositions, { seatIndex });
                   // TODO: consider wrapper for session/hand poker tables
                   return (
                     <PokerTableSeat
@@ -78,7 +80,7 @@ export default function PokerTable(props) {
                       onClick={() => isActive && onClickSeat(seatIndex)}
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
-                      isSelected={seatIndex === selectedSeatIndex || (resultDecoratedPosition && resultDecoratedPosition.amountWon > 0)}
+                      isSelected={selectedSeatIndices.indexOf(seatIndex) > -1}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length
@@ -88,7 +90,7 @@ export default function PokerTable(props) {
                       lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
                       currentBettingRound={hand && hand.currentBettingRound}
                       isLiveHand={hand && hand.buttonSeatIndex !== null}
-                      isHandComplete={!!hand && getIsHandComplete(hand)}
+                      showHoleCards={isHandComplete}
                       amountInvested={hand && getCurrentAmountInvestedForSeat(hand, seatIndex)}
                       shrink={shrink}
                     />

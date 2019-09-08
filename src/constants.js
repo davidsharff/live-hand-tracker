@@ -33,6 +33,12 @@ export const handActionTypes = {
   REVEAL: 'reveal'
 };
 
+export const cascadeActionTypes = [
+  handActionTypes.FOLD,
+  handActionTypes.CHECK,
+  handActionTypes.CALL
+];
+
 export const positionLabels = {
   SB: 'SB',
   BB: 'BB'
