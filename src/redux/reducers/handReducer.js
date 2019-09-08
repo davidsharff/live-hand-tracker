@@ -371,6 +371,9 @@ export function getCurrentActivePositions(hand) {
     hand.seats[seatIndex].isActive &&
     (
       !_.some(hand.actions, { seatIndex, type: handActionTypes.FOLD }) &&
+      // TODO: this really needs to distinguish edge-case of excluding river mucks if they happen while action is live.
+      //       To accomplish, the isCurrentRoundComplete selector can be used to find the last live action and only include
+      //       mucks that happened after river completed.
       !_.some(hand.actions, { seatIndex, type: handActionTypes.MUCK })
     )
   );

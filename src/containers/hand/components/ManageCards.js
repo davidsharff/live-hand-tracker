@@ -280,7 +280,8 @@ function getIsCardIndexDisabled(type, cardIndex) {
   return (
     (type === cardInputTypes.HOLE_CARDS && cardIndex > 1) ||
     (type === cardInputTypes.FLOP && cardIndex > 2) ||
-    (type === cardInputTypes.TURN && cardIndex > 3)
+    (type === cardInputTypes.TURN && cardIndex > 3) ||
+    (type === cardInputTypes.RIVER && cardIndex > 4)
   );
 }
 
