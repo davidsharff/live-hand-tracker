@@ -20,6 +20,7 @@ import {
 
 export default function PokerTable(props) {
   // TODO: either keep hand prop and drop other props in favor of applicable selectors, or drop hand and use props for everything.
+  // TODO: would be nice to have wrapper component that prevented needing to handle null refs if being using in Session vs Hand.
   const { seats, heroSeatIndex, showLegend, onClickSeat, hand, shrink, selectedSeatIndices } = props;
   const theme = useTheme();
   const { palette } = theme;
@@ -80,8 +81,8 @@ export default function PokerTable(props) {
                       onClick={() => isActive && onClickSeat(seatIndex)}
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
-                      isSelected={selectedSeatIndices.indexOf(seatIndex) > -1}
-                      isMultiSelected={selectedSeatIndices.indexOf(seatIndex) > -1 && _.last(selectedSeatIndices) !== seatIndex}
+                      isSelected={selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1}
+                      isMultiSelected={selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1 && _.last(selectedSeatIndices) !== seatIndex}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length
