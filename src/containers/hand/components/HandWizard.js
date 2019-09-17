@@ -48,6 +48,7 @@ export default function HandWizard(props) {
   //   - Support skipping to future seat for cascading actions if nextToAct and future seat last action was the same.
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
+  //   - Continue to show past action in poker table seat during board input?
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
   //      -- Lookup how to handle odd number when splitting pot
   //   - Remove all setting hand in localStorage for single time setting currentHandId. Add api stub to getHand(currentHandId)
@@ -55,6 +56,7 @@ export default function HandWizard(props) {
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
   //   - get rid of all exact '/hand/actions' navigation
   //   - Support all-in flag
+  //   - It'd be nice if the poker seat UI made it clear when and what is clickable (e.g. when you can click ahead to future seat, the fact you can't click on seats at all during board input, etc.)
   //   - Breakout hand and session middleware and make sure apiMiddleware saves session and hand seperately
   //   - handle forward/back nav and possibly also clicking seats to edit past action selection during betting round and ultimately in any betting round.
   //   - Add interstitial start hand screen should default to setting button but toggle to re-configure seat. Maybe make session details visible here but need to decide if certain edits create new sessions.

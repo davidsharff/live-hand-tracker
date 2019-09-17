@@ -93,6 +93,9 @@ function Hand(props) {
 
       if (_.some(activePositions, { seatIndex }) && (!lastSeatAction || lastSeatAction.bettingRound !== hand.currentBettingRound)) {
         handleNavToSeatIndexActions(seatIndex);
+      } else {
+        // TODO: add real UI
+        window.alert('You can only skip to seats that haven\'t acted this round');
       }
     }
   };
