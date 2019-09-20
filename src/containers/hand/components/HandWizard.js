@@ -46,6 +46,8 @@ export default function HandWizard(props) {
 
   // TODO:
   //   - BREAKOUT THIS FILE INTO MULTIPLE COMPONENTS
+  //   - Disable bet/raise if auto-cascade hasn't ben selected. Hide bet/raise keyboard when it has check and fold, then transform selection into simple label,
+  //     and always use label for check-only, or make the drop down it's own step and never show anything about it on next screen, or only support auto-action for check/fold.
   //   - Handle clicking 0 when no bet/raise has been inputted
   //   - Support skipping to future seat for cascading actions if nextToAct and future seat last action was the same.
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
@@ -54,6 +56,7 @@ export default function HandWizard(props) {
   //   - To gain space for bet/raise presets and/or all-in flag consider
   //      - Poker seat action desc one line to shrink rectangles.
   //      - One line header swith smaller text desc round, pot, seat, etc.
+  //      - Collapse top nav by default to just show hand #
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - Continue to show past action in poker table seat during board input?
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
