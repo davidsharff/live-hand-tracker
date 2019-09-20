@@ -5,7 +5,7 @@ import { Route, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import Container from '@material-ui/core/Container';
 import Typography from "@material-ui/core/Typography/Typography";
-import Input from "@material-ui/core/Input/Input";
+import BackspaceIcon from "@material-ui/icons/BackspaceOutlined";
 import Button from "@material-ui/core/Button/Button";
 
 import MenuItem from '@material-ui/core/MenuItem';
@@ -45,9 +45,15 @@ export default function HandWizard(props) {
   }, [resultDecoratedPositions]);
 
   // TODO:
+  //   - BREAKOUT THIS FILE INTO MULTIPLE COMPONENTS
+  //   - Handle clicking 0 when no bet/raise has been inputted
   //   - Support skipping to future seat for cascading actions if nextToAct and future seat last action was the same.
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
   //   - Confirm behavior for seat selection once final results are in. Currently, split pot situations are broken.
+  //   - Write up handling 4 and 5 figures for long term.
+  //   - To gain space for bet/raise presets and/or all-in flag consider
+  //      - Poker seat action desc one line to shrink rectangles.
+  //      - One line header swith smaller text desc round, pot, seat, etc.
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - Continue to show past action in poker table seat during board input?
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
@@ -404,17 +410,27 @@ function ActionBody(props) {
         {
           // TODO: make most common actions sort first.
           _.sortBy(availableActions, sortActionComponents)
-            .map((availableAction, i) =>
-              <div style={{ flex: (i === availableActions.length - 1) ? 2 : 1}}>
-                <ActionOption
-                  key={seatIndex + availableAction.type}
-                  type={availableAction.type}
-                  amount={availableAction.amount}
-                  onClick={handleClick}
-                  isDisabled={areMultipleSeatsSelected && !cascadeActionType}
-                />
-              </div>
-            )
+            .map((availableAction) => {
+              const { type, amount } = availableAction;
+              const isBetOrRaise = type === handActionTypes.BET || type === handActionTypes.RAISE;
+
+              return (
+                <div style={{ flex: isBetOrRaise ? 2 : .75}} key={seatIndex + type}>
+                  <ActionOption
+                    type={type}
+                    amount={amount}
+                    onClick={handleClick}
+                    // TODO: this logic seems wrong.
+                    isDisabled={areMultipleSeatsSelected && !cascadeActionType}
+                  />
+                </div>
+              );
+            })
+        }
+        {
+          // TODO: hacky spacer to keep showdown buttons in same spot.
+          availableActions.length < 3 &&
+          <div style={{ flex: 2}} />
         }
       </ActionsContainer>
     </BodyContainer>
@@ -427,7 +443,7 @@ const BodyContainer = styled.div`
   align-items: center;
   flex: 1;
   width: 100%;
-  padding: 10px 0 20px 0;
+  padding-bottom: 20px;
 `;
 
 const ActionsContainer = styled.div`
@@ -435,7 +451,7 @@ const ActionsContainer = styled.div`
   flex-direction: column;
   flex: 1;
   width: 100%;
-  padding-top: 20px;
+  padding-top: ${ isTinyScreen() ? '10px' : '20px'};
   justify-content: space-between;
 `;
 
@@ -445,72 +461,165 @@ function ActionOption(props) {
   // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
 
-  const passiveActions = _.reject(_.values(handActionTypes), t =>
-    t === handActionTypes.BET || t === handActionTypes.RAISE
-  );
-
   const buttonColor = type === handActionTypes.MUCK || type === handActionTypes.FOLD
     ? 'secondary'
     : 'primary';
 
   const typeLabel = _.startCase(type);
 
-  if (_.includes(passiveActions, type)) {
+  // TODO: consider breaking this out and moving to a new turnary where ActionOption is called.
+  if (type === handActionTypes.BET || type === handActionTypes.RAISE) {
     return (
-      <ActionButton color={buttonColor} onClick={handleClick} disabled={isDisabled}>
-        { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
-      </ActionButton>
-
+      <BetOrRaiseActionOptions
+        buttonColor={buttonColor}
+        minAmount={amount}
+        handleClick={handleClick}
+        label={typeLabel}
+        isDisabled={isDisabled}
+      />
     );
   }
 
   return (
-    <ActionButtonWithInput
-      buttonColor={buttonColor}
-      amount={amount}
-      handleClick={handleClick}
-      label={typeLabel}
-      isDisabled={isDisabled}
-    />
-  );
-}
-
-function ActionButtonWithInput(props) {
-  const { amount, label, handleClick, buttonColor, isDisabled } = props;
-  const [newAmount, setNewAmount] = useState(amount);
-
-  const handleChange = (e) => {
-    const newValue = parseInt(e.target.value, 10);
-    setNewAmount(
-      isNaN(newValue) ? 0 : newValue
-    );
-  };
-
-  return (
-    <ActionButton
-      variant="outlined"
-      color={buttonColor}
-      fullWidth
-      disableRipple
-      onClick={() => handleClick(newAmount)}
-      disabled={isDisabled}
-    >
-      <span style={{ marginRight: '5px' }}>{ label }&nbsp;$</span>
-      <Input
-        onClick={(e) => e.stopPropagation() }
-        inputProps={{ style: { maxWidth: '50px', textAlign: 'center', padding: '2px 0' } }}
-        color="success"
-        type="number"
-        value={newAmount}
-        onChange={handleChange}
-        disabled={isDisabled}
-      />
+    <ActionButton color={buttonColor} onClick={handleClick} disabled={isDisabled}>
+      { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
     </ActionButton>
   );
 }
 
-const ActionButton = styled(({ ...rest }) => <Button { ...rest } disableRipple fullWidth variant="outlined" />)`
+function BetOrRaiseActionOptions(props) {
+  const { minAmount, label, handleClick, buttonColor, isDisabled } = props;
+  const [newAmount, setNewAmount] = useState('');
+  //const [showMinAmountError, setShowMinAmountError] = useState();
+
+  const hasMetMin = newAmount && newAmount > minAmount;
+
+  const handleClickValue = (val) => {
+    const newAmountStr = '' + newAmount + val;
+    setNewAmount(
+      parseInt(newAmountStr, 10)
+    );
+  };
+
+  const handleBackspace = (e) => {
+    e.stopPropagation();
+    const amountStr = newAmount + '';
+
+    if (amountStr.length === 1) {
+      setNewAmount('');
+    } else {
+      setNewAmount(
+        parseInt(amountStr.slice(0, -1), 10)
+      );
+    }
+  };
+
+
+  // TODO: check against minAmount and show error
+  const handleSubmit = () => {
+    if (hasMetMin) {
+      handleClick(newAmount);
+    } else {
+      // setShowMinAmountError(true);
+      // setTimeout(() => setShowMinAmountError(false), 3000);
+      // TODO: use toastr or notification bar to show error
+      window.alert(`${label} must be at least $${minAmount}.\nYour amount: $${newAmount}`);
+    }
+  };
+
+  const backspaceColorProp = newAmount && (newAmount < minAmount)
+    ? { color: 'primary' }
+    : {};
+
+  console.log('hasMetMin', hasMetMin, newAmount, minAmount);
+
+  return (
+    <React.Fragment>
+      <ActionButton
+        color={ newAmount ? buttonColor : 'default'}
+        variant={hasMetMin ? 'contained' : 'outlined'}
+        disabled={!newAmount || isDisabled}
+        onClick={handleSubmit}
+      >
+        {
+          newAmount
+            ? (
+              <span style={{ marginRight: '2px' }}>
+                { label }:&nbsp;${ newAmount }
+              </span>
+            )
+            : (
+              <span>
+                Input {label}&nbsp;
+                <span>(min: ${minAmount})</span>
+              </span>
+            )
+        }
+        {
+          newAmount &&
+          <BackspaceClickTarget onClick={handleBackspace}>
+            <BackspaceIcon { ...backspaceColorProp }/>
+          </BackspaceClickTarget>
+        }
+      </ActionButton>
+      {
+        [_.range(1, 6), [..._.range(6, 10), 0]].map((rowVals, rowIndex) =>
+          <AmountButtonsRow key={rowIndex}>
+            {
+              rowVals.map((val, i) =>
+                <AmountValueButton
+                  key={rowIndex + '' + i}
+                  color="primary"
+                  isLastItem={i === 4}
+                  onClick={() => (newAmount || val > 0) && handleClickValue(val)}
+                >
+                  { val }
+                </AmountValueButton>
+              )
+            }
+          </AmountButtonsRow>
+        )
+      }
+    </React.Fragment>
+  );
+}
+
+const ActionButton = styled(({ variant, ...rest }) => <Button { ...rest } disableRipple fullWidth variant={variant || "outlined"} />)`
   height: 44px;
+  :focus {
+    outline: none;
+  }
+`;
+
+const AmountButtonsRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  height: ${isTinyScreen() ? '44px' : '54px' };
+  justify-content: space-between;
+  margin-top: 10px;
+`;
+
+const AmountValueButton = styled(({ isLastItem, ...rest }) => <Button { ...rest } disableRipple variant="outlined" />)`
+  padding-left: 1px !important;
+  padding-right: 1px !important;
+  flex: 1;
+  margin-right: ${(p) => p.isLastItem ? '0' : '2px'} !important;
+  min-width: 44px !important;
+`;
+
+const BackspaceClickTarget = styled.div`
+  position: absolute;
+  right: 0;
+  width: 75px; 
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  :active {
+    background-color: #7281d6;
+  }
 `;
 
 function sortActionComponents({ type }) {
