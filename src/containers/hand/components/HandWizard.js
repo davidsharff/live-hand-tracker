@@ -47,6 +47,7 @@ export default function HandWizard(props) {
   // TODO:
   //   - Support skipping to future seat for cascading actions if nextToAct and future seat last action was the same.
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
+  //   - Confirm behavior for seat selection once final results are in. Currently, split pot situations are broken.
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - Continue to show past action in poker table seat during board input?
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
@@ -399,19 +400,23 @@ function ActionBody(props) {
         areMultipleSeatsSelected &&
         <CascadeActionSelect />
       }
-      {
-        // TODO: make most common actions sort first.
-        _.sortBy(availableActions, sortActionComponents)
-          .map(availableAction =>
-            <ActionOption
-              key={seatIndex + availableAction.type}
-              type={availableAction.type}
-              amount={availableAction.amount}
-              onClick={handleClick}
-              isDisabled={areMultipleSeatsSelected && !cascadeActionType}
-            />
-          )
-      }
+      <ActionsContainer>
+        {
+          // TODO: make most common actions sort first.
+          _.sortBy(availableActions, sortActionComponents)
+            .map((availableAction, i) =>
+              <div style={{ flex: (i === availableActions.length - 1) ? 2 : 1}}>
+                <ActionOption
+                  key={seatIndex + availableAction.type}
+                  type={availableAction.type}
+                  amount={availableAction.amount}
+                  onClick={handleClick}
+                  isDisabled={areMultipleSeatsSelected && !cascadeActionType}
+                />
+              </div>
+            )
+        }
+      </ActionsContainer>
     </BodyContainer>
   );
 }
@@ -425,6 +430,15 @@ const BodyContainer = styled.div`
   padding: 10px 0 20px 0;
 `;
 
+const ActionsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  padding-top: 20px;
+  justify-content: space-between;
+`;
+
 function ActionOption(props) {
   const { type, amount, onClick, isDisabled } = props;
 
@@ -435,11 +449,15 @@ function ActionOption(props) {
     t === handActionTypes.BET || t === handActionTypes.RAISE
   );
 
+  const buttonColor = type === handActionTypes.MUCK || type === handActionTypes.FOLD
+    ? 'secondary'
+    : 'primary';
+
   const typeLabel = _.startCase(type);
 
   if (_.includes(passiveActions, type)) {
     return (
-      <ActionButton color="primary" onClick={handleClick} disabled={isDisabled}>
+      <ActionButton color={buttonColor} onClick={handleClick} disabled={isDisabled}>
         { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
       </ActionButton>
 
@@ -448,7 +466,7 @@ function ActionOption(props) {
 
   return (
     <ActionButtonWithInput
-      buttonColor="secondary"
+      buttonColor={buttonColor}
       amount={amount}
       handleClick={handleClick}
       label={typeLabel}
@@ -492,7 +510,6 @@ function ActionButtonWithInput(props) {
 }
 
 const ActionButton = styled(({ ...rest }) => <Button { ...rest } disableRipple fullWidth variant="outlined" />)`
-  margin-top: 20px !important;
   height: 44px;
 `;
 
@@ -503,7 +520,7 @@ function sortActionComponents({ type }) {
       ? 1
       : type  === handActionTypes.FOLD
         ? 2
-        : type === handActionTypes.BET
+        : type === handActionTypes.MUCK
           ? 3
           : 4;
 };
