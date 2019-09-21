@@ -55,7 +55,7 @@ export default function HandWizard(props) {
   //   - Write up handling 4 and 5 figures for long term.
   //   - To gain space for bet/raise presets and/or all-in flag consider
   //      - Poker seat action desc one line to shrink rectangles.
-  //      - One line header swith smaller text desc round, pot, seat, etc.
+  //      - One line header switch smaller text desc round, pot, seat, etc.
   //      - Collapse top nav by default to just show hand #
   //   - selectedSeatIndex state name is off now since multiple are supported. Its more of routeSeatIndex
   //   - Continue to show past action in poker table seat during board input?
@@ -280,13 +280,6 @@ function HandCompleteBody(props) {
       <Typography variant="subtitle2">
         Board: { board.join(' ')}
       </Typography>
-      {/*<div style={{ display: 'flex', justifyContent: 'space-between', margin: '5px 0'}}>*/}
-        {/*{*/}
-          {/*board.map(card =>*/}
-            {/*<img key={card} src={cardImages[card]} style={cardImgStyle} alt="" />*/}
-          {/*)*/}
-        {/*}*/}
-      {/*</div>*/}
       {
         // TODO: show board first then each position either has hole cards or mucked.
         _.sortBy(resultDecoratedPositions, ({ amountWon }) => amountWon > 0 ? -1 : 1).map(p =>
@@ -312,7 +305,6 @@ function HandCompleteBody(props) {
               </Typography>
             }
           </React.Fragment>
-
         )
       }
       <Button onClick={onCreateNewHand} variant="contained" color="primary" fullWidth style={{ margin: '20px 0'}}>
