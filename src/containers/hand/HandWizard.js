@@ -16,9 +16,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 
 
 
-import PokerTable from "../../../components/PokerTable";
-import ManageCards from "./ManageCards";
-import { bettingRounds, cardInputTypes, cascadeActionTypes, handActionTypes } from "../../../constants";
+import PokerTable from "../../components/PokerTable";
+import ManageCards from "./components/ManageCards";
+import { bettingRounds, cardInputTypes, cascadeActionTypes, handActionTypes } from "../../constants";
 import {
   getAvailableActionForSeatIndex,
   getIsHandComplete,
@@ -27,8 +27,8 @@ import {
   getResultDecoratedPositions,
   getCurrentActivePositions,
   getNextToActSeatIndex
-} from '../../../redux/reducers/handReducer';
-import { isTinyScreen } from '../../../utils';
+} from '../../redux/reducers/handReducer';
+import { isTinyScreen } from '../../utils';
 
 export default function HandWizard(props) {
   //const { hand, deck, matchParams, isHandComplete, onSaveBoardCards } = props;
@@ -77,7 +77,7 @@ export default function HandWizard(props) {
   //   - Change action urls to include betting round to setup support for future editing
   // TODO: below sections should be their own components
 
-  // TODO: move to Hand.js route definition redirect handling.
+  // TODO: move to HandWizardConnector.js route definition redirect handling.
   if (matchParams.inputStepType === 'actions') {
 
     const positionsMissingRevealedCards = hand.actions
@@ -192,7 +192,7 @@ export default function HandWizard(props) {
             </React.Fragment>
           )
       }
-      {/* TODO: move all card input routes to Hand.js and rename HandWizard to ActionWizard */}
+      {/* TODO: move all card input routes to HandWizardConnector.js and rename HandWizard to ActionWizard */}
       {
         hand.seats.map((s, i) =>
           <Route key={i} path={`/hand/cards/seat/${i + 1}`} render={(routerProps) => {
@@ -594,6 +594,7 @@ const AmountButtonsRow = styled.div`
   margin-top: 10px;
 `;
 
+// TODO: look at removing !important via && syntax
 const AmountValueButton = styled(({ isLastItem, ...rest }) => <Button { ...rest } disableRipple variant="outlined" />)`
   padding-left: 1px !important;
   padding-right: 1px !important;

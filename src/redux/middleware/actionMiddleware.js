@@ -38,6 +38,7 @@ export default store => next => action => {
           handId: Math.round(Math.random() * 10000000)
         }
       });
+      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }
 

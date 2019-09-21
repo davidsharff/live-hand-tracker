@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import _ from 'lodash';
 import { connect } from "react-redux";
 import { withRouter } from 'react-router-dom';
@@ -13,173 +13,89 @@ import styled from 'styled-components';
 
 import PokerTable from '../../components/PokerTable';
 import { sessionType } from '../../types';
-import actionTypes from '../../redux/actionTypes';
 
 import { isValidSession } from "../../redux/reducers/sessionReducer";
 
-// TODO: seat selection defaults to two rows with two column radio buttons: empty | hero and third option on last item X remove.
-// TODO: after initial setup, show num seats/players with potentially collapsed edit table, blinds, hero seat, and other details that have to be confirmed at start of each hand.
-// TODO: consider exposing isHero, isActive, and remove for seats inside the handInput wizard screens so they never are forced to use the extra screen to confirm session details.
-function Session(props) {
-  const { session } = props;
+function SessionConnector(props) {
 
-  useEffect(() => {
-    if (session === null) {
-      props.dispatch({
-        type: actionTypes.CREATE_SESSION
-      });
-    }
-  });
+  const {
+    session,
+    handleChangeLocation,
+    handleChangeSmallBlind,
+    handleChangeBigBlind,
+    handleChangeTableSize,
+    handleClickSeat,
+    handleClickNext
+  } = props;
 
-  if (session === null) {
-    // TODO: any real loading indicator should use reactstrap spinners
-    return (
-      <div>Loading...</div>
-    );
-  }
-
-  const handleChangeLocation = (location) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_LOCATION,
-    payload: {
-      location
-    }
-  });
-
-  const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
-    payload: {
-      seatIndex
-    }
-  });
-
-  const handleChangeMaxSeats = (newTotalSeats) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_TOTAL_SEATS,
-    payload: {
-      change: newTotalSeats - props.session.defaultSeats.length
-    }
-  });
-
-  const handleToggleActiveSeat = (seatIndex) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
-    payload: {
-      seatIndex
-    }
-  });
-
-  const handleChangeSmallBlind = (smallBlind) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_SMALL_BLIND,
-    payload: {
-      smallBlind
-    }
-  });
-
-  // TODO: handle blur on enter
-  const handleChangeBigBlind = (bigBlind) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_BIG_BLIND,
-    payload: {
-      bigBlind
-    }
-  });
-
-  const handleClickSeat = (seatIndex) => {
-    const { defaultHeroSeatIndex } = session;
-    if (seatIndex === defaultHeroSeatIndex) {
-      handleSetHeroSeatIndex(null);
-    } else  {
-      if (defaultHeroSeatIndex === null) {
-        handleSetHeroSeatIndex(seatIndex);
-      } else {
-        handleToggleActiveSeat(seatIndex);
-      }
-    }
-  };
-
-  const handleClickNext = () => {
-    localStorage.setItem('savedSession', JSON.stringify(session));
-    // TODO: this should be in middleware that inspects the action type fire by next button
-    if (props.hasHand) {
-      // TODO: fire update hand action
-    } else {
-      props.dispatch({
-        type: actionTypes.CREATE_HAND
-      });
-    }
-    props.history.push('/hand/actions');
-  };
-
-  // TODO: consider breaking into discreet steps
   return(
-    <React.Fragment>
-      <Container>
-        <SessionField>
-          <TextField
-            label="Location"
-            //className={classes.textField}
-            value={session.location}
-            onChange={(e) => handleChangeLocation(e.target.value)}
-            margin="normal"
-            style={{ marginTop: 0}}
-          />
-        </SessionField>
-        <SessionField>
-          <InputLabel>Small Blind</InputLabel>
-          <NumberSelector
-            defaultValues={[1, 2, 5, 10]}
-            currentValue={session.smallBlind}
-            onChange={handleChangeSmallBlind}
-            minValue={null}
-            maxValue={session.bigBlind}
-          />
-        </SessionField>
-        <SessionField>
-          <InputLabel>Big Blind</InputLabel>
-          <NumberSelector
-            defaultValues={[2, 3, 5, 10]}
-            currentValue={session.bigBlind}
-            onChange={handleChangeBigBlind}
-            minValue={session.smallBlind}
-            maxValue={null}
-          />
-        </SessionField>
-        <SessionField>
-          <InputLabel>Table Size (total seats)</InputLabel>
-          <NumberSelector
-            defaultValues={[6, 9, 10]}
-            currentValue={session.defaultSeats.length || null}
-            onChange={handleChangeMaxSeats}
-            minValue={2}
-            maxValue={10}
-            hideOtherInput
-          />
-        </SessionField>
-          <SessionField>
-            <InputLabel>Configure Seats</InputLabel>
-            <PokerTable
-              seats={session.defaultSeats}
-              onToggleActiveSeat={handleToggleActiveSeat}
-              onSetHeroSeatIndex={handleSetHeroSeatIndex}
-              heroSeatIndex={session.defaultHeroSeatIndex}
-              onClickSeat={handleClickSeat}
-              showLegend
-            />
-          </SessionField>
-          <SessionField>
-            <Button
-              disabled={!isValidSession(session)}
-              color="primary"
-              onClick={handleClickNext}
-              variant="outlined"
-              fullWidth
-            >
-              Next
-            </Button>
-          </SessionField>
-      </Container>
-    </React.Fragment>
+    <Container>
+      <SessionField>
+        <TextField
+          label="Location"
+          //className={classes.textField}
+          value={session.location}
+          onChange={handleChangeLocation}
+          margin="normal"
+          style={{ marginTop: 0}}
+        />
+      </SessionField>
+      <SessionField>
+        <InputLabel>Small Blind</InputLabel>
+        <NumberSelector
+          defaultValues={[1, 2, 5, 10]}
+          currentValue={session.smallBlind}
+          onChange={handleChangeSmallBlind}
+          minValue={null}
+          maxValue={session.bigBlind}
+        />
+      </SessionField>
+      <SessionField>
+        <InputLabel>Big Blind</InputLabel>
+        <NumberSelector
+          defaultValues={[2, 3, 5, 10]}
+          currentValue={session.bigBlind}
+          onChange={handleChangeBigBlind}
+          minValue={session.smallBlind}
+          maxValue={null}
+        />
+      </SessionField>
+      <SessionField>
+        <InputLabel>Table Size (total seats)</InputLabel>
+        <NumberSelector
+          defaultValues={[6, 9, 10]}
+          currentValue={session.defaultSeats.length || null}
+          onChange={handleChangeTableSize}
+          minValue={2}
+          maxValue={10}
+          hideOtherInput
+        />
+      </SessionField>
+      <SessionField>
+        <InputLabel>Configure Seats</InputLabel>
+        <PokerTable
+          seats={session.defaultSeats}
+          heroSeatIndex={session.defaultHeroSeatIndex}
+          onClickSeat={handleClickSeat}
+          showLegend
+        />
+      </SessionField>
+      <SessionField>
+        <Button
+          disabled={!isValidSession(session)}
+          color="primary"
+          onClick={handleClickNext}
+          variant="outlined"
+          fullWidth
+        >
+          Next
+        </Button>
+      </SessionField>
+    </Container>
   );
 }
 
-Session.propTypes = {
+SessionConnector.propTypes = {
   session: sessionType,
   hasHand: PropTypes.bool
 };
@@ -187,7 +103,7 @@ Session.propTypes = {
 export default withRouter(connect((state) => ({
   session: state.session,
   hasHand: state.hand !== null
-}))(Session));
+}))(SessionConnector));
 
 const SessionField = styled.div`
   margin-bottom: 20px;
@@ -222,10 +138,10 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
   const pctWidthVal = 100 / (defaultValues.length + (hideOtherInput ? 0 : 1));
   // TODO: this should use an Input not TextField
   return (
-    <BlindsRow>
+    <NumberRow>
       {
         defaultValues.map((value) =>
-          <BlindButton
+          <NumberButton
             key={value}
             disabled={isDefaultDisabled(value)}
             color="primary"
@@ -238,7 +154,7 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
             pctWidth={pctWidthVal+ '%'}
           >
             { value }
-          </BlindButton>
+          </NumberButton>
         )
       }
       {/* TODO: use input components instead of textfield to get rid of shrunk label */}
@@ -256,11 +172,11 @@ const NumberSelector = ({ defaultValues, currentValue, onChange, minValue, maxVa
           }}
         />
       }
-    </BlindsRow>
+    </NumberRow>
   );
 };
 
-const BlindsRow = styled.div`
+const NumberRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -268,10 +184,9 @@ const BlindsRow = styled.div`
   height: 50px;
 `;
 
-const BlindButton = styled(({ pctWidth, ...rest}) => <Button { ...rest }/>)`
+const NumberButton = styled(({ pctWidth, ...rest}) => <Button { ...rest }/>)`
   && {
     min-width: unset;
-    //padding: 10px;
     min-width: ${p => `calc(${p.pctWidth} - 5px)`};
     max-width: ${p => `calc(${p.pctWidth} - 5px)`};
     padding: 5px 25px;

@@ -6,8 +6,8 @@ import _ from 'lodash';
 import Slide from '@material-ui/core/Slide';
 
 import Header from '../components/Header';
-import Session from './session/Session';
-import Hand from './hand/Hand';
+import Session from './session/SessionConnector';
+import Hand from './hand/HandWizardConnector';
 
 import localActionTypes from '../redux/localActionTypes';
 

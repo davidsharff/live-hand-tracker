@@ -1,10 +1,10 @@
 // TODO: clicking create hand button should move existing hand into a "hands" session collection and reset hand state with defaults
 import React, { useEffect }  from 'react';
-import { Redirect, Route, withRouter, Switch } from 'react-router-dom';
+import { Redirect, Route, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
-import HandWizard from './components/HandWizard';
+import HandWizard from './HandWizard';
 
 import actionTypes from '../../redux/actionTypes';
 import { handType, deckType, sessionType } from '../../types';
@@ -15,9 +15,8 @@ import {
   getIsHandComplete,
   getNextToActSeatIndex
 } from "../../redux/reducers/handReducer";
-import Overview from "./components/Overview";
 
-function Hand(props) {
+function HandWizardConnector(props) {
   const { session, hand, deck, isHandComplete, history } = props;
 
   useEffect(() => window.scrollTo(0, 0), []);
@@ -125,42 +124,35 @@ function Hand(props) {
     history.push('/hand/actions');
   }
 
-  // TODO: all routes below should use handId param
+  // TODO: any routes below should use handId param
   return (
-    <React.Fragment>
-      <Switch>
-        <Route exact path="/hand/overview" render={() =>
-          <Overview hand={hand} />
-        }/>
-        <Route path="/hand/:inputStepType" render={({ match }) => {
+    <Route path="/hand/:inputStepType" render={({ match }) => {
 
-          if (match.isExact && hand.buttonSeatIndex !== null) {
-            handleNavToSeatIndexActions(getNextToActSeatIndex(hand));
-            return null;
-          }
+      if (match.isExact && hand.buttonSeatIndex !== null) {
+        handleNavToSeatIndexActions(getNextToActSeatIndex(hand));
+        return null;
+      }
 
-          return (
-            <HandWizard
-              matchParams={match.params}
-              hand={hand}
-              onAction={handleAddAction}
-              blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
-              deck={deck}
-              onSaveBoardCards={handleSaveBoardCards}
-              onSaveHoleCards={handleSaveHoleCards}
-              board={hand.board}
-              isHandComplete={isHandComplete}
-              onClickSeat={handleClickSeat}
-              onCreateNewHand={handleCreateNewHand}
-            />
-          );
-        }}/>
-      </Switch>
-    </React.Fragment>
+      return (
+        <HandWizard
+          matchParams={match.params}
+          hand={hand}
+          onAction={handleAddAction}
+          blinds={{ small: session.smallBlind, big: session.bigBlind /* TODO: consider nesting under blinds in session state. */}}
+          deck={deck}
+          onSaveBoardCards={handleSaveBoardCards}
+          onSaveHoleCards={handleSaveHoleCards}
+          board={hand.board}
+          isHandComplete={isHandComplete}
+          onClickSeat={handleClickSeat}
+          onCreateNewHand={handleCreateNewHand}
+        />
+      );
+    }}/>
   );
 }
 
-Hand.propTypes = {
+HandWizardConnector.propTypes = {
   hand: handType,
   deck: deckType,
   session: sessionType
@@ -176,4 +168,4 @@ export default withRouter(connect((state) => ({
     ? state.hand.currentBettingRound
     : null,
   isHandComplete: getIsHandComplete(state.hand)
-}))(Hand));
+}))(HandWizardConnector));
