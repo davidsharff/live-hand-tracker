@@ -35,8 +35,7 @@ export const handActionTypes = {
 
 export const cascadeActionTypes = [
   handActionTypes.FOLD,
-  handActionTypes.CHECK,
-  handActionTypes.CALL
+  handActionTypes.CHECK
 ];
 
 export const positionLabels = {

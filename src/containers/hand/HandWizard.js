@@ -36,7 +36,10 @@ export default function HandWizard(props) {
   }, [resultDecoratedPositions]);
 
   // TODO:
-  //   - BREAKOUT THIS FILE INTO MULTIPLE COMPONENTS
+  //   - Bug: thought I noticed muck creating invalid hand state when multiselecting. Couldn't immediately duplicate
+  //   - Bug: Prevent next in board input if cards are missing.
+  //   - Bug: not ending hand if second to last player mucks
+  //   - Consider moving selectedSeat state handling, up to connector or moving all this file's content up and getting ride of connector approach entirely.
   //   - Disable bet/raise if auto-cascade hasn't ben selected. Hide bet/raise keyboard when it has check and fold, then transform selection into simple label,
   //     and always use label for check-only, or make the drop down it's own step and never show anything about it on next screen, or only support auto-action for check/fold.
   //   - Handle clicking 0 when no bet/raise has been inputted
@@ -102,9 +105,8 @@ export default function HandWizard(props) {
           activePositions.length === 0 &&
           _.last(hand.actions).seatIndex === seatIndex
         )
-
       );
-    }
+    };
 
     if (hand.buttonSeatIndex !== null && matchParams.inputStepType === 'actions' && selectedSeatIndex !== null) {
       // Note: this only includes seats that haven't acted this round. A clearer but too long variable name would be
@@ -138,6 +140,7 @@ export default function HandWizard(props) {
     }
 
     setSelectedSeatIndex(seatIndex);
+    const nextToActSeatIndex = getNextToActSeatIndex(hand);
 
     // TODO: include betting round in header.
     return (
@@ -146,7 +149,7 @@ export default function HandWizard(props) {
         seatIndex={seatIndex}
         onClickAction={onAction}
         areMultipleSeatsSelected={selectedSeatIndices.length > 1}
-        nextToActSeatIndex={getNextToActSeatIndex(hand)}
+        nextToActSeatIndex={nextToActSeatIndex}
       />
     );
   };

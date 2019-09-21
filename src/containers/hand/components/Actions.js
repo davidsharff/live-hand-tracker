@@ -1,19 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import _ from 'lodash';
 
-import FormControl from '@material-ui/core/FormControl/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText/FormHelperText';
-import InputLabel from '@material-ui/core/InputLabel/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem/MenuItem';
-import Select from '@material-ui/core/Select/Select';
 import Typography from '@material-ui/core/Typography/Typography';
 
-import { cascadeActionTypes, handActionTypes } from '../../../constants';
+import { handActionTypes } from '../../../constants';
 
 // TODO: need to either move these to container component or move selector calls into other components where applicable.
 import {
   getAvailableActionForSeatIndex,
-  getCurrentActivePositions,
   getIsHandComplete,
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound
@@ -24,9 +18,7 @@ import BackspaceIcon from '@material-ui/core/SvgIcon/SvgIcon';
 import Button from '@material-ui/core/Button/Button';
 
 export default function ActionBody(props) {
-  const { hand, seatIndex, onClickAction, areMultipleSeatsSelected, nextToActSeatIndex } = props;
-
-  const [cascadeActionType, setCascadeActionType] = useState(null);
+  const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -34,66 +26,14 @@ export default function ActionBody(props) {
 
   const potSize = getTotalPotSizeDuringRound(hand, hand.currentBettingRound);
 
-  const handleClick = useCallback((actionType, amount) =>
-      onClickAction(seatIndex, actionType, amount, cascadeActionType)
-    , [seatIndex, onClickAction, cascadeActionType]
-  );
-
-  // TODO: flashing some intervening state showing a Bet button on mobile.
-  // Update: this todo was pre-ui overhaul
-
-  const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
   const isHandComplete = getIsHandComplete(hand);
 
-  const availableCascadeActionTypes = _(availableActions)
-    .filter(({ type }) => areMultipleSeatsSelected && _.includes(cascadeActionTypes, type))
-    .map('type')
-    .value();
+  const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
 
-  const CascadeActionSelect = () => {
-    const activePositions = getCurrentActivePositions(hand);
-
-    const firstSkippedPosIndex = _.findIndex(activePositions, { seatIndex: nextToActSeatIndex});
-    const lastSkippedPosIndex = _.findIndex(activePositions, { seatIndex }) - 1;
-
-    useEffect(() => {
-      if (cascadeActionType === null && availableCascadeActionTypes.length === 1) {
-        setCascadeActionType(availableCascadeActionTypes[0]);
-      }
-    }, []);
-
-    return (
-      <FormControl style={{ width: '100%' }}>
-        <InputLabel>
-          Prior Seat(s) Action
-        </InputLabel>
-        <Select
-          value={
-            cascadeActionType === null && availableCascadeActionTypes.length === 1
-              ? availableCascadeActionTypes[0]
-              : cascadeActionType || ''
-          }
-          onChange={(e) => setCascadeActionType(e.target.value)}
-        >
-          {
-            availableCascadeActionTypes.map((type) =>
-              <MenuItem key={type} value={type} style={{ paddingBottom: '2px'}}>
-                { _.capitalize(type) }
-              </MenuItem>
-            )
-          }
-        </Select>
-        <FormHelperText>
-          Apply this action to skipped positions:&nbsp;
-          { activePositions[firstSkippedPosIndex].label }
-          {
-            lastSkippedPosIndex > firstSkippedPosIndex &&
-            (' - ' + activePositions[lastSkippedPosIndex].label)
-          }
-        </FormHelperText>
-      </FormControl>
-    );
-  };
+  const handleClick = useCallback((actionType, amount) =>
+      onClickAction(seatIndex, actionType, amount)
+    , [seatIndex, onClickAction]
+  );
 
   return (
     <React.Fragment>
@@ -103,14 +43,12 @@ export default function ActionBody(props) {
       <Typography variant="h6">
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
       </Typography>
-      {
-        areMultipleSeatsSelected &&
-        <CascadeActionSelect />
-      }
       <ActionsContainer>
         {
           // TODO: make most common actions sort first.
-          _.sortBy(availableActions, sortActionComponents)
+          _(availableActions)
+            .sortBy(sortActionComponents)
+            .reject(({ type }) => areMultipleSeatsSelected && type === handActionTypes.MUCK)
             .map((availableAction) => {
               const { type, amount } = availableAction;
               const isBetOrRaise = type === handActionTypes.BET || type === handActionTypes.RAISE;
@@ -121,12 +59,11 @@ export default function ActionBody(props) {
                     type={type}
                     amount={amount}
                     onClick={handleClick}
-                    // TODO: this logic seems wrong.
-                    isDisabled={areMultipleSeatsSelected && !cascadeActionType}
                   />
                 </div>
               );
             })
+            .value()
         }
         {
           // TODO: hacky spacer to keep showdown buttons in same spot.
@@ -148,7 +85,7 @@ const ActionsContainer = styled.div`
 `;
 
 function ActionOption(props) {
-  const { type, amount, onClick, isDisabled } = props;
+  const { type, amount, onClick } = props;
 
   // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
@@ -167,20 +104,19 @@ function ActionOption(props) {
         minAmount={amount}
         onSubmit={handleClick}
         label={typeLabel}
-        isDisabled={isDisabled}
       />
     );
   }
 
   return (
-    <ActionButton color={buttonColor} onClick={() => handleClick()} disabled={isDisabled}>
+    <ActionButton color={buttonColor} onClick={() => handleClick()}>
       { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
     </ActionButton>
   );
 }
 
 function BetOrRaiseActionOptions(props) {
-  const { minAmount, label, onSubmit, buttonColor, isDisabled } = props;
+  const { minAmount, label, onSubmit, buttonColor } = props;
   const [newAmount, setNewAmount] = useState('');
   //const [showMinAmountError, setShowMinAmountError] = useState();
 
@@ -227,7 +163,7 @@ function BetOrRaiseActionOptions(props) {
       <ActionButton
         color={ newAmount ? buttonColor : 'default'}
         variant={hasMetMin ? 'contained' : 'outlined'}
-        disabled={!newAmount || isDisabled}
+        disabled={!newAmount}
         onClick={handleSubmit}
       >
         {

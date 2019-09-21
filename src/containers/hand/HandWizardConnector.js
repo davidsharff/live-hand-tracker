@@ -62,14 +62,13 @@ function HandWizardConnector(props) {
     });
   };
 
-  const handleAddAction = (seatIndex, type, amount, cascadeActionType) => {
+  const handleAddAction = (seatIndex, type, amount) => {
     props.dispatch({
       type: actionTypes.ADD_ACTION,
       payload: {
         seatIndex,
         type,
-        amount,
-        cascadeActionType: cascadeActionType || null
+        amount
       },
       aux: {
         navToNextSeatIndex: (hand) => handleNavToSeatIndexActions(getNextToActSeatIndex(hand)),

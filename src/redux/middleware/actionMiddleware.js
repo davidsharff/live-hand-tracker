@@ -5,8 +5,8 @@ import {
   isCurrentRoundComplete,
   getIsHandComplete,
   getNextToActSeatIndex,
-  getAmountToContinueForSeatIndex,
-  getCurrentActivePositions
+  getCurrentActivePositions,
+  getAvailableActionForSeatIndex
 } from "../reducers/handReducer";
 import { cascadeActionTypes } from '../../constants';
 
@@ -44,9 +44,9 @@ export default store => next => action => {
 
     // TODO: get rid of muck redux action type and replace with handActionType
     case actionTypes.ADD_ACTION: {
-      const { cascadeActionType } = payload;
+      const { seatIndex } = payload;
 
-      if (cascadeActionType !== null) {
+      if (seatIndex !== getNextToActSeatIndex(store.getState().hand)) {
         createCascadingActions(store.getState().hand, action, next);
       }
 
@@ -103,18 +103,25 @@ export default store => next => action => {
 };
 
 function createCascadingActions(hand, action, next) {
-  const { payload } = action;
-  const { cascadeActionType } = payload;
+  // TODO: add validation to ensure none in the seatIndex range have acted.
+  const actionSeatIndex = action.payload.seatIndex;
+
+  const nextToActSeatIndex = getNextToActSeatIndex(hand);
+
+  const availableActions = getAvailableActionForSeatIndex(hand, nextToActSeatIndex);
+
+  const availableCascadeActions = _.intersection(cascadeActionTypes, _.map(availableActions, 'type'));
+
+  if (availableCascadeActions.length > 1) {
+    console.error('Unable to apply cascading action. More than one action available: ' + availableCascadeActions);
+  }
+
+  const cascadeActionType = availableCascadeActions[0];
 
   const activePositions = getCurrentActivePositions(hand);
 
-  const initialPositionIndex = _.findIndex(activePositions, { seatIndex: getNextToActSeatIndex(hand)});
-  const endPositionIndex = _.findIndex(activePositions, { seatIndex: payload.seatIndex });
-
-  // Only calls are cascade-able action types that need an amount.
-  const amount = cascadeActionType === cascadeActionTypes.CALL
-    ? getAmountToContinueForSeatIndex(hand, activePositions[initialPositionIndex].seatIndex)
-    : 0;
+  const initialPositionIndex = _.findIndex(activePositions, { seatIndex: nextToActSeatIndex});
+  const endPositionIndex = _.findIndex(activePositions, { seatIndex: actionSeatIndex });
 
   activePositions.slice(initialPositionIndex, endPositionIndex).forEach(({ seatIndex }) =>
     next({
@@ -122,7 +129,7 @@ function createCascadingActions(hand, action, next) {
       payload: {
         type: cascadeActionType,
         seatIndex,
-        amount
+        amount: 0
       }
     })
   );

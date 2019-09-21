@@ -14,10 +14,12 @@ import {
   getCurrentActionsForSeat,
   getCurrentAmountInvestedForSeat,
   getPositionLabelForSeatIndex,
-  getIsHandComplete
+  getIsHandComplete, getCurrentActions
 } from '../redux/reducers/handReducer';
+import { handActionTypes } from '../constants';
 
 
+// TODO: consider wrapper for session/hand poker tables
 export default function PokerTable(props) {
   // TODO: either keep hand prop and drop other props in favor of applicable selectors, or drop hand and use props for everything.
   // TODO: would be nice to have wrapper component that prevented needing to handle null refs if being using in Session vs Hand.
@@ -46,6 +48,14 @@ export default function PokerTable(props) {
     </LegendItem>
   );
 
+  const getCascadeActionType = () => {
+    console.log('_.sumBy(getCurrentActions(hand), \'amount\')', _.sumBy(getCurrentActions(hand), 'amount'), 'CLEANUP');
+
+    return _.sumBy(getCurrentActions(hand), 'amount') > 0
+      ? handActionTypes.FOLD
+      : handActionTypes.CHECK;
+  };
+
   return (
     <React.Fragment>
       {
@@ -73,7 +83,9 @@ export default function PokerTable(props) {
               {
                 seatsRow.map(({ isActive }, _i) => {
                   const seatIndex = _i + ( rowIndex === 1 ? 5 : 0);
-                  // TODO: consider wrapper for session/hand poker tables
+                  const isSelected = selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1;
+                  const isMultiSelected = isSelected &&  _.last(selectedSeatIndices) !== seatIndex;
+
                   return (
                     <PokerTableSeat
                       key={seatIndex}
@@ -81,20 +93,24 @@ export default function PokerTable(props) {
                       onClick={() => onClickSeat(seatIndex)}
                       seat={seats[seatIndex]}
                       isHero={seatIndex === heroSeatIndex}
-                      isSelected={selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1}
-                      isMultiSelected={selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1 && _.last(selectedSeatIndices) !== seatIndex}
+                      isSelected={isSelected}
+                      isMultiSelected={isMultiSelected}
                       seatIndex={seatIndex}
                       positionLabel={
                         hand && hand.positions.length
                           ? getPositionLabelForSeatIndex(hand, seatIndex)
                           : null
                       }
-                      lastAction={hand && _.last(getCurrentActionsForSeat(hand, seatIndex))}
                       currentBettingRound={hand && hand.currentBettingRound}
                       isLiveHand={hand && hand.buttonSeatIndex !== null}
                       showHoleCards={isHandComplete}
                       amountInvested={hand && getCurrentAmountInvestedForSeat(hand, seatIndex)}
                       shrink={shrink}
+                      lastAction={hand && (
+                        isMultiSelected
+                          ? { type: getCascadeActionType(), bettingRound: hand.currentBettingRound }
+                          : _.last(getCurrentActionsForSeat(hand, seatIndex))
+                      )}
                     />
                   );
                 })
