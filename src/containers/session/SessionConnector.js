@@ -45,13 +45,6 @@ function SessionConnector(props) {
     }
   });
 
-  const handleToggleActiveSeat = (seatIndex) => props.dispatch({
-    type: actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT,
-    payload: {
-      seatIndex
-    }
-  });
-
   // TODO: handle blur on enter
   const handleChangeBigBlind = (bigBlind) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_BIG_BLIND,
@@ -62,19 +55,27 @@ function SessionConnector(props) {
 
   const handleClickSeat = (seatIndex) => {
     const { defaultHeroSeatIndex } = session;
-    if (seatIndex === defaultHeroSeatIndex) {
-      handleSetHeroSeatIndex(null);
-    } else  {
-      if (defaultHeroSeatIndex === null) {
-        handleSetHeroSeatIndex(seatIndex);
-      } else {
-        handleToggleActiveSeat(seatIndex);
-      }
+    console.log('defaultHeroSeatIndex', defaultHeroSeatIndex, seatIndex);
+    if (defaultHeroSeatIndex === null) {
+      updateHeroSeatIndex(seatIndex);
+
+    } else if (seatIndex === defaultHeroSeatIndex) {
+      updateHeroSeatIndex(null);
+
+    } else {
+      toggleIsActiveSeat(seatIndex);
     }
   };
 
-  const handleSetHeroSeatIndex = (seatIndex) => props.dispatch({
+  const updateHeroSeatIndex = (seatIndex) => props.dispatch({
     type: actionTypes.UPDATE_SESSION_HERO_SEAT_INDEX,
+    payload: {
+      seatIndex
+    }
+  });
+
+  const toggleIsActiveSeat = (seatIndex) => props.dispatch({
+    type: actionTypes.UPDATE_SESSION_TOGGLE_ACTIVE_SEAT,
     payload: {
       seatIndex
     }
@@ -88,6 +89,7 @@ function SessionConnector(props) {
   });
 
   const handleClickNext = () => {
+    localStorage.setItem('savedSession', JSON.stringify(session));
     // TODO: this should be in middleware that inspects the action type fire by next button
     if (props.hasHand) {
       // TODO: fire update hand action
@@ -99,7 +101,7 @@ function SessionConnector(props) {
     props.history.push('/hand/actions');
   };
 
-  // TODO: consider breaking into discreet steps
+  // TODO: consider breaking into discreet steps or enforcing order by disabling future steps.
   return(
     <Session
       session={session}

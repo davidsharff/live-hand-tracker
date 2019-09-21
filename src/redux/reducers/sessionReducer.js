@@ -40,7 +40,7 @@ export default function session(state = initialState, action) {
       });
     }
 
-    case actionTypes.UPDATE_SESSION_IS_ACTIVE_SEAT: {
+    case actionTypes.UPDATE_SESSION_TOGGLE_ACTIVE_SEAT: {
       const { seatIndex } = payload;
 
       const targetSeat = state.defaultSeats[seatIndex];

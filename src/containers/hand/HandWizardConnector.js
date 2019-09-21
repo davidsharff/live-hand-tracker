@@ -79,6 +79,10 @@ function HandWizardConnector(props) {
   };
 
   const handleClickSeat = (seatIndex) => {
+    if (!hand.seats[seatIndex].isActive) {
+      return;
+    }
+
     // TODO: lookup url to make sure we aren't inputting hero hole cards.
     if (hand.buttonSeatIndex === null) {
       handleSetButtonIndex(seatIndex);
