@@ -44,6 +44,7 @@ export default function HandWizard(props) {
   //   - Handle clicking 0 when no bet/raise has been inputted
   //   - Consider moving board and manage card routes oustide of wizard
   //   - Table config every hand: session should exit before configuring table, table slides up, show legend and start in edit mode, have start hand button below, start hand button takes to button selection screen.
+  //   - Show kicker in hand desc when necessary (needs verification but seems to not be supported out of the box with library)
   //   - Confirm behavior for seat selection once final results are in. Currently, split pot situations are broken.
   //   - Write up handling 4 and 5 figures for long term.
   //   - To gain space for bet/raise presets and/or all-in flag consider
