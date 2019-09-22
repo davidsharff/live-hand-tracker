@@ -46,13 +46,14 @@ export default function ManageCards(props) {
       type, pendingCards, selectedCardIndex, setPendingCards, setSelectedCardIndex, initialCards, onSave, card
     );
 
-  const showCardCarousel = selectedCard && selectedCard.length === 1;
+  const showCardPicker = selectedCard && selectedCard.length === 1;
 
-  const showValueKeyboard = !showCardCarousel && selectedCardIndex !== null;
+  const showValueKeyboard = !showCardPicker && selectedCardIndex !== null;
 
   // TODO:
+  //    Consistent staggering of suits in card picker
   //    Capture if they mucked?
-  //    Write up "view all cards" link that opens true carousel of entire deck with labels of card location underneath.
+  //    Write up "view all cards" link that opens true picker of entire deck with labels of card location underneath.
   //    showButtonControls break on future rounds if there was a refresh.
 
   const isHoleCards = type === cardInputTypes.HOLE_CARDS;
@@ -87,7 +88,7 @@ export default function ManageCards(props) {
       </div>
       </CardsSurface>
       {
-        !showCardCarousel && !showValueKeyboard && isBoardFilledForRound(cards, type) &&
+        !showCardPicker && !showValueKeyboard && isBoardFilledForRound(cards, type) &&
         <EditContainer>
           {
             <Button
@@ -103,10 +104,9 @@ export default function ManageCards(props) {
         </EditContainer>
       }
       {
-        showCardCarousel &&
+        showCardPicker &&
         <CardPicker>
-
-            <CardCarouselRow>
+            <CardPickerRow>
               {
                 _(cardImages)
                   .keys()
@@ -133,7 +133,7 @@ export default function ManageCards(props) {
                   )
                   .value()
               }
-            </CardCarouselRow>
+            </CardPickerRow>
           <div onClick={() => handleClickCardValue(selectedCardIndex, '')}>
             <ArrowLeft fontSize="large" />
             <span>Card Value</span>
@@ -235,7 +235,7 @@ const CardPicker = styled.div`
   padding-top: 10px;
 `;
 
-const CardCarouselRow = styled.div`
+const CardPickerRow = styled.div`
   display: flex;
   flex: 1;
   justify-content: space-around;

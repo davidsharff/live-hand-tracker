@@ -49,8 +49,6 @@ export default function PokerTable(props) {
   );
 
   const getCascadeActionType = () => {
-    console.log('_.sumBy(getCurrentActions(hand), \'amount\')', _.sumBy(getCurrentActions(hand), 'amount'), 'CLEANUP');
-
     return _.sumBy(getCurrentActions(hand), 'amount') > 0
       ? handActionTypes.FOLD
       : handActionTypes.CHECK;

@@ -39,6 +39,7 @@ export default function HandWizard(props) {
   //   - Bug: thought I noticed muck creating invalid hand state when multiselecting. Couldn't immediately duplicate
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
+  //   - Bug: 10 card selection is broken
   //   - Consider moving selectedSeat state handling, up to connector or moving all this file's content up and getting ride of connector approach entirely.
   //   - Handle clicking 0 when no bet/raise has been inputted
   //   - Consider moving board and manage card routes oustide of wizard
@@ -53,6 +54,7 @@ export default function HandWizard(props) {
   //   - Continue to show past action in poker table seat during board input?
   //   - HAND SPLIT POT and replace winningSeatIndice function with robust data for full descriptions
   //      -- Lookup how to handle odd number when splitting pot
+  //   - Handle side pots (which requires all-in flag listed in seperate todo ).
   //   - Remove all setting hand in localStorage for single time setting currentHandId. Add api stub to getHand(currentHandId)
   //   - Handle changing past actions
   //   - write up if it needs to support inputting cards for folded hands. Could include at same time recording other seat/hand details, or could add a button to go into card input mode?
@@ -126,8 +128,9 @@ export default function HandWizard(props) {
     .map('seatIndex')
     .value();
 
-  const showHandCompleteUI = matchParams.inputStepType === 'actions' && resultDecoratedPositions.length;
+  const hasFinalResults = matchParams.inputStepType === 'actions' && resultDecoratedPositions.length;
 
+  // Use creator fn to prevent route from unnecessarily remounting component.
   const createActionsInputComp = (seatIndex) => () => {
     if (hand.buttonSeatIndex === null || resultDecoratedPositions.length > 0) {
       // TODO: make this a different route
@@ -149,6 +152,7 @@ export default function HandWizard(props) {
     );
   };
 
+  // Use creator fn to prevent route from unnecessarily remounting component.
   const createHoleCardsComp = (seatIndex) => () => {
     // TODO: add global redirect at /hand route that redirects to button selection if you hit future state url.
     setSelectedSeatIndex(seatIndex); // TODO: re-route if invalid seat index (somehow?).
@@ -168,6 +172,7 @@ export default function HandWizard(props) {
     );
   };
 
+  // Use creator fn to prevent route from unnecessarily remounting component.
   const createBoardCardsComp = (bettingRound) => () => {
     if (hand.buttonSeatIndex === null) {
       return <Redirect to="/hand/actions" />;
@@ -199,7 +204,10 @@ export default function HandWizard(props) {
         routeSeatIndex={selectedSeatIndex}
         resultDecoratedPositions={resultDecoratedPositions}
         hand={hand}
-        shrink={isTinyScreen() && matchParams.inputStepType === 'cards'}
+        shrink={
+          hasFinalResults ||
+          (isTinyScreen() && matchParams.inputStepType === 'cards')
+        }
         isHandComplete={isHandComplete}
         selectedSeatIndices={selectedSeatIndices}
       />
@@ -208,7 +216,7 @@ export default function HandWizard(props) {
           // TODO: this will be unecessary once card management routes are moved into parent Hand component
           hand.buttonSeatIndex === null
             ? <NewHand />
-            : showHandCompleteUI
+            : hasFinalResults
               ? <HandComplete
                   resultDecoratedPositions={resultDecoratedPositions}
                   potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
