@@ -8,6 +8,7 @@ import cardImages from '../assets/cards';
 
 import { isTinyScreen } from '../utils';
 
+// TODO: consider using card table surface and standardizing with ManageCards
 export default function BoardDisplay(props) {
   const { board } = props;
   const winningCards = props.winningCards || [];

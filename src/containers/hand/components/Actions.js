@@ -16,6 +16,8 @@ import styled from 'styled-components';
 import { isTinyScreen } from '../../../utils';
 import BackspaceIcon from '@material-ui/core/SvgIcon/SvgIcon';
 import Button from '@material-ui/core/Button/Button';
+import BoardDisplay from '../../../components/BoardDisplay';
+
 
 export default function Actions(props) {
   const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
@@ -40,9 +42,13 @@ export default function Actions(props) {
       <Typography variant="h5">
         { isHandComplete ? 'Showdown' : _.startCase(hand.currentBettingRound) }
       </Typography>
-      <Typography variant="h6">
+      <Typography variant="h6" style={{ lineHeight: 1, marginBottom: '5px'}}>
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
       </Typography>
+      {
+        isHandComplete &&
+        <BoardDisplay board={hand.board} />
+      }
       <ActionsContainer>
         {
           // TODO: make most common actions sort first.

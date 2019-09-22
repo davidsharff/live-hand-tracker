@@ -205,7 +205,7 @@ export default function HandWizard(props) {
         resultDecoratedPositions={resultDecoratedPositions}
         hand={hand}
         shrink={
-          hasFinalResults ||
+          isHandComplete ||
           (isTinyScreen() && matchParams.inputStepType === 'cards')
         }
         isHandComplete={isHandComplete}
