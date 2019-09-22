@@ -14,7 +14,7 @@ import {
 } from '../../../redux/reducers/handReducer';
 import styled from 'styled-components';
 import { isTinyScreen } from '../../../utils';
-import BackspaceIcon from '@material-ui/core/SvgIcon/SvgIcon';
+import BackspaceIcon from '@material-ui/icons/Backspace';
 import Button from '@material-ui/core/Button/Button';
 import BoardDisplay from '../../../components/BoardDisplay';
 
@@ -189,7 +189,7 @@ function BetOrRaiseActionOptions(props) {
         {
           newAmount &&
           <BackspaceClickTarget onClick={handleBackspace}>
-            <BackspaceIcon { ...backspaceColorProp }/>
+            <BackspaceIcon { ...backspaceColorProp } />
           </BackspaceClickTarget>
         }
       </ActionButton>
