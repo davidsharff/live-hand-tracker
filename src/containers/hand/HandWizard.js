@@ -16,8 +16,9 @@ import { bettingRounds, cardInputTypes, handActionTypes } from "../../constants"
 import {
   getTotalPotSizeDuringRound,
   getResultDecoratedPositions,
-  getCurrentActivePositions,
-  getNextToActSeatIndex
+  getNextToActSeatIndex,
+  getSkippedSeatIndicesForSeatIndex,
+  getSeatIndicesThatCompletedHand
 } from "../../redux/reducers/handReducer";
 
 import { isTinyScreen } from "../../utils";
@@ -27,6 +28,7 @@ export default function HandWizard(props) {
   const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, onCreateNewHand, matchParams } = props;
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
+  const isActionInput = matchParams.inputStepType === 'actions';
   const resultDecoratedPositions = getResultDecoratedPositions(hand);
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function HandWizard(props) {
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
   //   - Bug: 10 card selection is broken
+  //   - Consider better name for the aggressor in round and their associated action. Currently calling "lastLiveAction" as opposed to passive actions.
   //   - Consider moving selectedSeat state handling, up to connector or moving all this file's content up and getting ride of connector approach entirely.
   //   - Handle clicking 0 when no bet/raise has been inputted
   //   - Consider moving board and manage card routes oustide of wizard
@@ -47,6 +50,7 @@ export default function HandWizard(props) {
   //   - Show kicker in hand desc when necessary (needs verification but seems to not be supported out of the box with library)
   //   - Confirm behavior for seat selection once final results are in. Currently, split pot situations are broken.
   //   - Write up handling 4 and 5 figures for long term.
+  //   - Replace one-off selector logic with existing selectors where applicable.
   //   - To gain space for bet/raise presets and/or all-in flag consider
   //      - Poker seat action desc one line to shrink rectangles.
   //      - One line header switch smaller text desc round, pot, seat, etc.
@@ -63,6 +67,7 @@ export default function HandWizard(props) {
   //   - It'd be nice if the poker seat UI made it clear when and what is clickable (e.g. when you can click ahead to future seat, the fact you can't click on seats at all during board input, etc.)
   //   - Breakout hand and session middleware and make sure apiMiddleware saves session and hand seperately
   //   - handle forward/back nav and possibly also clicking seats to edit past action selection during betting round and ultimately in any betting round.
+  //       - Supporting editing old actions from current round may be pretty easy (cascade in reverse but with different action type)
   //       - Change action urls to include betting round to support editing past actions.
   //   - Need explicit constraint or support for editing session since you can now return to it after hand begins.
   //   - Use consistent typography, particularly missing text color
@@ -71,7 +76,7 @@ export default function HandWizard(props) {
   // TODO: below sections should be their own components
 
   // TODO: move to HandWizardConnector.js route definition redirect handling.
-  if (matchParams.inputStepType === 'actions') {
+  if (isActionInput) {
 
     const positionsMissingRevealedCards = hand.actions
       .filter(({ type, seatIndex }) =>
@@ -85,49 +90,13 @@ export default function HandWizard(props) {
     }
   }
 
-  const getIncludeInSeatSelection = (seatIndex) => {
-    // Short-circuit. Evaluations below assume that either routeSeatIndex is null or there are multiple selected seats.
-    if (seatIndex === selectedSeatIndex) {
-      return true;
-    }
-
-    const activePositions = getCurrentActivePositions(hand);
-
-    // TODO: test this before committing.
-    // In results phase, all winners are selected.
-    if (isHandComplete) {
-      const resultDecoratedPosition = _.find(resultDecoratedPositions, { seatIndex });
-      return (
-        (resultDecoratedPosition && resultDecoratedPosition.amountWon > 0) ||
-        (
-          activePositions.length === 0 &&
-          _.last(hand.actions).seatIndex === seatIndex
-        )
-      );
-    };
-
-    if (hand.buttonSeatIndex !== null && matchParams.inputStepType === 'actions' && selectedSeatIndex !== null) {
-      // Note: this only includes seats that haven't acted this round. A clearer but too long variable name would be
-      // orderedSeatIndicesWaitingForInitialActionThisRound
-      const leftToActSeatIndices = _(activePositions)
-        .map('seatIndex')
-        .reject((sIndex) => _.some(hand.actions, { seatIndex: sIndex, bettingRound: hand.currentBettingRound }))
-        .value();
-
-      const targetSeatLeftToActIndex = leftToActSeatIndices.indexOf(seatIndex);
-      const selectedSeatLeftToActIndex = leftToActSeatIndices.indexOf(selectedSeatIndex);
-
-      // Handle multiple seats selected
-      return targetSeatLeftToActIndex !== -1 && targetSeatLeftToActIndex <= selectedSeatLeftToActIndex;
-    }
-  };
-
-  const selectedSeatIndices = _(hand.positions)
-    .filter(({ seatIndex }) =>
-      getIncludeInSeatSelection(seatIndex)
-    )
-    .map('seatIndex')
-    .value();
+  const selectedSeatIndices = isHandComplete
+    ? getSeatIndicesThatCompletedHand(hand)
+    : selectedSeatIndex === null
+      ? []
+      : isActionInput
+        ? [...getSkippedSeatIndicesForSeatIndex(hand, selectedSeatIndex), selectedSeatIndex]
+        : [selectedSeatIndex];
 
   const hasFinalResults = matchParams.inputStepType === 'actions' && resultDecoratedPositions.length;
 

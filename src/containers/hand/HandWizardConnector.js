@@ -13,7 +13,9 @@ import {
   getCurrentActivePositions,
   getDeck,
   getIsHandComplete,
-  getNextToActSeatIndex
+  getNextToActSeatIndex,
+  getLastLiveAction,
+  getCurrentAmountInvestedForSeat
 } from "../../redux/reducers/handReducer";
 
 function HandWizardConnector(props) {
@@ -90,14 +92,22 @@ function HandWizardConnector(props) {
       // Allow clicking ahead to input action if seat is live and hasn't acted this round.
     } else if (_.includes(props.location.pathname, 'actions') && !isHandComplete) {
       const activePositions = getCurrentActivePositions(hand);
+      const lastLiveAction = getLastLiveAction(hand); // e.g. bet/raise/call
+      const lastLiveActionAmount = lastLiveAction
+        ? lastLiveAction.amount
+        : null;
 
-      const lastSeatAction = _.findLast(hand.actions, { seatIndex });
+      // During action phases, support clicking on any seat yet to complete action in round.
+      const waitingToActPositions = activePositions.filter((p) =>
+        !lastLiveActionAmount ||
+        getCurrentAmountInvestedForSeat(hand, p.seatIndex) < lastLiveActionAmount
+      );
 
-      if (_.some(activePositions, { seatIndex }) && (!lastSeatAction || lastSeatAction.bettingRound !== hand.currentBettingRound)) {
+      if (_.some(waitingToActPositions, { seatIndex })) {
         handleNavToSeatIndexActions(seatIndex);
       } else {
         // TODO: add real UI
-        window.alert('You can only skip to seats that haven\'t acted this round');
+        window.alert('Cannot select this seat. Click on any other seat that hasn\'t met current action.');
       }
     }
   };

@@ -5,8 +5,8 @@ import {
   isCurrentRoundComplete,
   getIsHandComplete,
   getNextToActSeatIndex,
-  getCurrentActivePositions,
-  getAvailableActionForSeatIndex
+  getAvailableActionForSeatIndex,
+  getSkippedSeatIndicesForSeatIndex
 } from "../reducers/handReducer";
 import { cascadeActionTypes } from '../../constants';
 
@@ -118,12 +118,7 @@ function createCascadingActions(hand, action, next) {
 
   const cascadeActionType = availableCascadeActions[0];
 
-  const activePositions = getCurrentActivePositions(hand);
-
-  const initialPositionIndex = _.findIndex(activePositions, { seatIndex: nextToActSeatIndex});
-  const endPositionIndex = _.findIndex(activePositions, { seatIndex: actionSeatIndex });
-
-  activePositions.slice(initialPositionIndex, endPositionIndex).forEach(({ seatIndex }) =>
+  getSkippedSeatIndicesForSeatIndex(hand, actionSeatIndex).forEach(seatIndex =>
     next({
       type: actionTypes.CASCADE_ADD_ACTION,
       payload: {

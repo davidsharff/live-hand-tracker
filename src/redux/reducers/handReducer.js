@@ -275,14 +275,18 @@ export function getNextToActSeatIndex(hand) {
   return nextPosition.seatIndex;
 }
 
+export function getLastLiveActionForSeat(hand, seatIndex) {
+  return _.last(getCurrentActionsForSeat(hand, seatIndex)) || null;
+}
+
 export function getLastActionTypeForSeat(hand, seatIndex) {
-  const lastAction = _.last(getCurrentActionsForSeat(hand, seatIndex));
+  const lastAction = getLastLiveActionForSeat(hand, seatIndex);
   return lastAction
     ? lastAction.type
     : null;
 }
 
-function getLastLiveAction(hand) {
+export function getLastLiveAction(hand) {
   return _(hand.actions)
     .filter(({ type, bettingRound}) =>
       bettingRound === hand.currentBettingRound &&
@@ -492,3 +496,36 @@ export function getResultDecoratedPositions(hand) {
     );
 }
 
+export function getSkippedSeatIndicesForSeatIndex(hand, selectedSeatIndex) {
+  const activePositions = getCurrentActivePositions(hand);
+  const actingSeatIndex   = _.findIndex(activePositions, { seatIndex: selectedSeatIndex });
+
+  const sortedPositions = [
+    ...activePositions.slice(actingSeatIndex + 1),
+    ...activePositions.slice(0, actingSeatIndex + 1)
+  ];
+
+  const sortedNextToActIndex = _.findIndex(sortedPositions, { seatIndex: getNextToActSeatIndex(hand)});
+
+  return _.map(sortedPositions.slice(sortedNextToActIndex, -1), 'seatIndex');
+}
+
+// TODO: really bringing some weak sauce with this name. Improve.
+export function getSeatIndicesThatCompletedHand(hand) {
+  if (!getIsHandComplete(hand)) {
+    return [];
+  };
+
+  const resultDecoratedPositions = getResultDecoratedPositions(hand);
+  const activePositions = getCurrentActivePositions(hand);
+
+  if (activePositions === 0) {
+    // Everyone else folded and last player mucked
+    return _.last(hand.actions).seatIndex;
+  }
+
+  return _(resultDecoratedPositions)
+    .filter('amountWon')
+    .map('seatIndex')
+    .value();
+}
