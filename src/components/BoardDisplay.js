@@ -46,5 +46,5 @@ export default function BoardDisplay(props) {
 const BoardRow = styled.div`
   display: flex;
   width: 100%;
-  justify-content: space-around;
+  justify-content: space-between;
 `;

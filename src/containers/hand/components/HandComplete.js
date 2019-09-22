@@ -28,20 +28,23 @@ export default function HandCompleteBody(props) {
 
   return (
     <React.Fragment>
-      <div style={{ alignSelf: 'flex-start', width: '100%' }}>
-        <BoardDisplay board={board} winningCards={winningCards} />
+      <Typography variant="h5" style={{ marginBottom: '5px', textAlign: 'center'}}>
+        Results
+      </Typography>
+      <BoardDisplay board={board} winningCards={winningCards} />
+      <div style={{ flex: 1, width: '100%', marginTop: '5px'}}>
         {
           // TODO: show board first then each position either has hole cards or mucked.
-          _.sortBy(resultDecoratedPositions, 'amountWon').reverse().map(p => console.log('p', p) ||
-            <div key={p.seatIndex}>
+          _.sortBy(resultDecoratedPositions, 'amountWon').reverse().map(p =>
+            <div key={p.seatIndex} style={{ margin: '2px 0'}}>
               <LogLinePrefix positionLabel={p.label} seatIndex={p.seatIndex}>
-                <span>
-                  {
-                    p.handDescription
-                      ? ': ' + p.handDescription
-                      : ' mucked'
-                  }
-                </span>
+                  <span>
+                    {
+                      p.handDescription
+                        ? ': ' + p.handDescription
+                        : ' mucked'
+                    }
+                  </span>
               </LogLinePrefix>
               {
                 p.amountWon > 0 &&
