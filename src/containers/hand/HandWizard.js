@@ -8,7 +8,7 @@ import Container from "@material-ui/core/Container";
 import Actions from "./components/Actions";
 import NewHand from "./components/NewHand";
 import ManageCards from "./components/ManageCards";
-import HandComplete from "./components/HandComplete";
+import HandComplete from "./components/HandResults";
 
 import PokerTable from "../../components/PokerTable";
 

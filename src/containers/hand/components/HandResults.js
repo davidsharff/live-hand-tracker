@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography/Typography';
 
 import BoardDisplay from '../../../components/BoardDisplay';
 
-export default function HandCompleteBody(props) {
+export default function HandResults(props) {
   const { resultDecoratedPositions, board, onCreateNewHand } = props;
 
 

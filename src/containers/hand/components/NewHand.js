@@ -3,7 +3,7 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography/Typography';
 
 
-export default function NewHandBody({ header, subtitle }) {
+export default function NewHand({ header, subtitle }) {
   return (
     <React.Fragment>
       <Typography variant="h5">

@@ -17,7 +17,7 @@ import { isTinyScreen } from '../../../utils';
 import BackspaceIcon from '@material-ui/core/SvgIcon/SvgIcon';
 import Button from '@material-ui/core/Button/Button';
 
-export default function ActionBody(props) {
+export default function Actions(props) {
   const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
 
   const positionLabel = seatIndex === hand.heroSeatIndex
