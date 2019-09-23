@@ -30,7 +30,7 @@ export default function BoardDisplay(props) {
         _(board)
           .concat(Array(5).fill(''))
           .slice(0, 5)
-          .map((card) =>
+          .map((card, i) =>
             card
               ? (
                 <img
@@ -43,7 +43,7 @@ export default function BoardDisplay(props) {
                   alt={card}
                 />
               )
-              : <div style={cardImgDimensions} />
+              : <EmptyCardSlot key={i} style={cardImgDimensions} />
         )
           .value()
       }
@@ -56,4 +56,8 @@ const BoardRow = styled.div`
   display: flex;
   width: 100%;
   justify-content: space-between;
+`;
+
+const EmptyCardSlot = styled.div`
+  border: dotted 1px #333;
 `;

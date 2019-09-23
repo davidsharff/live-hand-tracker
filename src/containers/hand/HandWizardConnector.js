@@ -141,7 +141,7 @@ function HandWizardConnector(props) {
   return (
     <Route path="/hand/:inputStepType" render={({ match }) => {
 
-      if (match.isExact && hand.buttonSeatIndex !== null) {
+      if (match.isExact && match.params.inputStepType === 'actions' && hand.buttonSeatIndex !== null) {
         handleNavToSeatIndexActions(getNextToActSeatIndex(hand));
         return null;
       }

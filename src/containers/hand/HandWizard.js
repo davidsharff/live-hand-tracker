@@ -42,18 +42,20 @@ export default function HandWizard(props) {
   const isActionInput            = matchParams.inputStepType === 'actions';
   const resultDecoratedPositions = getResultDecoratedPositions(hand);
   const isHandComplete           = getIsHandComplete(hand);
+  const hasFinalResults          = resultDecoratedPositions.length > 0;
 
   useEffect(() => {
-    if (resultDecoratedPositions.length) {
+    if (hasFinalResults) {
       setSelectedSeatIndex(null);
     }
-  }, [resultDecoratedPositions]);
+  }, [hasFinalResults]);
 
   // TODO:
   //   - Bug: thought I noticed muck creating invalid hand state when multiselecting. Couldn't immediately duplicate
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
   //   - Bug: 10 card selection is broken
+  //   - Share card surface between ManageCards and BoardDisplay
   //   - Add option to make notes about any seat in action body
   //   - Support clicking on any seat in results step to input discovered cards, notes, etc.
   //   - Move hand results to its own route and ensure it resets selectedSeatIndex
@@ -93,7 +95,6 @@ export default function HandWizard(props) {
 
   // TODO: move to HandWizardConnector.js route definition redirect handling.
   if (isActionInput) {
-
     const positionsMissingRevealedCards = hand.actions
       .filter(({ type, seatIndex }) =>
         type === handActionTypes.REVEAL &&
@@ -114,11 +115,13 @@ export default function HandWizard(props) {
         ? [...getSkippedSeatIndicesForSeatIndex(hand, selectedSeatIndex), selectedSeatIndex]
         : [selectedSeatIndex];
 
-  const hasFinalResults = matchParams.inputStepType === 'actions' && resultDecoratedPositions.length;
+  if (matchParams.inputStepType !== 'results' && hasFinalResults) {
+    return <Redirect to="/hand/results" />;
+  }
 
   // Use creator fn to prevent route from unnecessarily remounting component.
   const createActionsInputComp = (seatIndex) => () => {
-    if (hand.buttonSeatIndex === null || resultDecoratedPositions.length > 0) {
+    if (hand.buttonSeatIndex === null || hasFinalResults) {
       // TODO: make this a different route
       return <Redirect to="/hand/actions" />;
     }
@@ -202,15 +205,8 @@ export default function HandWizard(props) {
           // TODO: this will be unecessary once card management routes are moved into parent Hand component
           hand.buttonSeatIndex === null
             ? <NewHand />
-            : hasFinalResults
-              ? <HandResults
-                  resultDecoratedPositions={resultDecoratedPositions}
-                  potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
-                  board={hand.board}
-                  onCreateNewHand={onCreateNewHand}
-                />
-              : hand.seats.map(({ isActive }, i) => isActive &&
-                  <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={createActionsInputComp(i)}/>
+            : hand.seats.map(({ isActive }, i) => isActive &&
+                <Route key={i} path={`/hand/actions/seat/${i + 1}`} render={createActionsInputComp(i)}/>
               )
         }
         {
@@ -223,6 +219,18 @@ export default function HandWizard(props) {
             // TOO: bug. Handle if they manually return to prior board input url.
             <Route exact key={bettingRound} path={`/hand/cards/board/${bettingRound}`} render={createBoardCardsComp(bettingRound)}/>
           )
+        }
+        {
+          hasFinalResults &&
+          <Route path={`/hand/results`} render={() =>
+            <HandResults
+              resultDecoratedPositions={resultDecoratedPositions}
+              potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
+              board={hand.board}
+              onCreateNewHand={onCreateNewHand}
+              subtitle={`${_.capitalize(hand.currentBettingRound)} | Pot $${getTotalPotSizeDuringRound(hand, hand.currentBettingRound)}`}
+            />
+          }/>
         }
       </BodyContainer>
     </StyledContainer>

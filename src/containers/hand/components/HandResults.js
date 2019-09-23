@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography/Typography';
 import BoardDisplay from '../../../components/BoardDisplay';
 
 export default function HandResults(props) {
-  const { resultDecoratedPositions, board, onCreateNewHand } = props;
+  const { resultDecoratedPositions, board, subtitle, onCreateNewHand } = props;
 
 
 
@@ -30,8 +30,11 @@ export default function HandResults(props) {
 
   return (
     <React.Fragment>
-      <Typography variant="h5" style={{ marginBottom: '5px', textAlign: 'center'}}>
+      <Typography variant="h5" style={{ textAlign: 'center'}}>
         Results
+      </Typography>
+      <Typography variant="h6" style={{ lineHeight: 1, marginBottom: '5px', textAlign: 'center'}}>
+        { subtitle }
       </Typography>
       <BoardDisplay board={board} winningCards={winningCards} />
       <div style={{ flex: 1, width: '100%', marginTop: '5px'}}>
