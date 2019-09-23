@@ -18,18 +18,30 @@ import {
   getResultDecoratedPositions,
   getNextToActSeatIndex,
   getSkippedSeatIndicesForSeatIndex,
-  getSeatIndicesThatCompletedHand
+  getSeatIndicesThatCompletedHand,
+  getIsHandComplete
 } from "../../redux/reducers/handReducer";
 
 import { isTinyScreen } from "../../utils";
 
 
 export default function HandWizard(props) {
-  const { hand, deck, onClickSeat, isHandComplete, onSaveHoleCards, onSaveBoardCards, onAction, onCreateNewHand, matchParams } = props;
+  const {
+    hand,
+    deck,
+    onClickSeat,
+    onSaveHoleCards,
+    onSaveBoardCards,
+    onAction,
+    onCreateNewHand,
+    matchParams
+  } = props;
+
   const [selectedSeatIndex, setSelectedSeatIndex] = useState(null);
 
-  const isActionInput = matchParams.inputStepType === 'actions';
+  const isActionInput            = matchParams.inputStepType === 'actions';
   const resultDecoratedPositions = getResultDecoratedPositions(hand);
+  const isHandComplete           = getIsHandComplete(hand);
 
   useEffect(() => {
     if (resultDecoratedPositions.length) {

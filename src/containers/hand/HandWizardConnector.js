@@ -156,7 +156,6 @@ function HandWizardConnector(props) {
           onSaveBoardCards={handleSaveBoardCards}
           onSaveHoleCards={handleSaveHoleCards}
           board={hand.board}
-          isHandComplete={isHandComplete}
           onClickSeat={handleClickSeat}
           onCreateNewHand={handleCreateNewHand}
         />
