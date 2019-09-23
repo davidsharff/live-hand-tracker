@@ -38,7 +38,6 @@ export default store => next => action => {
           handId: Math.round(Math.random() * 10000000)
         }
       });
-      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }
 
@@ -65,8 +64,6 @@ export default store => next => action => {
         }
       }
 
-      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
-
       action.aux.navToNextSeatIndex(store.getState().hand);
       return;
     }
@@ -79,7 +76,6 @@ export default store => next => action => {
         action.aux.navToNextSeatIndex(store.getState().hand);
       }
 
-      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }
 
@@ -91,14 +87,11 @@ export default store => next => action => {
         action.aux.navToNextSeatIndex(store.getState().hand);
       }
 
-      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
       return;
     }
 
     default:
       next(action);
-      // TODO: de-dup setting hand in local storage
-      localStorage.setItem('hand', JSON.stringify(store.getState().hand));
   }
 };
 
