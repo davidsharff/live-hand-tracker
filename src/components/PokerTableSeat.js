@@ -74,7 +74,6 @@ export default function PokerTableSeat(props) {
       onClick={onClick}
       borderColor={borderColor}
       heavyBorder={isSelected}
-      isMultiRow={isLiveHand}
       shrink={shrink}
       backgroundColor={
         useDisabledUI
@@ -134,7 +133,7 @@ export default function PokerTableSeat(props) {
   );
 }
 
-const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, isMultiRow, shrink, ...rest}) => <div {...rest} />)`
+const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, shrink, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
