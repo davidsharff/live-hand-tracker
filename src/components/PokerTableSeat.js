@@ -102,8 +102,8 @@ export default function PokerTableSeat(props) {
               ? (
                 <div>
                   {
-                    lastAction.type === handActionTypes.MUCK
-                      ? _.capitalize(handActionTypes.MUCK)
+                    lastAction.type === handActionTypes.MUCK || lastAction.type === handActionTypes.FOLD
+                      ? _.capitalize(lastAction.type)
                       : seat.holeCards.length
                         ? seat.holeCards.join(' ')
                         : lastAction.type === handActionTypes.REVEAL

@@ -55,6 +55,7 @@ export default function HandWizard(props) {
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
   //   - Bug: 10 card selection is broken
+  //   - Bug: clicking past card selections screws up logic on what cards are available to click
   //   - Consider changing hero seat icon during hand to normal position abbreviation with red background.
   //   - Share card surface between ManageCards and BoardDisplay
   //   - Add option to make notes about any seat in action body
