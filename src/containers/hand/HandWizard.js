@@ -186,12 +186,12 @@ export default function HandWizard(props) {
     <StyledContainer>
       {/* TODO: convert to onClick*/}
       <PokerTable
+        // TODO: refactor below to get list of clickable seat indices and use to drive display UI.
         seats={hand.seats}
         onClickSeat={onClickSeat}
         heroSeatIndex={hand.heroSeatIndex}
         showLegend={false}
         routeSeatIndex={selectedSeatIndex}
-        resultDecoratedPositions={resultDecoratedPositions}
         hand={hand}
         shrink={
           isHandComplete ||

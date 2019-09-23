@@ -84,6 +84,7 @@ export default function PokerTable(props) {
                   const isSelected = selectedSeatIndices && selectedSeatIndices.indexOf(seatIndex) > -1;
                   const isMultiSelected = isSelected &&  _.last(selectedSeatIndices) !== seatIndex;
 
+                  // TODO: remove hand state props and pass format specific props instead (e.g. highlight, disabled, etc.)
                   return (
                     <PokerTableSeat
                       key={seatIndex}

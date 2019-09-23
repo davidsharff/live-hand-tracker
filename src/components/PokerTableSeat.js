@@ -22,7 +22,6 @@ export default function PokerTableSeat(props) {
     positionLabel,
     lastAction,
     isLiveHand,
-    currentBettingRound,
     amountInvested,
     showHoleCards,
     shrink
@@ -50,16 +49,15 @@ export default function PokerTableSeat(props) {
     );
   };
 
-  const foldedInPriorRound = (
-    !!lastAction &&
-    (
+  const hasFolded = (
+    !isMultiSelected &&
+    !!lastAction && (
       lastAction.type === handActionTypes.FOLD ||
       lastAction.type === handActionTypes.MUCK
-    ) &&
-    lastAction.bettingRound !== currentBettingRound
+    )
   );
 
-  const useDisabledUI = foldedInPriorRound || !isActive;
+  const useDisabledUI = hasFolded || !isActive;
 
   const selectedBorderColor = palette.primary.dark;
 
@@ -93,7 +91,7 @@ export default function PokerTableSeat(props) {
           fontSize: '14px',
           // TODO: extract. This is ugly and bad.
           backgroundColor: isHero ? palette.secondary.dark : isActive ? palette.primary.dark : undefined,
-          opacity: foldedInPriorRound && .5
+          opacity: hasFolded && .5
         }}
       />
       {
