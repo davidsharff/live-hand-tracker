@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import Typography from "@material-ui/core/Typography/Typography";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import Grow from '@material-ui/core/Grow';
+//import Grow from '@material-ui/core/Grow';
 //import Collapse from '@material-ui/core/Collapse';
 import Slide from '@material-ui/core/Slide';
 import ArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -119,17 +119,21 @@ export default function ManageCards(props) {
                       ( !_.includes(deck, cardKey) && cards[selectedCardIndex] === cardKey )
                     )
                   )
+                  // .map((cardKey) =>
+                  //   <Grow
+                  //     key={cardKey}
+                  //     in={true}
+                  //     style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
+                  //   >
+                  //     <div onClick={() => handlePickCard(cardKey)}>
+                  //       <img src={cardImages[cardKey]} style={{ width: '60px', height: '90px'}} alt="" />
+                  //     </div>
+                  //   </Grow>
+                  // )
                   .map((cardKey) =>
-                    <Grow
-                      key={cardKey}
-                      in={true}
-                      style={{ transformOrigin: '0 0 0', transitionDelay: '100ms' }}
-                    >
-                      {/* TODO: should we somehow include cards no longer in deck and show them disabled and/or with cards location? */}
-                      <div onClick={() => handlePickCard(cardKey)}>
-                        <img src={cardImages[cardKey]} style={{ width: '60px', height: '90px'}} alt="" />
-                      </div>
-                    </Grow>
+                    <div key={cardKey} onClick={() => handlePickCard(cardKey)}>
+                      <img src={cardImages[cardKey]} style={{ width: '60px', height: '90px'}} alt="" />
+                    </div>
                   )
                   .value()
               }
