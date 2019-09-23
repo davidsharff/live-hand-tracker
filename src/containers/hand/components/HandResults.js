@@ -7,17 +7,19 @@ import Typography from '@material-ui/core/Typography/Typography';
 import BoardDisplay from '../../../components/BoardDisplay';
 
 export default function HandResults(props) {
-  const { resultDecoratedPositions, board, onCreateNewHand, header } = props;
+  const { resultDecoratedPositions, board, onCreateNewHand } = props;
 
 
 
   // TODO: handle split pot
-  const winningCards = _(resultDecoratedPositions)
+  const winningCardsObj = _(resultDecoratedPositions)
     .filter('amountWon')
     .sortBy('amountWon') // Only highlight cards belonging to hand winning the most (in anticipation of supporting side-pots in the future)
-    .last()
-    .handCards
-    .map(({ value, suit }) => value + suit);
+    .last();
+
+  const winningCards = winningCardsObj
+    ? winningCardsObj.handCards.map(({ value, suit }) => value + suit)
+    : [];
 
   const LogLinePrefix = ({ positionLabel, seatIndex, children }) => (
     <Typography variant="subtitle2" style={{ margin: '2px 0'}}>
@@ -29,7 +31,7 @@ export default function HandResults(props) {
   return (
     <React.Fragment>
       <Typography variant="h5" style={{ marginBottom: '5px', textAlign: 'center'}}>
-        { header }
+        Results
       </Typography>
       <BoardDisplay board={board} winningCards={winningCards} />
       <div style={{ flex: 1, width: '100%', marginTop: '5px'}}>

@@ -64,28 +64,28 @@ export default function ManageCards(props) {
         <Typography variant="h5" style={{ marginBottom: '5px'}}>
           { headerText }
         </Typography>
-      <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
-        {
-        pendingCards.map((card, i) =>
-        <CardSlot
-          key={i}
-          onClick={() => !getIsCardIndexDisabled(type, i) && handleClickCardSlot(i)}
-          isEmpty={!card || card.length === 1}
-          isSelected={i === selectedCardIndex}
-          type={type}
-          isDisabled={getIsCardIndexDisabled(type, i)}
-          disabledBackgroundColor={palette.action.disabledBackground}
-          leftMargin={getCardSlotLeftMargin(isTinyScreen(), isHoleCards, i)}
-          rightMargin={getCardSlotRightMargin(isTinyScreen(), isHoleCards, i)}
-        >
+        <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
           {
-            card.length === 2 &&
-            <img src={cardImages[card]} style={{ width: '100%', height: '100%'}} alt="" />
+          pendingCards.map((card, i) =>
+            <CardSlot
+              key={i}
+              onClick={() => !getIsCardIndexDisabled(type, i) && handleClickCardSlot(i)}
+              isEmpty={!card || card.length === 1}
+              isSelected={i === selectedCardIndex}
+              type={type}
+              isDisabled={getIsCardIndexDisabled(type, i)}
+              disabledBackgroundColor={palette.action.disabledBackground}
+              leftMargin={getCardSlotLeftMargin(isTinyScreen(), isHoleCards, i)}
+              rightMargin={getCardSlotRightMargin(isTinyScreen(), isHoleCards, i)}
+            >
+              {
+                card.length === 2 &&
+                <img src={cardImages[card]} style={{ width: '100%', height: '100%'}} alt="" />
+              }
+            </CardSlot>
+          )
           }
-        </CardSlot>
-        )
-        }
-      </div>
+        </div>
       </CardsSurface>
       {
         !showCardPicker && !showValueKeyboard && isBoardFilledForRound(cards, type) &&

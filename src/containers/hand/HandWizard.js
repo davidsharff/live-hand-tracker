@@ -8,7 +8,7 @@ import Container from "@material-ui/core/Container";
 import Actions from "./components/Actions";
 import NewHand from "./components/NewHand";
 import ManageCards from "./components/ManageCards";
-import HandComplete from "./components/HandResults";
+import HandResults from "./components/HandResults";
 
 import PokerTable from "../../components/PokerTable";
 
@@ -42,6 +42,10 @@ export default function HandWizard(props) {
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
   //   - Bug: 10 card selection is broken
+  //   - Add option to make notes about any seat in action body
+  //   - Support clicking on any seat in results step to input discovered cards, notes, etc.
+  //   - Move hand results to its own route and ensure it resets selectedSeatIndex
+  //   - Order card picker options by suit and use spacers so that they don't shift after selections for faster inputs
   //   - Consider better name for the aggressor in round and their associated action. Currently calling "lastLiveAction" as opposed to passive actions.
   //   - Consider moving selectedSeat state handling, up to connector or moving all this file's content up and getting ride of connector approach entirely.
   //   - Handle clicking 0 when no bet/raise has been inputted
@@ -91,7 +95,7 @@ export default function HandWizard(props) {
   }
 
   const selectedSeatIndices = isHandComplete
-    ? getSeatIndicesThatCompletedHand(hand)
+    ? isActionInput ? [selectedSeatIndex] : getSeatIndicesThatCompletedHand(hand) // Use noi
     : selectedSeatIndex === null
       ? []
       : isActionInput
@@ -187,7 +191,7 @@ export default function HandWizard(props) {
           hand.buttonSeatIndex === null
             ? <NewHand />
             : hasFinalResults
-              ? <HandComplete
+              ? <HandResults
                   resultDecoratedPositions={resultDecoratedPositions}
                   potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
                   board={hand.board}

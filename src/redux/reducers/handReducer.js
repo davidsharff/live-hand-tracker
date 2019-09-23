@@ -450,6 +450,10 @@ export function getResultDecoratedPositions(hand) {
     return [];
   }
 
+  if (hand.currentBettingRound !== bettingRounds.RIVER) {
+    return activePositions;
+  }
+
   const boardCards = hand.board;
 
   // One player remaining who chose to reveal cards.
@@ -517,6 +521,7 @@ export function getSeatIndicesThatCompletedHand(hand) {
   };
 
   const resultDecoratedPositions = getResultDecoratedPositions(hand);
+
   const activePositions = getCurrentActivePositions(hand);
 
   if (activePositions === 0) {

@@ -27,17 +27,25 @@ export default function BoardDisplay(props) {
   return (
     <BoardRow>
       {
-        board.map((card) =>
-          <img
-            key={card}
-            src={cardImages[card]}
-            style={{
-              ...(_.includes(winningCards, card) ? winningCardStyle : {}),
-              ...cardImgDimensions
-            }}
-            alt={card}
-          />
+        _(board)
+          .concat(Array(5).fill(''))
+          .slice(0, 5)
+          .map((card) =>
+            card
+              ? (
+                <img
+                  key={card}
+                  src={cardImages[card]}
+                  style={{
+                    ...(_.includes(winningCards, card) ? winningCardStyle : {}),
+                    ...cardImgDimensions
+                  }}
+                  alt={card}
+                />
+              )
+              : <div style={cardImgDimensions} />
         )
+          .value()
       }
     </BoardRow>
   );
