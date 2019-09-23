@@ -4,8 +4,8 @@ import hearts from './hearts';
 import spades from './spades';
 
 export default {
+  ...hearts,
   ...clubs,
   ...diamonds,
-  ...hearts,
   ...spades
-}
+};
