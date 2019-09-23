@@ -95,7 +95,7 @@ export default function PokerTableSeat(props) {
         }}
       />
       {
-        isLiveHand && isActive &&
+        isActive &&
         <BodyContainer style={{color: palette.text.secondary}}>
           {
             showHoleCards
@@ -112,32 +112,23 @@ export default function PokerTableSeat(props) {
                   }
                 </div>
               )
-              : lastAction && (
-                <React.Fragment>
-                  <div>
+              : lastAction
+                ? (
+                  <React.Fragment>
+                    <div>{ _.capitalize(lastAction.type) }</div>
                     {
-                      _.capitalize(lastAction.type)
+                      !shrink && lastAction.amount > 0 &&
+                      <div>${amountInvested}</div>
                     }
+                  </React.Fragment>
+                )
+                : !isLiveHand && (
+                  <div style={{color: palette.text.secondary }}>
+                    Seat&nbsp;{seatIndex + 1}
                   </div>
-                  {
-                    !shrink &&
-                    <div>
-                      {
-                        lastAction && lastAction.amount > 0 &&
-                        '$' + amountInvested
-                      }
-                    </div>
-                  }
-                </React.Fragment>
-              )
+                )
           }
         </BodyContainer>
-      }
-      {
-        !isLiveHand &&
-        <div style={{color: palette.text.secondary }}>
-          Seat&nbsp;{seatIndex + 1}
-        </div>
       }
     </SquareSeatContainer>
   );
@@ -146,12 +137,12 @@ export default function PokerTableSeat(props) {
 const SquareSeatContainer = styled(({ borderColor, heavyBorder, backgroundColor, isMultiRow, shrink, ...rest}) => <div {...rest} />)`
   display: flex;
   flex-direction: column;
-  justify-content: ${p => p.isMultiRow ? 'space-between' : 'space-around'}
+  justify-content: space-between;
   align-items: center;
   flex-basis: calc(20% - 5px);
   margin-right: 5px;
   margin-bottom: 5px;
-  padding-top: ${p => p.isMultiRow && '5px'};
+  padding-top: 5px;
   height: ${p => p.shrink ? '55px' : '70px'};
   background-color: ${p => p.backgroundColor};
   border: ${p => `solid ${p.borderColor} 1px`};
