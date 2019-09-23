@@ -55,12 +55,15 @@ export default function Actions(props) {
           _(availableActions)
             .sortBy(sortActionComponents)
             .reject(({ type }) => areMultipleSeatsSelected && type === handActionTypes.MUCK)
-            .map((availableAction) => {
+            .map((availableAction, i) => {
               const { type, amount } = availableAction;
               const isBetOrRaise = type === handActionTypes.BET || type === handActionTypes.RAISE;
+              const marginTop = isHandComplete
+                ? i === 0 ? '10px' : '20px'
+                : '0';
 
               return (
-                <div style={{ flex: isBetOrRaise ? 2 : .75}} key={seatIndex + type}>
+                <div style={{ flex: isBetOrRaise ? 2 : .75, marginTop }} key={seatIndex + type}>
                   <ActionOption
                     type={type}
                     amount={amount}
@@ -74,7 +77,7 @@ export default function Actions(props) {
         {
           // TODO: hacky spacer to keep showdown buttons in same spot.
           availableActions.length < 3 &&
-          <div style={{ flex: 2}} />
+          <div style={{ flex: 2 }} />
         }
       </ActionsContainer>
     </React.Fragment>
