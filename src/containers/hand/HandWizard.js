@@ -51,6 +51,7 @@ export default function HandWizard(props) {
   }, [hasFinalResults]);
 
   // TODO:
+  //   - If this remains a webapp in alpha testing, see: https://developers.google.com/web/fundamentals/native-hardware/fullscreen/
   //   - Bug: thought I noticed muck creating invalid hand state when multiselecting. Couldn't immediately duplicate
   //   - Bug: Prevent next in board input if cards are missing.
   //   - Bug: not ending hand if second to last player mucks
