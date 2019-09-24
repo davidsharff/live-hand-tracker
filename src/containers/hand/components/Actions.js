@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 import Typography from '@material-ui/core/Typography/Typography';
 
-import { handActionTypes } from '../../../constants';
+import { handActionTypes, passiveActionTypes } from '../../../constants';
 
 // TODO: need to either move these to container component or move selector calls into other components where applicable.
 import {
@@ -18,7 +18,6 @@ import BackspaceIcon from '@material-ui/icons/Backspace';
 import Button from '@material-ui/core/Button/Button';
 import BoardDisplay from '../../../components/BoardDisplay';
 
-
 export default function Actions(props) {
   const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
 
@@ -32,54 +31,87 @@ export default function Actions(props) {
 
   const availableActions = getAvailableActionForSeatIndex(hand, seatIndex);
 
-  const handleClick = useCallback((actionType, amount) =>
-      onClickAction(seatIndex, actionType, amount)
+  const handleClick = useCallback((actionType, betOrRaiseAmount) =>
+      onClickAction(seatIndex, actionType, betOrRaiseAmount)
     , [seatIndex, onClickAction]
   );
+
+  const aggressiveAction = _.some(availableActions, { type: handActionTypes.REVEAL }) // Showdown: no options available.
+    ? null
+    : _.find(availableActions, { type: handActionTypes.RAISE }) || _.find(availableActions, { type: handActionTypes.BET });
 
   return (
     <React.Fragment>
       <Typography variant="h5">
         { isHandComplete ? 'Showdown' : _.startCase(hand.currentBettingRound) }
       </Typography>
-      <Typography variant="h6" style={{ lineHeight: 1, marginBottom: '5px'}}>
+      <Typography variant="h6" style={{ lineHeight: isTinyScreen() && !isHandComplete && 1, marginBottom: '5px'}}>
         {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
       </Typography>
       {
         isHandComplete &&
         <BoardDisplay board={hand.board} />
       }
-      <ActionsContainer>
-        {
-          // TODO: make most common actions sort first.
-          _(availableActions)
-            .sortBy(sortActionComponents)
-            .reject(({ type }) => areMultipleSeatsSelected && type === handActionTypes.MUCK)
-            .map((availableAction, i) => {
-              const { type, amount } = availableAction;
-              const isBetOrRaise = type === handActionTypes.BET || type === handActionTypes.RAISE;
-              const marginTop = isHandComplete
-                ? i === 0 ? '10px' : '20px'
-                : '0';
+      {
+        _.some(availableActions, { type: handActionTypes.REVEAL }) &&
+        availableActions.map(({ type }) =>
+          <div style={{ marginTop: '20px', width: '100%'}}>
+            <ActionOption
+              key={type}
+              type={type}
+              onClick={() => handleClick(type)}
+            >
+            </ActionOption>
+          </div>
+        )
+      }
 
-              return (
-                <div style={{ flex: isBetOrRaise ? 2 : .75, marginTop }} key={seatIndex + type}>
-                  <ActionOption
-                    type={type}
-                    amount={amount}
-                    onClick={handleClick}
-                  />
-                </div>
-              );
-            })
-            .value()
-        }
         {
-          // TODO: hacky spacer to keep showdown buttons in same spot.
-          availableActions.length < 3 &&
-          <div style={{ flex: 2 }} />
+          !_.some(availableActions, { type: handActionTypes.REVEAL }) &&
+          <ActionsContainer>
+            {
+              _(passiveActionTypes)
+                .chunk(2)
+                .flatMap((actions, rowIndex) =>
+                  <ActionOptionRow key={rowIndex}>
+                    {
+                      actions.map((type, i) => {
+                        const availableAction = _.find(availableActions, { type });
+                        const xMargin = '5px';
+                        return (
+                          <div
+                            key={type}
+                            style={{ flex: 1, marginRight: i === 0 && xMargin, marginLeft: i === 1 && xMargin }}
+                          >
+                            <ActionOption
+                              type={type}
+                              amount={_.get(availableAction, 'amount')}
+                              onClick={() => handleClick(type)}
+                              disabled={
+                                !availableAction ||
+                                (availableAction.type === handActionTypes.MUCK && areMultipleSeatsSelected)
+                              }
+                            />
+                          </div>
+                        );
+                      })
+                    }
+                  </ActionOptionRow>
+                )
+                .value()
+            }
+            {
+              aggressiveAction &&
+              <div style={{ flex: .75 }}>
+                <AggresiveActionInput
+                  minAmount={aggressiveAction.amount}
+                  onSubmit={(newAmount) => handleClick(aggressiveAction.type, newAmount)}
+                  label={aggressiveAction.type}
+                />
+              </div>
+            }
+          </ActionsContainer>
         }
-      </ActionsContainer>
     </React.Fragment>
   );
 }
@@ -93,8 +125,15 @@ const ActionsContainer = styled.div`
   justify-content: space-between;
 `;
 
+const ActionOptionRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: ${p => p.rowHeight};
+`;
+
 function ActionOption(props) {
-  const { type, amount, onClick } = props;
+  const { type, amount, disabled, onClick } = props;
 
   // TODO: invesigate the native event warning.
   const handleClick = (optionalValue) => onClick(type, optionalValue || null);
@@ -105,29 +144,21 @@ function ActionOption(props) {
 
   const typeLabel = _.startCase(type);
 
-  // TODO: consider breaking this out and moving to a new turnary where ActionOption is called.
-  if (type === handActionTypes.BET || type === handActionTypes.RAISE) {
-    return (
-      <BetOrRaiseActionOptions
-        buttonColor={buttonColor}
-        minAmount={amount}
-        onSubmit={handleClick}
-        label={typeLabel}
-      />
-    );
-  }
-
   return (
-    <ActionButton color={buttonColor} onClick={() => handleClick()}>
-      { typeLabel + (type === handActionTypes.CALL ? ' $' + amount : '')}
+    <ActionButton
+      color={buttonColor}
+      onClick={() => handleClick()}
+      variant="contained"
+      disabled={disabled}
+    >
+      { typeLabel + (type === handActionTypes.CALL && !disabled ? ' $' + amount : '')}
     </ActionButton>
   );
 }
 
-function BetOrRaiseActionOptions(props) {
-  const { minAmount, label, onSubmit, buttonColor } = props;
+function AggresiveActionInput(props) {
+  const { minAmount, label, onSubmit } = props;
   const [newAmount, setNewAmount] = useState('');
-  //const [showMinAmountError, setShowMinAmountError] = useState();
 
   const hasMetMin = newAmount && newAmount >= minAmount;
 
@@ -156,8 +187,6 @@ function BetOrRaiseActionOptions(props) {
     if (hasMetMin) {
       onSubmit(newAmount);
     } else {
-      // setShowMinAmountError(true);
-      // setTimeout(() => setShowMinAmountError(false), 3000);
       // TODO: use toastr or notification bar to show error
       window.alert(`${label} must be at least $${minAmount}.\nYour amount: $${newAmount}`);
     }
@@ -170,9 +199,8 @@ function BetOrRaiseActionOptions(props) {
   return (
     <React.Fragment>
       <ActionButton
-        color={ newAmount ? buttonColor : 'default'}
+        color="primary"
         variant={hasMetMin ? 'contained' : 'outlined'}
-        disabled={!newAmount}
         onClick={handleSubmit}
       >
         {
@@ -219,7 +247,7 @@ function BetOrRaiseActionOptions(props) {
 }
 
 const ActionButton = styled(({ variant, ...rest }) => <Button { ...rest } disableRipple fullWidth variant={variant || "outlined"} />)`
-  height: 44px;
+  height: ${isTinyScreen() ? '44px' : '54px'};
   :focus {
     outline: none;
   }
@@ -256,15 +284,3 @@ const BackspaceClickTarget = styled.div`
     background-color: #7281d6;
   }
 `;
-
-function sortActionComponents({ type }) {
-  return type === handActionTypes.CHECK
-    ? 0
-    : type === handActionTypes.CALL
-      ? 1
-      : type  === handActionTypes.FOLD
-        ? 2
-        : type === handActionTypes.MUCK
-          ? 3
-          : 4;
-};

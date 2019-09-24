@@ -58,6 +58,9 @@ export default function HandWizard(props) {
   //   - Bug: not ending hand if second to last player mucks
   //   - Bug: 10 card selection is broken
   //   - Bug: clicking past card selections screws up logic on what cards are available to click
+  //   - Refreshing during showdown, at least for last remaining player, brings back real action options.
+  //   - New action input display gives more space for action body title, particularly at showdown.
+  //   - Action option buttons need more dynamic solution for heights. Likely flex grow the container rows vertically and let button height be 100%
   //   - Consider changing hero seat icon during hand to normal position abbreviation with red background.
   //   - Share card surface between ManageCards and BoardDisplay
   //   - Add option to make notes about any seat in action body

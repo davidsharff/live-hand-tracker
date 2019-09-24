@@ -33,6 +33,13 @@ export const handActionTypes = {
   REVEAL: 'reveal'
 };
 
+export const passiveActionTypes = [
+  handActionTypes.CHECK,
+  handActionTypes.CALL,
+  handActionTypes.MUCK,
+  handActionTypes.FOLD
+];
+
 export const cascadeActionTypes = [
   handActionTypes.FOLD,
   handActionTypes.CHECK
