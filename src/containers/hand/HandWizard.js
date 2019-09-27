@@ -236,7 +236,7 @@ export default function HandWizard(props) {
               potSize={getTotalPotSizeDuringRound(hand, bettingRounds.RIVER)}
               board={hand.board}
               onCreateNewHand={onCreateNewHand}
-              subtitle={`${_.capitalize(hand.currentBettingRound)} | Pot $${getTotalPotSizeDuringRound(hand, hand.currentBettingRound)}`}
+              subHeader={`${_.capitalize(hand.currentBettingRound)} | Pot $${getTotalPotSizeDuringRound(hand, hand.currentBettingRound)}`}
             />
           }/>
         }

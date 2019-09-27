@@ -5,9 +5,11 @@ import Button from '@material-ui/core/Button/Button';
 import Typography from '@material-ui/core/Typography/Typography';
 
 import BoardDisplay from '../../../components/BoardDisplay';
+import { MainHeader, SubHeader } from '../../../components/StyledTypography';
+import { isTinyScreen } from '../../../utils';
 
 export default function HandResults(props) {
-  const { resultDecoratedPositions, board, subtitle, onCreateNewHand } = props;
+  const { resultDecoratedPositions, board, subHeader, onCreateNewHand } = props;
 
 
 
@@ -30,12 +32,12 @@ export default function HandResults(props) {
 
   return (
     <React.Fragment>
-      <Typography variant="h5" style={{ textAlign: 'center'}}>
+      <MainHeader style={{ textAlign: 'center'}}>
         Results
-      </Typography>
-      <Typography variant="h6" style={{ lineHeight: 1, marginBottom: '5px', textAlign: 'center'}}>
-        { subtitle }
-      </Typography>
+      </MainHeader>
+      <SubHeader style={{ lineHeight: isTinyScreen() && 1, marginBottom: '5px', textAlign: 'center'}}>
+        { subHeader }
+      </SubHeader>
       <BoardDisplay board={board} winningCards={winningCards} />
       <div style={{ flex: 1, width: '100%', marginTop: '5px'}}>
         {

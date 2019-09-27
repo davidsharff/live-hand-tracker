@@ -64,7 +64,7 @@ export default function Actions(props) {
       {
         _.some(availableActions, { type: handActionTypes.REVEAL }) &&
         availableActions.map(({ type }) =>
-          <div style={{ marginTop: '20px', width: '100%'}}>
+          <div key={type} style={{ marginTop: '20px', width: '100%'}}>
             <ActionOption
               key={type}
               type={type}
