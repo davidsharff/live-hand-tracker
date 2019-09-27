@@ -247,6 +247,7 @@ const CardPickerRow = styled.div`
 
 const CardSlot = styled(({ isEmpty, isSelected, isDisabled, disabledBackgroundColor, leftMargin, rightMargin, ...rest }) => <div { ...rest }/>)`
   border: ${p => p.isEmpty && 'dotted 1px #333'};
+  border-radius: 6px;
   height: ${isTinyScreen() ? '75px' : '90px'};
   width: ${isTinyScreen() ? '50px' : '60px'};
   margin-left: ${p => p.leftMargin};

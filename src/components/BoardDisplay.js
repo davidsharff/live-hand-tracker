@@ -43,7 +43,7 @@ export default function BoardDisplay(props) {
                   alt={card}
                 />
               )
-              : <EmptyCardSlot key={i} style={cardImgDimensions} />
+              : <EmptyCardSlot key={i} style={cardImgDimensions} emptyBackgroundColor={palette.action.disabledBackground}/>
         )
           .value()
       }
@@ -58,6 +58,9 @@ const BoardRow = styled.div`
   justify-content: space-between;
 `;
 
+// TODO: these styles need to be shared with manage cards. Really, the entire board display should be shared.
 const EmptyCardSlot = styled.div`
   border: dotted 1px #333;
+  border-radius: 6px;
+  background-color: ${p => p.emptyBackgroundColor}
 `;
