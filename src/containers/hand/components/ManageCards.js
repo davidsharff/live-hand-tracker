@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import styled from 'styled-components';
 
-import Typography from "@material-ui/core/Typography/Typography";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 //import Grow from '@material-ui/core/Grow';
@@ -19,6 +18,7 @@ import { deckType, holeCardsType } from '../../../types';
 // TODO: if a react web app is used in production, need to be smart about when to load these.
 import cardImages from '../../../assets/cards';
 import { isTinyScreen } from '../../../utils';
+import { SubHeader } from '../../../components/StyledTypography';
 
 // TODO: all the consts seem messy--could be cleaned up.
 export default function ManageCards(props) {
@@ -61,9 +61,9 @@ export default function ManageCards(props) {
   return (
     <React.Fragment>
       <CardsSurface>
-        <Typography variant="h5" style={{ marginBottom: '5px'}}>
+        <SubHeader style={{ marginBottom: '5px'}}>
           { headerText }
-        </Typography>
+        </SubHeader>
         <div style={{display: 'flex', width: '100%', justifyContent: isTinyScreen() || isHoleCards ? 'center' : 'space-around'}}>
           {
           pendingCards.map((card, i) =>

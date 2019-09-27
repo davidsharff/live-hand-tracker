@@ -164,7 +164,7 @@ export default function HandWizard(props) {
             setSelectedSeatIndex(null);
           }
         }}
-        headerText={'Hole Cards: ' + (seatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${seatIndex + 1}`)}
+        headerText={(seatIndex === hand.heroSeatIndex ? 'Hero' : `Seat ${seatIndex + 1}`) + ' Hole Cards'}
       />
     );
   };

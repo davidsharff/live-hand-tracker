@@ -1,17 +1,17 @@
 import React from 'react';
 
-import Typography from '@material-ui/core/Typography/Typography';
+import { MainHeader, Subtitle } from '../../../components/StyledTypography';
 
 
 export default function NewHand({ header, subtitle }) {
   return (
     <React.Fragment>
-      <Typography variant="h5">
+      <MainHeader>
         New Hand
-      </Typography>
-      <Typography variant="subtitle1" style={{ marginBottom: '10px', textAlign: 'center'}}>
+      </MainHeader>
+      <Subtitle style={{ marginBottom: '10px', textAlign: 'center'}}>
         Tap button seat location to begin.
-      </Typography>
+      </Subtitle>
     </React.Fragment>
   );
 }
