@@ -4,7 +4,6 @@ import _ from 'lodash';
 import styled from 'styled-components';
 
 import Button from "@material-ui/core/Button";
-import Paper from "@material-ui/core/Paper";
 //import Grow from '@material-ui/core/Grow';
 //import Collapse from '@material-ui/core/Collapse';
 import Slide from '@material-ui/core/Slide';
@@ -192,7 +191,7 @@ ManageCards.propTypes = {
   deck: deckType.isRequired
 };
 
-const CardsSurface = styled(Paper)`
+const CardsSurface = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
