@@ -1,10 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import _ from 'lodash';
 
-import Typography from '@material-ui/core/Typography/Typography';
+import styled from 'styled-components';
+import BackspaceIcon from '@material-ui/icons/Backspace';
+import Button from '@material-ui/core/Button/Button';
+import { useTheme } from '@material-ui/styles';
+
+import BoardDisplay from '../../../components/BoardDisplay';
+import { MainHeader, SubHeader } from '../../../components/StyledTypography';
 
 import { handActionTypes, passiveActionTypes } from '../../../constants';
-
 // TODO: need to either move these to container component or move selector calls into other components where applicable.
 import {
   getAvailableActionForSeatIndex,
@@ -12,14 +17,13 @@ import {
   getPositionLabelForSeatIndex,
   getTotalPotSizeDuringRound
 } from '../../../redux/reducers/handReducer';
-import styled from 'styled-components';
+
 import { isTinyScreen } from '../../../utils';
-import BackspaceIcon from '@material-ui/icons/Backspace';
-import Button from '@material-ui/core/Button/Button';
-import BoardDisplay from '../../../components/BoardDisplay';
 
 export default function Actions(props) {
   const { hand, seatIndex, onClickAction, areMultipleSeatsSelected } = props;
+
+  const { palette } = useTheme();
 
   const positionLabel = seatIndex === hand.heroSeatIndex
     ? 'Hero'
@@ -40,14 +44,19 @@ export default function Actions(props) {
     ? null
     : _.find(availableActions, { type: handActionTypes.RAISE }) || _.find(availableActions, { type: handActionTypes.BET });
 
+  const Divider = () => (
+    <span style={{ fontSize: '18px', borderLeft: `solid 2px ${palette.text.secondary}`}}/>
+  );
+
   return (
     <React.Fragment>
-      <Typography variant="h5">
+      {/* TODO: consider moving to a StyledTypography components file. */}
+      <MainHeader>
         { isHandComplete ? 'Showdown' : _.startCase(hand.currentBettingRound) }
-      </Typography>
-      <Typography variant="h6" style={{ lineHeight: isTinyScreen() && !isHandComplete && 1, marginBottom: '5px'}}>
-        {positionLabel}&nbsp;|&nbsp;Seat { seatIndex + 1 }&nbsp;|&nbsp;Pot: ${ potSize }
-      </Typography>
+      </MainHeader>
+      <SubHeader variant="h6" style={{ lineHeight: isTinyScreen() && !isHandComplete && 1, marginBottom: '5px' }}>
+        Pos: {positionLabel}&nbsp;<Divider />&nbsp;Seat: { seatIndex + 1 }&nbsp;<Divider />&nbsp;Pot: ${ potSize }
+      </SubHeader>
       {
         isHandComplete &&
         <BoardDisplay board={hand.board} />

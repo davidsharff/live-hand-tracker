@@ -27,8 +27,7 @@ export default function PokerTableSeat(props) {
     shrink
   } = props;
 
-  const theme = useTheme();
-  const { palette } = theme;
+  const { palette } = useTheme();
 
   const isActive = !!seat && seat.isActive;
 
