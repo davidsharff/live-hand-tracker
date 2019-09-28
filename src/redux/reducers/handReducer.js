@@ -50,7 +50,7 @@ export default function handReducer(hand = initialState, action) {
       const positions = sortedActiveSeats.map(({ seatIndex }, positionIndex) => ({
         seatIndex,
         label: positionLabels[positionIndex]
-      }));
+      })); // TODO: I don't think we need this state. It could be a selector instead.
 
       return _.assign({}, hand, {
         buttonSeatIndex: payload.buttonSeatIndex, // TODO: i don't think we need this state.
