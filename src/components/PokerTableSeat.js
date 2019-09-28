@@ -92,42 +92,39 @@ export default function PokerTableSeat(props) {
           opacity: hasFolded && .5
         }}
       />
-      {
-        isActive &&
-        <BodyContainer style={{color: palette.text.secondary}}>
-          {
-            showHoleCards
-              ? (
-                <div>
-                  {
-                    lastAction.type === handActionTypes.MUCK || lastAction.type === handActionTypes.FOLD
-                      ? _.capitalize(lastAction.type)
-                      : seat.holeCards.length
-                        ? seat.holeCards.join(' ')
-                        : lastAction.type === handActionTypes.REVEAL
-                          ? 'Reveal'
-                          : '??'
-                  }
-                </div>
-              )
-              : lastAction
-                ? (
-                  <React.Fragment>
-                    <div>{ _.capitalize(lastAction.type) }</div>
-                    {
-                      !shrink && lastAction.amount > 0 &&
-                      <div>${amountInvested}</div>
-                    }
-                  </React.Fragment>
-                )
-                : !isLiveHand && (
-                  <div style={{color: palette.text.secondary }}>
-                    Seat&nbsp;{seatIndex + 1}
-                  </div>
-                )
-          }
-        </BodyContainer>
-      }
+      <BodyContainer style={{color: palette.text.secondary}}>
+        {
+          showHoleCards
+            ? (
+              <div>
+                {
+                  lastAction.type === handActionTypes.MUCK || lastAction.type === handActionTypes.FOLD
+                    ? _.capitalize(lastAction.type)
+                    : seat.holeCards.length
+                    ? seat.holeCards.join(' ')
+                    : lastAction.type === handActionTypes.REVEAL
+                      ? 'Reveal'
+                      : '??'
+                }
+              </div>
+            )
+            : lastAction
+            ? (
+              <React.Fragment>
+                <div>{ _.capitalize(lastAction.type) }</div>
+                {
+                  !shrink && lastAction.amount > 0 &&
+                  <div>${amountInvested}</div>
+                }
+              </React.Fragment>
+            )
+            : (!isLiveHand || !isActive) && (
+              <div style={{color: palette.text.secondary }}>
+                Seat&nbsp;{seatIndex + 1}
+              </div>
+            )
+        }
+      </BodyContainer>
     </SquareSeatContainer>
   );
 }
