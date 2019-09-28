@@ -120,7 +120,11 @@ export default function PokerTableSeat(props) {
             )
             : (!isLiveHand || !isActive) && (
               <div style={{color: palette.text.secondary }}>
-                Seat&nbsp;{seatIndex + 1}
+                {
+                  isActive
+                    ? `Seat ${seatIndex + 1}`
+                    : 'Empty'
+                }
               </div>
             )
         }
