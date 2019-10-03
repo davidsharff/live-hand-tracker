@@ -16,7 +16,7 @@ export const sortedBettingRounds = [bettingRounds.PRE_FLOP, bettingRounds.FLOP, 
 export const suits = ['club', 'heart', 'diamond', 'spade'];
 
 // TODO: change 10 --> T so that all cards have same str length.
-export const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+export const cardValues = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
 
 export const cards = _.flatMap(suits, (s) => cardValues.map(c =>
   c + s.slice(0, 1)

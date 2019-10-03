@@ -6,7 +6,7 @@ import sixClubs from './06Clubs.svg';
 import sevenClubs from './07Clubs.svg';
 import eightClubs from './08Clubs.svg';
 import nineClubs from './09Clubs.svg';
-import tenClubs from './10Clubs.svg';
+import tenClubs from './TenClubs.svg';
 import jackClubs from './JackClubs.svg';
 import queenClubs from './QueenClubs.svg';
 import kingClubs from './KingClubs.svg';
@@ -21,7 +21,7 @@ export default {
   '7c': sevenClubs,
   '8c': eightClubs,
   '9c': nineClubs,
-  '10c': tenClubs,
+  'Tc': tenClubs,
   'Jc': jackClubs,
   'Qc': queenClubs,
   'Kc': kingClubs,

@@ -6,7 +6,7 @@ import sixDiamonds from './06Diamonds.svg';
 import sevenDiamonds from './07Diamonds.svg';
 import eightDiamonds from './08Diamonds.svg';
 import nineDiamonds from './09Diamonds.svg';
-import tenDiamonds from './10Diamonds.svg';
+import tenDiamonds from './TenDiamonds.svg';
 import jackDiamonds from './JackDiamonds.svg';
 import queenDiamonds from './QueenDiamonds.svg';
 import kingDiamonds from './KingDiamonds.svg';
@@ -21,7 +21,7 @@ export default {
   '7d': sevenDiamonds,
   '8d': eightDiamonds,
   '9d': nineDiamonds,
-  '10d': tenDiamonds,
+  'Td': tenDiamonds,
   'Jd': jackDiamonds,
   'Qd': queenDiamonds,
   'Kd': kingDiamonds,

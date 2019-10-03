@@ -6,7 +6,7 @@ import sixHearts from './06Hearts.svg';
 import sevenHearts from './07Hearts.svg';
 import eightHearts from './08Hearts.svg';
 import nineHearts from './09Hearts.svg';
-import tenHearts from './10Hearts.svg';
+import tenHearts from './TenHearts.svg';
 import jackHearts from './JackHearts.svg';
 import queenHearts from './QueenHearts.svg';
 import kingHearts from './KingHearts.svg';
@@ -21,7 +21,7 @@ export default {
   '7h': sevenHearts,
   '8h': eightHearts,
   '9h': nineHearts,
-  '10h': tenHearts,
+  'Th': tenHearts,
   'Jh': jackHearts,
   'Qh': queenHearts,
   'Kh': kingHearts,

@@ -6,7 +6,7 @@ import sixSpades from './06Spades.svg';
 import sevenSpades from './07Spades.svg';
 import eightSpades from './08Spades.svg';
 import nineSpades from './09Spades.svg';
-import tenSpades from './10Spades.svg';
+import tenSpades from './TenSpades.svg';
 import jackSpades from './JackSpades.svg';
 import queenSpades from './QueenSpades.svg';
 import KingSpades from './KingSpades.svg';
@@ -21,7 +21,7 @@ export default {
   '7s': sevenSpades,
   '8s': eightSpades,
   '9s': nineSpades,
-  '10s': tenSpades,
+  'Ts': tenSpades,
   'Js': jackSpades,
   'Qs': queenSpades,
   'Ks': KingSpades,
