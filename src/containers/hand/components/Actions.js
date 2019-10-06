@@ -1,9 +1,17 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import _ from 'lodash';
 
 import styled from 'styled-components';
+
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import BackspaceIcon from '@material-ui/icons/Backspace';
 import Button from '@material-ui/core/Button/Button';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Grow from '@material-ui/core/Grow';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
 import { useTheme } from '@material-ui/styles';
 
 import BoardDisplay from '../../../components/BoardDisplay';
@@ -112,7 +120,7 @@ export default function Actions(props) {
             {
               aggressiveAction &&
               <div style={{ flex: .75 }}>
-                <AggresiveActionInput
+                <AggressiveActionInput
                   minAmount={aggressiveAction.amount}
                   onSubmit={(newAmount) => handleClick(aggressiveAction.type, newAmount)}
                   label={aggressiveAction.type}
@@ -165,11 +173,20 @@ function ActionOption(props) {
   );
 }
 
-function AggresiveActionInput(props) {
+function AggressiveActionInput(props) {
   const { minAmount, label, onSubmit } = props;
-  const [newAmount, setNewAmount] = useState('');
 
-  const hasMetMin = newAmount && newAmount >= minAmount;
+  const { palette } = useTheme();
+
+  const [newAmount, setNewAmount]  = useState('');
+
+  // TODO: abstract popper handling into shared component or hook.
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuAnchorRef = useRef(null);
+
+  const [isAllIn, setIsAllIn] = useState(false);
+
+  const hasMetMin = newAmount && (isAllIn || newAmount >= minAmount);
 
   const handleClickValue = (val) => {
     const newAmountStr = '' + newAmount + val;
@@ -191,7 +208,6 @@ function AggresiveActionInput(props) {
     }
   };
 
-
   const handleSubmit = () => {
     if (hasMetMin) {
       onSubmit(newAmount);
@@ -201,9 +217,29 @@ function AggresiveActionInput(props) {
     }
   };
 
-  const backspaceColorProp = newAmount && (newAmount < minAmount)
+  const handleMenuItemClick = (option) => {
+    setIsAllIn(option.toLowerCase() === 'all-in');
+    setIsMenuOpen(false);
+  };
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    setIsMenuOpen(prevOpen => !prevOpen);
+  };
+
+  const handleClose = event => {
+    if (menuAnchorRef.current && menuAnchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setIsMenuOpen(false);
+  };
+
+  const backspaceColorProp = newAmount && !hasMetMin
     ? { color: 'primary' }
     : {};
+
+  const actionLabel = isAllIn ? 'All-In' : label;
 
   return (
     <React.Fragment>
@@ -212,27 +248,66 @@ function AggresiveActionInput(props) {
         variant={hasMetMin ? 'contained' : 'outlined'}
         onClick={handleSubmit}
       >
+        <ActionDropdownButton
+          aria-owns={isMenuOpen ? 'menu-list-grow' : undefined}
+          aria-haspopup="true"
+          onClick={handleToggle}
+          focusRipple={false}
+          style={{ minWidth: 0, color: hasMetMin ? '#fff' : palette.primary.dark }}
+          component="div"
+        >
+          <ArrowDropDownIcon ref={menuAnchorRef} />
+        </ActionDropdownButton>
         {
           newAmount
             ? (
               <span style={{ marginRight: '2px' }}>
-                { label }:&nbsp;${ newAmount }
-              </span>
+                  { actionLabel }:&nbsp;${ newAmount }
+                </span>
             )
             : (
               <span>
-                Input {label}&nbsp;
-                <span>(min: ${minAmount})</span>
-              </span>
+                  Input { actionLabel }&nbsp;
+                {
+                  !isAllIn &&
+                  <span>(min: ${minAmount})</span>
+                }
+                </span>
             )
         }
         {
           newAmount &&
           <BackspaceClickTarget onClick={handleBackspace}>
-            <BackspaceIcon { ...backspaceColorProp } />
+            <BackspaceIcon { ...backspaceColorProp } style={{ marginRight: '10px' }} />
           </BackspaceClickTarget>
         }
       </ActionButton>
+      <Popper open={isMenuOpen} anchorEl={menuAnchorRef.current} transition>
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+            }}
+          >
+            <Paper id="menu-list-grow">
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList>
+                  {[_.capitalize(label), 'All-In'].map((option) => (
+                    <MenuItem
+                      key={option}
+                      selected={option === label}
+                      onClick={event => handleMenuItemClick(option)}
+                    >
+                      { option }
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
       {
         [_.range(1, 6), [..._.range(6, 10), 0]].map((rowVals, rowIndex) =>
           <AmountButtonsRow key={rowIndex}>
@@ -262,6 +337,18 @@ const ActionButton = styled(({ variant, ...rest }) => <Button { ...rest } disabl
   }
 `;
 
+const ActionDropdownButton = styled(props => <Button disableRipple {...props} />)`
+  position: absolute !important;
+  left: 0;
+  width: 44px;
+  :focus {
+    outline: none;
+  }
+  :active {
+    background-color: #7281d6 !important;
+  }
+`;
+
 const AmountButtonsRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -277,17 +364,18 @@ const AmountValueButton = styled(({ isLastItem, ...rest }) => <Button { ...rest 
   flex: 1;
   margin-right: ${(p) => p.isLastItem ? '0' : '2px'} !important;
   min-width: 44px !important;
+  z-index: 0;
 `;
 
 const BackspaceClickTarget = styled.div`
   position: absolute;
   right: 0;
-  width: 75px; 
+  width: 65px; 
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   color: #fff;
   :active {
     background-color: #7281d6;
