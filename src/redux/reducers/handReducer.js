@@ -21,7 +21,10 @@ export default function handReducer(hand = initialState, action) {
         actions: [],
         positions: [],
         currentBettingRound: bettingRounds.PRE_FLOP,
-        board: []
+        board: [],
+        seats: payload.handSessionDefaults.seats.map(s => _.assign({}, s, {
+          startingStack: null
+        }))
       });
 
     case actionTypes.SET_HOLE_CARDS: {

@@ -9,7 +9,8 @@ export const holeCardsType = PT.arrayOf(
 
 export const seatsType = PT.arrayOf(PT.exact({
   isActive: PT.bool.isRequired,
-  holeCards: holeCardsType
+  holeCards: holeCardsType,
+  startingStack: PT.number
 })).isRequired;
 
 export const handType = PT.exact({
